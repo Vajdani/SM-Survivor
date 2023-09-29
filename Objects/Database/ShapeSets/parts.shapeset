@@ -1,0 +1,29 @@
+{
+   "partList" : [
+      {
+         "color" : "fc949d",
+         "flammable" : true,
+         "hull" : {
+            "col" : "$SURVIVAL_DATA/Objects/Collision/obj_decor_sunshakemachine.obj",
+            "x" : 5,
+            "y" : 8,
+            "z" : 5
+         },
+         "name" : "obj_decor_sunshakemachine",
+         "physicsMaterial" : "Metal",
+         "ratings" : {
+            "buoyancy" : 6,
+            "density" : 4,
+            "durability" : 4,
+            "friction" : 4
+         },
+         "renderable" : "$SURVIVAL_DATA/Objects/Renderable/decor/obj_decor_sunshakemachine.rend",
+         "rotationSet" : "PropY",
+         "scripted" : {
+            "classname" : "RockFormation",
+            "filename" : "$CONTENT_DATA/Scripts/RockFormation.lua"
+         },
+         "uuid" : "41d4ffa1-1dec-4c17-930a-e2acb5036b96"
+      }
+   ]
+}

@@ -1,0 +1,9 @@
+{
+   "allow_add_mods" : true,
+   "custom_icons" : false,
+   "description" : "This mod doesn't have a description",
+   "localId" : "55fc8cf9-942c-4b55-98d2-8155ffcfe6fb",
+   "name" : "SM_Survivor",
+   "type" : "Custom Game",
+   "version" : 0
+}
