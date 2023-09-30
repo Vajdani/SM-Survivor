@@ -1,10 +1,12 @@
 {
    "lodList" : [
       {
-         "mesh" : "$CONTENT_DATA/Objects/Mesh/rock.fbx",
+         "mesh" : "$CONTENT_DATA/Harvestables/Mesh/rock.fbx",
+         "pose0" : "$CONTENT_DATA/Harvestables/Mesh/rock_pose0.fbx",
+         "pose1" : "$CONTENT_DATA/Harvestables/Mesh/rock_pose0.fbx",
          "subMeshList" : [
             {
-               "material" : "DifAsgNor",
+               "material" : "DifAsgNor_Pose2",
                "textureList" : [
                   "$SURVIVAL_DATA/Objects/Textures/harvests/Stone/env_nature_hvs_stone_dif.tga",
                   "$SURVIVAL_DATA/Objects/Textures/harvests/Stone/env_nature_hvs_stone_asg.tga",

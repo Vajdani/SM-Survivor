@@ -10,7 +10,7 @@
          "material" : "Rock",
          "name" : "rock",
          "removable" : false,
-         "renderable" : "$CONTENT_DATA/Objects/Renderables/rock.rend",
+         "renderable" : "$CONTENT_DATA/Harvestables/Renderables/rock.rend",
          "script" : {
             "class" : "RockFormation",
             "data" : {},

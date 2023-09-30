@@ -1,5 +1,6 @@
 ---@class RockFormation : HarvestableClass
 RockFormation = class()
+RockFormation.poseWeightCount = 2
 RockFormation.colours = {
     gold = sm.color.new(1,1,0),
     nitra = sm.color.new(1,0,0),
@@ -39,6 +40,7 @@ function RockFormation:sv_onHit()
         self.harvestable:destroy()
     else
         self.storage:save(self.sv)
+        self.network:sendToClients("cl_onHit")
     end
 end
 
@@ -49,6 +51,15 @@ function RockFormation:client_onCreate()
     if params then
         self:cl_load(params)
     end
+
+    self.animProgress = 0
+end
+
+function RockFormation:client_onFixedUpdate(dt)
+    if self.animProgress <= 0 then return end
+
+    self.animProgress = math.max(self.animProgress - dt * 5, 0)
+    self.harvestable:setPoseWeight(0, self.animProgress)
 end
 
 local fxId = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
@@ -69,4 +80,8 @@ function RockFormation:cl_load(data)
             self.effects[#self.effects+1] = effect
         end
     end
+end
+
+function RockFormation:cl_onHit()
+    self.animProgress = math.random(50, 100) * 0.01
 end

@@ -36,8 +36,7 @@ end
 
 function Game:client_onCreate()
     self:initCMD()
-    self:setLighting(0)
-
+    self:setLighting(0.5)
 end
 
 function Game:setLighting(time)

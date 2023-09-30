@@ -1,7 +1,7 @@
 ---@class MechanicUit : UnitClass
 MechanicUnit = class()
 
-local mineTimer = 10
+local mineTimer = 20
 
 function MechanicUnit:server_onCreate()
     self.mineBox =  sm.areaTrigger.createBox(sm.vec3.one(), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
@@ -22,6 +22,8 @@ function MechanicUnit:server_onFixedUpdate()
     if #contents > 0 then
         self.timer = self.timer - 1
         if self.timer <= 0 then
+            self.unit:sendCharacterEvent( "swing" )
+
             for k, rock in pairs(contents) do
                 if sm.exists(rock) then
                     local hit, result = sm.physics.raycast(pos, rock.worldPosition)
