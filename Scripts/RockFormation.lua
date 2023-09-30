@@ -27,6 +27,8 @@ function RockFormation:server_onCreate()
 end
 
 function RockFormation:sv_onHit()
+    if not sm.exists(self.harvestable) then return end
+
     self.sv.health = self.sv.health - 1
     if self.sv.health <= 0 then
         sm.effect.playEffect(

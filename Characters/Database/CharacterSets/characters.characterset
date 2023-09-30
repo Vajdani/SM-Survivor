@@ -43,7 +43,8 @@
             "$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_demolition_jacket/char_male_outfit_demolition_jacket.rend",
             "$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_demolition_pants/char_male_outfit_demolition_pants.rend",
             "$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_demolition_shoes/char_male_outfit_demolition_shoes.rend",
-            "$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
+            "$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend",
+            "$GAME_DATA/Character/Char_Tools/Char_sledgehammer/char_sledgehammer.rend"
          ],
          "tumble" : {
             "col" : "$SURVIVAL_DATA/Character/Char_Male/char_male_col.obj",

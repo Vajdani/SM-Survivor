@@ -13,7 +13,7 @@ function Input:client_onAction(action, state)
         self.network:sendToServer("sv_onMove", { key = action, state = state })
     end
 
-    return true
+    return false
 end
 
 function Input:sv_onMove(data, player)
