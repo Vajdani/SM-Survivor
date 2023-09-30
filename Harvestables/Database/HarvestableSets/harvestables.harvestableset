@@ -1,0 +1,22 @@
+{
+   "harvestableList" : [
+      {
+         "col_box" : {
+            "x" : 4,
+            "y" : 4,
+            "z" : 6
+         },
+         "mass" : 10000.0,
+         "material" : "Rock",
+         "name" : "rock",
+         "removable" : false,
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/rock.rend",
+         "script" : {
+            "class" : "RockFormation",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/RockFormation.lua"
+         },
+         "uuid" : "0c01f246-0090-43e4-8453-c1390322a7e4"
+      }
+   ]
+}

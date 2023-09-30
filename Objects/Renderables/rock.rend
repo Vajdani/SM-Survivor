@@ -1,0 +1,17 @@
+{
+   "lodList" : [
+      {
+         "mesh" : "$CONTENT_DATA/Objects/Mesh/rock.fbx",
+         "subMeshList" : [
+            {
+               "material" : "DifAsgNor",
+               "textureList" : [
+                  "$SURVIVAL_DATA/Objects/Textures/harvests/Stone/env_nature_hvs_stone_dif.tga",
+                  "$SURVIVAL_DATA/Objects/Textures/harvests/Stone/env_nature_hvs_stone_asg.tga",
+                  "$SURVIVAL_DATA/Objects/Textures/harvests/Stone/env_nature_hvs_stone_nor.tga"
+               ]
+            }
+         ]
+      }
+   ]
+}

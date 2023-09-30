@@ -1,3 +1,57 @@
 {
-    "meleeAttacks": []
+    "meleeAttacks": [
+        {
+			"uuid": "a645f20a-3d5c-4ddc-bdde-80f8c1ce82b2",
+			"name": "PickaxeSwipe",
+			"destruction":
+			{
+				"destructionLevels":
+				[
+					{
+						"qualityLevel": 1,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 2,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 3,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 4,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 5,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 6,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 7,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 8,
+						"chance": 0
+					},
+					{
+						"qualityLevel": 9,
+						"chance": 0
+					}
+				],
+				"radius": 0.1
+			},
+			"hitBox":
+			{
+				"halfWidth": 2,
+				"halfHeight": 1.5
+			},
+			"impactEffect": "Weapon - Impact"
+		}
+    ]
 }
