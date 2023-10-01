@@ -14,7 +14,7 @@
          "script" : {
             "class" : "RockFormation",
             "data" : {},
-            "file" : "$CONTENT_DATA/Scripts/RockFormation.lua"
+            "file" : "$CONTENT_DATA/Scripts/harvestable/RockFormation.lua"
          },
          "uuid" : "0c01f246-0090-43e4-8453-c1390322a7e4"
       }

@@ -8,8 +8,8 @@
          },
          "character" : {
             "data" : {},
-            "scriptClass" : "MechanicCharacter",
-            "scriptPath" : "$CONTENT_DATA/Scripts/MechanicCharacter.lua"
+            "scriptClass" : "MinerCharacter",
+            "scriptPath" : "$CONTENT_DATA/Scripts/character/MinerCharacter.lua"
          },
          "hit" : {
             "crouch" : {
@@ -52,8 +52,8 @@
          },
          "unit" : {
             "data" : {},
-            "scriptClass" : "MechanicUnit",
-            "scriptPath" : "$CONTENT_DATA/Scripts/MechanicUnit.lua"
+            "scriptClass" : "MinerUnit",
+            "scriptPath" : "$CONTENT_DATA/Scripts/unit/MinerUnit.lua"
          },
          "uuid" : "eb3d1c56-e2c0-4711-9c8d-218b36d5380b"
       }

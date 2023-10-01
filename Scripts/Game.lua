@@ -23,15 +23,27 @@ function Game.server_onPlayerJoined( self, player, isNewPlayer )
     end
 end
 
-function Game.sv_createPlayerCharacter( self, world, x, y, player, params )
-    local character = sm.character.createCharacter( player, world, sm.vec3.new( 32, 32, 5 ), 0, 0 )
+function Game:sv_createPlayerCharacter( world, x, y, player, params )
+	local pos = sm.vec3.new( 0, 0, -10 )
+    local character = sm.character.createCharacter( player, world, pos, 0, 0 )
 	player:setCharacter( character )
+	sm.event.sendToPlayer(player, "sv_createMiner", pos)
 end
 
 function Game:sv_gen()
     sm.event.sendToWorld(self.sv.saved.world, "sv_generateTerrain")
 end
 
+function Game:sv_recreate(data, player)
+	self.sv.saved.world:destroy()
+	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
+	self.storage:save( self.sv.saved )
+
+	if not sm.exists( self.sv.saved.world ) then
+		sm.world.loadWorld( self.sv.saved.world )
+	end
+	self.sv.saved.world:loadCell( 0, 0, player, "sv_createPlayerCharacter" )
+end
 
 
 function Game:client_onCreate()
@@ -62,6 +74,7 @@ end
 function Game:initCMD()
     sm.game.bindChatCommand("/gen", {}, "cl_gen", "Generate terrain")
     sm.game.bindChatCommand("/cam", {}, "cl_cam", "Switch camera mode")
+    sm.game.bindChatCommand("/recreate", {}, "cl_recreate", "Recreate terrain")
 end
 
 function Game:cl_gen()
@@ -70,4 +83,8 @@ end
 
 function Game:cl_cam()
     sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_cam")
+end
+
+function Game:cl_recreate()
+	self.network:sendToServer("sv_recreate")
 end

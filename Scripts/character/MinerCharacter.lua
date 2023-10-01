@@ -1,22 +1,22 @@
-dofile( "$SURVIVAL_DATA/Scripts/game/characters/BaseCharacter.lua" )
+---@class MinerCharacter : CharacterClass
+---@field animations table
+---@field isLocal boolean
+---@field swinging boolean
+---@field graphicsLoaded boolean
+---@field animationsLoaded boolean
+---@field koEffect Effect
+---@field blendSpeed number
+---@field blendTime number
+MinerCharacter = class()
 
-MechanicCharacter = class( BaseCharacter )
-
-function MechanicCharacter.server_onCreate( self )
-	BaseCharacter.server_onCreate( self )
-end
-
-function MechanicCharacter.client_onCreate( self )
-	BaseCharacter.client_onCreate( self )
+function MinerCharacter.client_onCreate( self )
 	self.animations = {}
 	self.isLocal = false
 	self.swinging = false
-	print( "-- MechanicCharacter created --" )
+	print( "-- MinerCharacter created --" )
 end
 
-function MechanicCharacter.client_onGraphicsLoaded( self )
-	BaseCharacter.client_onGraphicsLoaded( self )
-
+function MinerCharacter.client_onGraphicsLoaded( self )
 	self.animations.sledgehammer_attack1 = {
 		info = self.character:getAnimationInfo( "sledgehammer_attack1" ),
 		time = 0,
@@ -41,8 +41,7 @@ function MechanicCharacter.client_onGraphicsLoaded( self )
 	self.animationsLoaded = true
 end
 
-function MechanicCharacter.client_onGraphicsUnloaded( self )
-	BaseCharacter.client_onGraphicsUnloaded( self )
+function MinerCharacter.client_onGraphicsUnloaded( self )
 	self.graphicsLoaded = false
 	if self.koEffect then
 		self.koEffect:destroy()
@@ -54,12 +53,7 @@ local swingAnims = {
 	sledgehammer_attack1 = true,
 	sledgehammer_attack2 = true,
 }
-function MechanicCharacter.client_onUpdate( self, deltaTime )
-	if not self.animations.sledgehammer_attack2 then
-		self:client_onGraphicsLoaded()
-	end
-
-	BaseCharacter.client_onUpdate( self, deltaTime )
+function MinerCharacter.client_onUpdate( self, deltaTime )
 	if not self.graphicsLoaded then
 		return
 	end
@@ -100,7 +94,7 @@ function MechanicCharacter.client_onUpdate( self, deltaTime )
 	end
 end
 
-function MechanicCharacter.client_onEvent( self, event )
+function MinerCharacter.client_onEvent( self, event )
 	if not self.animationsLoaded then
 		return
 	end
@@ -116,7 +110,7 @@ function MechanicCharacter.client_onEvent( self, event )
 	end
 end
 
-function MechanicCharacter:initSwing()
+function MinerCharacter:initSwing()
 	if self.swing % 2 == 0 then
 		self.currentAnimation = "sledgehammer_attack2"
 		self.animations.sledgehammer_attack2.time = 0

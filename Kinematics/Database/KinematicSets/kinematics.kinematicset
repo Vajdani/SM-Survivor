@@ -1,56 +1,56 @@
 {
-   "kinematicList": [
+   "kinematicList" : [
       {
-         "col_box": {
-            "x": 1,
-            "y": 1,
-            "z": 1
+         "col_box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
          },
-         "mass": 10000.0,
-         "material": "Default",
-         "name": "input",
-         "renderable": "$CONTENT_DATA/Kinematics/Renderables/input.rend",
-         "script": {
-            "class": "Input",
-            "data": {},
-            "file": "$CONTENT_DATA/Scripts/Input.lua",
-            "seat": {
-               "bones": [
+         "mass" : 10000.0,
+         "material" : "Default",
+         "name" : "input",
+         "renderable" : "$CONTENT_DATA/Kinematics/Renderables/input.rend",
+         "script" : {
+            "class" : "Input",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/harvestable/Input.lua",
+            "seat" : {
+               "bones" : [
                   {
-                     "name": "Hips",
-                     "offset": {
-                        "x": 0.0,
-                        "y": -0.064,
-                        "z": -0.544
+                     "name" : "Hips",
+                     "offset" : {
+                        "x" : 0.0,
+                        "y" : -0.0640,
+                        "z" : -0.5440
                      }
                   },
                   {
-                     "freeRotation": true,
-                     "name": "LeftForeArm",
-                     "offset": {
-                        "x": 1.1720,
-                        "y": 0.9680,
-                        "z": 0.9680
+                     "freeRotation" : true,
+                     "name" : "LeftForeArm",
+                     "offset" : {
+                        "x" : 1.1720,
+                        "y" : 0.9680,
+                        "z" : 0.9680
                      },
-                     "steers": true
+                     "steers" : true
                   },
                   {
-                     "freeRotation": true,
-                     "name": "RightForeArm",
-                     "offset": {
-                        "x": -1.1720,
-                        "y": 0.9680,
-                        "z": 0.9680
+                     "freeRotation" : true,
+                     "name" : "RightForeArm",
+                     "offset" : {
+                        "x" : -1.1720,
+                        "y" : 0.9680,
+                        "z" : 0.9680
                      },
-                     "steers": true
+                     "steers" : true
                   }
                ],
-               "enterAudio": "Seat seated",
-               "exitAudio": "Seat unseated",
-               "ragdollFile": "$GAME_DATA/Character/seat_ragdoll.json"
+               "enterAudio" : "Seat seated",
+               "exitAudio" : "Seat unseated",
+               "ragdollFile" : "$GAME_DATA/Character/seat_ragdoll.json"
             }
          },
-         "uuid": "7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"
+         "uuid" : "7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"
       }
    ]
 }

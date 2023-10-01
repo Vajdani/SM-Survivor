@@ -1,25 +1,4 @@
 {
 	"toolList": [
-		{
-			"name": "Pickaxe",
-			"previewRenderable": "$GAME_DATA/Character/Char_Tools/char_sledgehammer_preview.rend",
-			"previewRotation": [
-				-1,
-				0,
-				0,
-				0,
-				0,
-				1,
-				0,
-				1,
-				0
-			],
-			"script": {
-				"class": "Pickaxe",
-				"data": {},
-				"file": "$CONTENT_DATA/Scripts/Pickaxe.lua"
-			},
-			"uuid": "52955ca2-3041-4835-8314-96aa9e11c85a"
-		}
 	]
 }

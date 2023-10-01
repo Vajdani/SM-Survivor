@@ -31,7 +31,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		end
 	end
 
-	local jWorld = sm.json.open( "$CONTENT_DATA/Terrain/Worlds/example.world")
+	local jWorld = sm.json.open( "$CONTENT_DATA/Terrain/Worlds/rockFloor.world")
 	for _, cell in pairs( jWorld.cellData ) do
 		if cell.path ~= "" then
 			local uid = sm.terrainTile.getTileUuid( cell.path )
@@ -98,11 +98,11 @@ function GetHeightAt( x, y, lod )
 end
 
 function GetColorAt( x, y, lod )
-	return sm.terrainTile.getColorAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
+	return 0.242, 0.423, 0.512 --sm.terrainTile.getColorAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
 end
 
 function GetMaterialAt( x, y, lod )
-	return sm.terrainTile.getMaterialAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
+	return 1, 0, 0, 0, 0, 0, 0, 0 --sm.terrainTile.getMaterialAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
 end
 
 function GetClutterIdxAt( x, y )
