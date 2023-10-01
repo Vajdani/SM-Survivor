@@ -36,6 +36,12 @@ function Player:server_onFixedUpdate()
 end
 
 function Player:sv_createMiner(pos)
+	--Thank Axolot for this mess
+	if not sm.exists(self.player.character) then
+		sm.event.sendToPlayer(self.player, "sv_createMiner", pos)
+		return
+	end
+
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
 	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos + verticalOffset)
 	sm.event.sendToPlayer(self.player, "sv_seat")
