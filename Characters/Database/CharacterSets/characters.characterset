@@ -34,7 +34,7 @@
          },
          "ragdoll" : "$SURVIVAL_DATA/Character/Char_Male/char_male_ragdoll.json",
          "renderables" : [
-            "$GAME_DATA/Character/Char_Male/Animations/char_male_tp.rend",
+            "$CONTENT_DATA/Characters/char_male_tp.rend",
             "$GAME_DATA/Character/Char_Male/Animations/char_male_tp_swim.rend",
             "$SURVIVAL_DATA/Character/Char_Male/Outfit/Backpack/Outfit_demolition_backpack/char_shared_outfit_demolition_backpack.rend",
             "$SURVIVAL_DATA/Character/Char_Male/Outfit/Gloves/Outfit_demolition_gloves/char_male_outfit_demolition_gloves.rend",

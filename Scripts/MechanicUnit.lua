@@ -1,11 +1,12 @@
 ---@class MechanicUit : UnitClass
 MechanicUnit = class()
 
-local mineTimer = 20
+local mineTimer = 25
 
 function MechanicUnit:server_onCreate()
-    self.mineBox =  sm.areaTrigger.createBox(sm.vec3.one(), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
+    self.mineBox =  sm.areaTrigger.createBox(sm.vec3.new(0.75,1,1), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
     self.timer = mineTimer
+    self.swinging = false
 end
 
 local y = sm.vec3.new(0,1,0)
@@ -18,12 +19,12 @@ function MechanicUnit:server_onFixedUpdate()
     self.mineBox:setWorldPosition(pos + dir)
 	self.mineBox:setWorldRotation(sm.vec3.getRotation(y, dir))
 
+    local oldSwinging = self.swinging
     local contents = self.mineBox:getContents()
     if #contents > 0 then
+        self.swinging = true
         self.timer = self.timer - 1
         if self.timer <= 0 then
-            self.unit:sendCharacterEvent( "swing" )
-
             for k, rock in pairs(contents) do
                 if sm.exists(rock) then
                     local hit, result = sm.physics.raycast(pos, rock.worldPosition)
@@ -40,5 +41,10 @@ function MechanicUnit:server_onFixedUpdate()
         end
     else
         self.timer = mineTimer
+        self.swinging = false
+    end
+
+    if self.swinging ~= oldSwinging then
+        self.unit:sendCharacterEvent( "swing"..(self.swinging and "_start" or "_end") )
     end
 end

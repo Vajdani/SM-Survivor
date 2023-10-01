@@ -2,8 +2,6 @@ dofile( "$SURVIVAL_DATA/Scripts/game/characters/BaseCharacter.lua" )
 
 MechanicCharacter = class( BaseCharacter )
 
-local sledgehammerRenderableTp = "$GAME_DATA/Character/Char_Male/Animations/char_male_tp_sledgehammer.rend"
-
 function MechanicCharacter.server_onCreate( self )
 	BaseCharacter.server_onCreate( self )
 end
@@ -12,13 +10,13 @@ function MechanicCharacter.client_onCreate( self )
 	BaseCharacter.client_onCreate( self )
 	self.animations = {}
 	self.isLocal = false
+	self.swinging = false
 	print( "-- MechanicCharacter created --" )
 end
 
 function MechanicCharacter.client_onGraphicsLoaded( self )
 	BaseCharacter.client_onGraphicsLoaded( self )
 
-	self.character:addRenderable( sledgehammerRenderableTp )
 	self.animations.sledgehammer_attack1 = {
 		info = self.character:getAnimationInfo( "sledgehammer_attack1" ),
 		time = 0,
@@ -52,6 +50,10 @@ function MechanicCharacter.client_onGraphicsUnloaded( self )
 	end
 end
 
+local swingAnims = {
+	sledgehammer_attack1 = true,
+	sledgehammer_attack2 = true,
+}
 function MechanicCharacter.client_onUpdate( self, deltaTime )
 	if not self.animations.sledgehammer_attack2 then
 		self:client_onGraphicsLoaded()
@@ -83,7 +85,11 @@ function MechanicCharacter.client_onUpdate( self, deltaTime )
 			if name == self.currentAnimation then
 				animation.weight = math.min(animation.weight+(self.blendSpeed * deltaTime), 1.0)
 				if animation.time >= animation.info.duration then
-					self.currentAnimation = ""
+					if swingAnims[self.currentAnimation] == true and self.swinging then
+						self:initSwing()
+					else
+						self.currentAnimation = ""
+					end
 				end
 			else
 				animation.weight = math.max(animation.weight-(self.blendSpeed * deltaTime ), 0.0)
@@ -99,15 +105,25 @@ function MechanicCharacter.client_onEvent( self, event )
 		return
 	end
 
-	if event == "swing" then
-		if self.swing % 2 == 0 then
-			self.currentAnimation = "sledgehammer_attack2"
-			self.animations.sledgehammer_attack2.time = 0
-		else
-			self.currentAnimation = "sledgehammer_attack1"
-			self.animations.sledgehammer_attack1.time = 0
-		end
+	if event == "swing_start" then
+		self.swinging = true
 
-		self.swing = self.swing + 1
+		if swingAnims[self.currentAnimation] == nil then
+			self:initSwing()
+		end
+	elseif event == "swing_end" then
+		self.swinging = false
 	end
+end
+
+function MechanicCharacter:initSwing()
+	if self.swing % 2 == 0 then
+		self.currentAnimation = "sledgehammer_attack2"
+		self.animations.sledgehammer_attack2.time = 0
+	else
+		self.currentAnimation = "sledgehammer_attack1"
+		self.animations.sledgehammer_attack1.time = 0
+	end
+
+	self.swing = self.swing + 1
 end
