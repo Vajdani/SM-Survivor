@@ -16,6 +16,8 @@ local moveDirs = {
 function Player:server_onCreate()
 	print("Player.server_onCreate")
 	self.moveDir = sm.vec3.zero()
+
+	self:sv_initMaterials()
 end
 
 function Player:server_onFixedUpdate()
@@ -42,12 +44,20 @@ function Player:sv_createMiner(pos)
 		return
 	end
 
+	self:sv_initMaterials()
+
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
 	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos + verticalOffset)
-	sm.event.sendToPlayer(self.player, "sv_seat")
+	self.controlled.publicData = { owner = self.player }
+	self:sv_seat()
 end
 
 function Player:sv_seat()
+	if not sm.exists(self.input) then
+		sm.event.sendToPlayer(self.player, "sv_seat")
+		return
+	end
+
 	self.input:setSeatCharacter(self.player.character)
 end
 
@@ -60,11 +70,39 @@ function Player:sv_onMove(data)
 	end
 end
 
+function Player:sv_initMaterials()
+	self.minerals = {}
+	for k, v in pairs(MINERALS) do
+		self.minerals[v] = 0
+	end
+	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
+end
+
+function Player:sv_collectMineral(data)
+	self.minerals[data.type] = self.minerals[data.type] + data.amount
+	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
+end
 
 
 function Player:client_onCreate()
 	self.isLocal = self.player == sm.localPlayer.getPlayer()
 	if not self.isLocal then return end
+
+	self.hud = sm.gui.createGuiFromLayout(
+		"$CONTENT_DATA/Gui/hud.layout", false,
+		{
+			isHud = true,
+			isInteractive = false,
+			needsCursor = false,
+			hidesHotbar = true,
+			isOverlapped = false,
+			backgroundAlpha = 0,
+		}
+	)
+	for k, v in pairs(MINERALS) do
+		self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
+	end
+	self.hud:open()
 
 	self:cl_cam()
 end
@@ -102,4 +140,10 @@ end
 
 function Player:cl_decreaseZoom()
 	self.zoom = self.zoom < 10 and self.zoom + 1 or 10
+end
+
+function Player:cl_updateMineralCount(data)
+	for k, v in pairs(data) do
+		self.hud:setText("amount_"..k, tostring(v))
+	end
 end

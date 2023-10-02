@@ -1,3 +1,10 @@
+MINERALDROPS = MINERALDROPS or {}
+MINERALS = {
+    "gold",
+    "nitra"
+}
+
+
 VEC3_X = sm.vec3.new(1,0,0)
 VEC3_Y = sm.vec3.new(0,1,0)
 VEC3_UP = sm.vec3.new(0,0,1)

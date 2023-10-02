@@ -51,6 +51,24 @@
             }
          },
          "uuid" : "7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"
+      },
+      {
+         "col" : "$GAME_DATA/Mesh/cube.mesh",
+         "collides" : {
+            "body" : true,
+            "character" : false,
+            "melee" : false,
+            "projectile" : false
+         },
+         "mass" : 10000.0,
+         "material" : "Default",
+         "name" : "mineralDrop",
+         "script" : {
+            "class" : "MineralDrop",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/harvestable/MineralDrop.lua"
+         },
+         "uuid" : "a09539ba-95d3-4f65-989d-83d1e9c32d0f"
       }
    ]
 }

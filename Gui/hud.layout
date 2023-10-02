@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="PanelEmpty" position_real="0 0 1 1" name="BackPanel">
+        <Widget type="Canvas" skin="Canvas" position_real="0.026041666666666668 0.097222222222222224 0.125 0.087962962962962965">
+            <Widget type="ImageBox" skin="ImageBox" position_real="0.020833333333333332 0.052631578947368418 0.16666666666666666 0.42105263157894735" name="icon_gold"/>
+            <Widget type="TextBox" skin="TextBox" position_real="0.1875 0.052631578947368418 0.79166666666666663 0.42105263157894735" name="amount_gold">
+                <Property key="FontName" value="SM_Digital"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="1"/>
+                <Property key="FontHeight" value="20"/>
+            </Widget>
+            <Widget type="ImageBox" skin="ImageBox" position_real="0.020833333333333332 0.52631578947368418 0.16666666666666666 0.42105263157894735" name="icon_nitra"/>
+            <Widget type="TextBox" skin="TextBox" position_real="0.1875 0.52631578947368418 0.79166666666666663 0.42105263157894735" name="amount_nitra">
+                <Property key="FontName" value="SM_Digital"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="1"/>
+                <Property key="FontHeight" value="20"/>
+            </Widget>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>

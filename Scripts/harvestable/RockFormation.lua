@@ -7,6 +7,7 @@ RockFormation.colours = {
 }
 
 local defaultRock = { type = "generic", health = 3 }
+local mineralDrop = sm.uuid.new("f6cc2b7a-fa4c-42e5-b272-604549028149")
 
 function RockFormation:server_onCreate()
     self.sv = {}
@@ -32,11 +33,21 @@ function RockFormation:sv_onHit()
 
     self.sv.health = self.sv.health - 1
     if self.sv.health <= 0 then
+        local worldPos = self.harvestable.worldPosition
         sm.effect.playEffect(
-            "Stone - BreakChunk small", self.harvestable.worldPosition,
+            "RockFormation - Break", worldPos,
             nil, self.harvestable.worldRotation, nil,
             { size = self.harvestable:getMass() / AUDIO_MASS_DIVIDE_RATIO }
         )
+
+        if self.sv.type ~= "generic" then
+            sm.projectile.harvestableCustomProjectileAttack(
+                { type = self.sv.type, amount = math.random(1, 4) },
+                mineralDrop, 0, worldPos, sm.noise.gunSpread(VEC3_UP * 2.5, 5),
+                self.harvestable, 0
+            )
+        end
+
         self.harvestable:destroy()
     else
         self.storage:save(self.sv)

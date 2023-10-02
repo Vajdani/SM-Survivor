@@ -1,3 +1,5 @@
 {
-   "particleSystemList" : []
+   "particleSystemList" : [
+      "rockformation_break.json"
+   ]
 }
