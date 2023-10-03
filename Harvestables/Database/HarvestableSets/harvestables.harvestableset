@@ -17,6 +17,24 @@
             "file" : "$CONTENT_DATA/Scripts/harvestable/RockFormation.lua"
          },
          "uuid" : "0c01f246-0090-43e4-8453-c1390322a7e4"
+      },
+      {
+         "col_box" : {
+            "x" : 4,
+            "y" : 4,
+            "z" : 6
+         },
+         "mass" : 10000.0,
+         "material" : "Rock",
+         "name" : "rock_mineral",
+         "removable" : false,
+         "renderable" : "$CONTENT_DATA/Harvestables/Renderables/rock _mineral.rend",
+         "script" : {
+            "class" : "MineralFormation",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/harvestable/RockFormation.lua"
+         },
+         "uuid" : "e731dede-34df-467f-8beb-315985179860"
       }
    ]
 }

@@ -15,6 +15,7 @@ World.cellMaxX = 0
 World.cellMinY = -1
 World.cellMaxY = 0
 World.worldBorder = true
+World.renderMode = "warehouse"
 
 function World.server_onCreate( self )
     print("World.server_onCreate")
@@ -27,6 +28,7 @@ function World.server_onCreate( self )
 end
 
 local rockId = sm.uuid.new("0c01f246-0090-43e4-8453-c1390322a7e4")
+local mineralId = sm.uuid.new("e731dede-34df-467f-8beb-315985179860")
 local types = {
     { type = "gold", health = 5 },
     { type = "nitra", health = 4 },
@@ -63,7 +65,12 @@ local function getMinreal(val)
     return false, -1
 end
 
-local newRock = sm.harvestable.create
+local function newRock(self, uuid, pos, rot)
+    local rock = sm.harvestable.create(uuid, pos, rot)
+    table_insert(self.sv_rocks, rock)
+    return rock
+end
+
 function World:spawnInChunk(cell_x, cell_y, seed, mineralSeed)
     local offset_x, offset_y = 64 * cell_x, 64 * cell_y
     local corner = vec3(offset_x, offset_y, 0)
@@ -71,16 +78,13 @@ function World:spawnInChunk(cell_x, cell_y, seed, mineralSeed)
         for y = 0, 63 do
             local final_x, final_y = (offset_x + x) / 8, (offset_y + y) / 8
             if abs(perlin(final_x, final_y, seed)) > 0.15 then
-                local rock = newRock(rockId, corner + vec3(x, y, 0.75), rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y))
-
                 local mineralNoise = abs(perlin(final_x, final_y, mineralSeed))
                 local isMineral, mineralType = getMinreal(mineralNoise)
-                --print(mineralNoise, isMineral, mineralType)
                 if isMineral then
-                    rock:setParams(types[mineralType])
+                    newRock(self, mineralId, corner + vec3(x, y, 0.75), rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y)):setParams(types[mineralType])
+                else
+                    newRock(self, rockId, corner + vec3(x, y, 0.75), rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y))
                 end
-
-                table_insert(self.sv_rocks, rock)
             end
         end
     end

@@ -4,7 +4,7 @@ MinerUnit = class()
 local mineTimer = 25
 
 function MinerUnit:server_onCreate()
-    self.mineBox =  sm.areaTrigger.createBox(sm.vec3.new(1.125,0.75,1), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
+    self.mineBox =  sm.areaTrigger.createBox(vec3(2,1.5,1) * 0.5, sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
     self.collectArea = sm.areaTrigger.createSphere(2, sm.vec3.zero(), nil, sm.areaTrigger.filter.harvestable)
     self.collectArea:bindOnEnter("sv_collect")
 

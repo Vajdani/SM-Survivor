@@ -61,7 +61,7 @@ function MineralDrop:cl_load(data)
     self.effect = sm.effect.createEffect("ShapeRenderable", self.harvestable)
     self.effect:setScale(fxScale)
     self.effect:setParameter("uuid", fxId)
-    self.effect:setParameter("color", RockFormation.colours[_type])
+    self.effect:setParameter("color", MineralFormation.colours[_type])
     self.effect:start()
 
     self.mineralData = data

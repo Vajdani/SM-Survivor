@@ -5,6 +5,7 @@
 ---@field graphicsLoaded boolean
 ---@field animationsLoaded boolean
 ---@field koEffect Effect
+---@field glowEffect Effect
 ---@field blendSpeed number
 ---@field blendTime number
 MinerCharacter = class()
@@ -37,8 +38,18 @@ function MinerCharacter.client_onGraphicsLoaded( self )
 	self.isLocal = self.character:getPlayer() == sm.localPlayer.getPlayer()
 	self.koEffect = sm.effect.createEffect( "Mechanic - KoLoop", self.character, "jnt_head" )
 
+	self.glowEffect = sm.effect.createEffect( "Glowstick - Hold", self.character )
+	self.glowEffect:start()
+	sm.event.sendToCharacter(self.character, "cl_initGlow")
+
 	self.graphicsLoaded = true
 	self.animationsLoaded = true
+end
+
+function MinerCharacter:cl_initGlow()
+	self.glowEffect:setOffsetPosition(VEC3_Y * 2)
+	self.glowEffect:setParameter("radius", 4)
+	self.glowEffect:setParameter("intensity", 1.25)
 end
 
 function MinerCharacter.client_onGraphicsUnloaded( self )
@@ -46,6 +57,11 @@ function MinerCharacter.client_onGraphicsUnloaded( self )
 	if self.koEffect then
 		self.koEffect:destroy()
 		self.koEffect = nil
+	end
+
+	if self.glowEffect then
+		self.glowEffect:destroy()
+		self.glowEffect = nil
 	end
 end
 

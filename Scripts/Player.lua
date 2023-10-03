@@ -89,7 +89,7 @@ function Player:client_onCreate()
 	if not self.isLocal then return end
 
 	self.hud = sm.gui.createGuiFromLayout(
-		"$CONTENT_DATA/Gui/hud.layout", false,
+		"$CONTENT_DATA/Gui/hud_pixels.layout", false,
 		{
 			isHud = true,
 			isInteractive = false,
