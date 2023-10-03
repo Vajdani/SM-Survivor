@@ -24,17 +24,19 @@ function MinerUnit:server_onFixedUpdate()
 
     local oldSwinging = self.swinging
     local contents = self.mineBox:getContents()
-    if #contents > 0 and sm.physics.spherecast(pos, pos + char.direction * 1.75, 0.05, char) then
+    if #contents > 0 then
         self.swinging = true
         self.timer = self.timer - 1
         if self.timer <= 0 then
             for k, rock in pairs(contents) do
                 if sm.exists(rock) and MINERALDROPS[rock.id] == nil then
                     local hit, result = sm.physics.raycast(pos, rock.worldPosition)
-                    sm.effect.playEffect(
-                        "Sledgehammer - Hit", result.pointWorld, nil, nil, nil,
-                        { Material = rock.materialId }
-                    )
+                    if hit then
+                        sm.effect.playEffect(
+                            "Sledgehammer - Hit", result.pointWorld, nil, nil, nil,
+                            { Material = rock.materialId }
+                        )
+                    end
 
                     sm.event.sendToHarvestable(rock, "sv_onHit")
                 end

@@ -115,7 +115,7 @@ function Player:client_onInteract()
 	return true
 end
 
-local camOffset = sm.vec3.new(-0.75,-1.25,1.25) * 10
+local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
 	local char = self.player.character
 	if not self.isLocal or not char then return end
