@@ -12,6 +12,18 @@ function MinerUnit:server_onCreate()
     self.swinging = false
 end
 
+function MinerUnit:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
+	sm.event.sendToPlayer(self.unit.publicData.owner, "sv_takeDamage", damage)
+end
+
+function MinerUnit:server_onExplosion(center, destructionLevel)
+	sm.event.sendToPlayer(self.unit.publicData.owner, "sv_takeDamage", destructionLevel * 3)
+end
+
+function MinerUnit:server_onMelee(position, attacker, damage, power, direction, normal)
+	sm.event.sendToPlayer(self.unit.publicData.owner, "sv_takeDamage", damage)
+end
+
 function MinerUnit:server_onFixedUpdate()
     local char = self.unit.character
     if not char or not sm.exists(char) then return end

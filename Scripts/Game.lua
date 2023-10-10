@@ -1,3 +1,6 @@
+dofile( "$SURVIVAL_DATA/Scripts/game/managers/UnitManager.lua" )
+dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
+
 ---@class Game : GameClass
 ---@field sv table
 Game = class( nil )
@@ -11,6 +14,13 @@ function Game.server_onCreate( self )
 		self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
 		self.storage:save( self.sv.saved )
 	end
+
+	g_unitManager = UnitManager()
+	g_unitManager:sv_onCreate( self.sv.saved.overworld )
+end
+
+function Game:server_onFixedUpdate()
+	g_unitManager:sv_onFixedUpdate()
 end
 
 function Game.server_onPlayerJoined( self, player, isNewPlayer )
@@ -21,6 +31,8 @@ function Game.server_onPlayerJoined( self, player, isNewPlayer )
         end
         self.sv.saved.world:loadCell( 0, 0, player, "sv_createPlayerCharacter" )
     end
+
+	g_unitManager:sv_onPlayerJoined( player )
 end
 
 function Game:sv_createPlayerCharacter( world, x, y, player, params )
@@ -48,7 +60,20 @@ end
 
 function Game:client_onCreate()
     self:initCMD()
-    self:setLighting(0.5)
+    --self:setLighting(0.5)
+
+	if g_unitManager == nil then
+		assert( not sm.isHost )
+		g_unitManager = UnitManager()
+	end
+	g_unitManager:cl_onCreate()
+
+	g_effectManager = EffectManager()
+	g_effectManager:cl_onCreate()
+end
+
+function Game.client_onLoadingScreenLifted( self )
+	g_effectManager:cl_onLoadingScreenLifted()
 end
 
 function Game:setLighting(time)

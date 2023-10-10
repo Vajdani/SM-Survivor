@@ -11,6 +11,8 @@ VEC3_UP = sm.vec3.new(0,0,1)
 
 RAD90 = math.rad(90)
 
+unit_miner = sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b")
+
 table_insert = table.insert
 perlin = sm.noise.perlinNoise2d
 random = math.random

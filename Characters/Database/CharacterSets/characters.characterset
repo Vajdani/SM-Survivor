@@ -56,6 +56,72 @@
             "scriptPath" : "$CONTENT_DATA/Scripts/unit/MinerUnit.lua"
          },
          "uuid" : "eb3d1c56-e2c0-4711-9c8d-218b36d5380b"
-      }
+      },
+      {
+			// Green Totebot
+			"uuid": "8984bdbf-521e-4eed-b3c4-2b5e287eb879",
+			"renderables":
+			[
+				"$SURVIVAL_DATA/Character/Char_Totebot/char_totebot.rend",
+				"$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_head_01.rend",
+				"$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_swim.rend",
+				"$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_head_01_swim.rend"
+			],
+			"ragdoll": "$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_ragdoll.json",
+			"tumble":
+			{
+				"col": "$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_tumble_col.obj",
+				"offset": [0.0, 0.0, 0.883]
+			},
+			"unit":
+			{
+				"scriptPath": "$CONTENT_DATA/Scripts/unit/TotebotGreenUnit.lua",
+				"scriptClass": "TotebotGreenUnit",
+				"data":
+				{}
+				
+			},
+			"hit":
+			{
+				"stand":
+				{
+					"col": "$SURVIVAL_DATA/Character/Char_Totebot/char_totebot_hit_col.obj",
+					"offset": [0.0, 0.0, 0.75]
+				}
+			},
+			"character": 
+			{
+				"scriptPath": "$CONTENT_DATA/Scripts/character/TotebotCharacter.lua",
+				"scriptClass": "TotebotCharacter",
+				"data": {}
+			},
+			"movement":
+			{
+				"moveSpeed": 1.8,
+				"slowDownSpeed": 1.0,
+				"crouchSpeed": 1.0,
+				"sprintSpeed": 4.0,
+				"headingRotationSpeed": 9.4245,
+				"facingRotationSpeed": 9.4245,
+				"canSwim": true
+			},
+			"sound":
+			{
+				"movementSoundFrames": [ 1 ],
+				"crouchedMovementSoundFrames": [ 1 ]
+			},
+			"capsule":
+			{
+				"radius": 0.5,
+				"height": 1.25
+			},
+			"paint":
+			{
+				"enable": true,
+				"defaultColor": "49642d",
+				"effect": "Paintcharacter - Small"
+			},
+			"mass": 275.0
+		}
    ]
 }

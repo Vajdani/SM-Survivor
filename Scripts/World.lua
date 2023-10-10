@@ -1,4 +1,5 @@
 dofile "util.lua"
+dofile "$SURVIVAL_DATA/Scripts/game/worlds/BaseWorld.lua"
 
 ---@class SpawnData
 ---@field chunks table
@@ -106,4 +107,18 @@ function World:server_onProjectile(position, airTime, velocity, projectileName, 
         local drop = sm.harvestable.create(mineralDrop, position, angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
         drop:setParams(customData)
     end
+end
+
+
+
+function World.client_onUpdate( self, dt )
+	g_effectManager:cl_onWorldUpdate( self )
+end
+
+function World.client_onCellLoaded( self, x, y )
+	g_effectManager:cl_onWorldCellLoaded( self, x, y )
+end
+
+function World.client_onCellUnloaded( self, x, y )
+	g_effectManager:cl_onWorldCellUnloaded( self, x, y )
 end

@@ -31,6 +31,67 @@
                 <Property key="Colour" value="1 0.585938 0"/>
             </Widget>
         </Widget>
+        <Widget type="Canvas" skin="Canvas" position="535 820 800 200" name="weaponPanel">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 800 50" name="healthBar">
+                <Widget type="TextBox" skin="TextBox" position="5 5 790 40" name="healthText">
+                    <Property key="FontName" value="SM_ButtonSmallBold"/>
+                    <Property key="TextAlign" value="Center"/>
+                    <Property key="Caption" value="HP 100/100"/>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="gui_keybinds_bg" position="5 60 190 125" name="weapon1">
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 180 95" name="weapon1_icon">
+                    <Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+                        <Property key="Colour" value="1 0.584314 0"/>
+                        <Widget type="TextBox" skin="TextBox" position="0 0 35 35" name="weapon1_level">
+                            <Property key="FontName" value="SM_ButtonSmallBold"/>
+                            <Property key="TextAlign" value="Center"/>
+                            <Property key="Caption" value="0"/>
+                        </Widget>
+                    </Widget>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 102 180 20" name="weapon1_ammo"/>
+            </Widget>
+            <Widget type="Widget" skin="gui_keybinds_bg" position="205 60 190 125" name="weapon2">
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 180 95" name="weapon2_icon">
+                    <Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+                        <Property key="Colour" value="1 0.584314 0"/>
+                        <Widget type="TextBox" skin="TextBox" position="0 0 35 35" name="weapon2_level">
+                            <Property key="FontName" value="SM_ButtonSmallBold"/>
+                            <Property key="TextAlign" value="Center"/>
+                            <Property key="Caption" value="0"/>
+                        </Widget>
+                    </Widget>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 102 180 20" name="weapon2_ammo"/>
+            </Widget>
+            <Widget type="Widget" skin="gui_keybinds_bg" position="405 60 190 125" name="weapon3">
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 180 95" name="weapon3_icon">
+                    <Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+                        <Property key="Colour" value="1 0.584314 0"/>
+                        <Widget type="TextBox" skin="TextBox" position="0 0 35 35" name="weapon3_level">
+                            <Property key="FontName" value="SM_ButtonSmallBold"/>
+                            <Property key="TextAlign" value="Center"/>
+                            <Property key="Caption" value="0"/>
+                        </Widget>
+                    </Widget>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 102 180 20" name="weapon3_ammo"/>
+            </Widget>
+            <Widget type="Widget" skin="gui_keybinds_bg" position="605 60 190 125" name="weapon4">
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 180 95" name="weapon4_icon">
+                    <Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+                        <Property key="Colour" value="1 0.584314 0"/>
+                        <Widget type="TextBox" skin="TextBox" position="0 0 35 35" name="weapon4_level">
+                            <Property key="FontName" value="SM_ButtonSmallBold"/>
+                            <Property key="TextAlign" value="Center"/>
+                            <Property key="Caption" value="0"/>
+                        </Widget>
+                    </Widget>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 102 180 20" name="weapon4_ammo"/>
+            </Widget>
+        </Widget>
     </Widget>
     <CodeGeneratorSettings/>
 </MyGUI>

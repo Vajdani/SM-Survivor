@@ -1,4 +1,6 @@
 dofile "util.lua"
+dofile "weapon/Weapon.lua"
+dofile "gui/Slider.lua"
 
 ---@class Player : PlayerClass
 ---@field input Harvestable
@@ -17,10 +19,28 @@ function Player:server_onCreate()
 	print("Player.server_onCreate")
 	self.moveDir = sm.vec3.zero()
 
+	self.health = 100
+	self.maxHealth = 100
+	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+
 	self:sv_initMaterials()
 end
 
-function Player:server_onFixedUpdate()
+function Player:sv_takeDamage(damage)
+	self.health = self.health - damage
+	print(self.player, self.health, "/", self.maxHealth)
+
+	if self.health <= 0 then
+		print(self.player, "died")
+		local char = self.controlled.character
+		char:setTumbling(true)
+		char:setDowned(true)
+	end
+
+	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+end
+
+function Player:server_onFixedUpdate(dt)
 	local char = self.player.character
 	if not char or not sm.exists(char) then return end
 
@@ -59,6 +79,7 @@ function Player:sv_seat()
 	end
 
 	self.input:setSeatCharacter(self.player.character)
+	self.network:setClientData({ controlled = self.controlled.character }, 2)
 end
 
 function Player:sv_onMove(data)
@@ -102,17 +123,86 @@ function Player:client_onCreate()
 	for k, v in pairs(MINERALS) do
 		self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
 	end
+
+	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100)
+	self.healthSlider:setColour(sm.color.new("#ff0000"))
+
 	self.hud:open()
 
 	self:cl_cam()
+
+	self.weapons = {}
+	self:cl_updateWeaponHud()
+
+	self.isDead = false
+end
+
+function Player:client_onClientDataUpdate(data, channel)
+	if not self.isLocal then return end
+
+	if channel == 1 then
+		local health = data.health
+		self.hud:setText("healthText", ("HP %s/%s"):format(math.max(health, 0), data.maxHealth))
+		self.healthSlider:update(math.max(health - 1, 0))
+		self.isDead = health <= 0
+	else
+		self.cl_controlled = data.controlled
+		self.enemyTrigger = sm.areaTrigger.createBox(sm.vec3.new(20, 20, 1), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.character)
+	end
 end
 
 function Player:client_onReload()
+	self.weapons = {}
+	self.weapons[1] = Spudgun():init(1, self.hud)
+	self.weapons[2] = Shotgun():init(2, self.hud)
+
+	self:cl_updateWeaponHud()
+
 	return true
 end
 
-function Player:client_onInteract()
+function Player:cl_updateWeaponHud()
+	for i = 1, 4 do
+		local widget = "weapon"..i
+		local weapon = self.weapons[i]
+		local display = weapon ~= nil
+		self.hud:setVisible(widget, display)
+
+		if display then
+			self.hud:setImage(widget.."_icon", weapon.icon)
+			self.hud:setText(widget.."_level", tostring(weapon.level))
+		end
+	end
+end
+
+function Player:client_onInteract(char, state)
+	if not state then return end
+	self.network:sendToServer("sv_spawnEnemy")
 	return true
+end
+
+function getYawPitch( direction )
+    return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
+end
+
+function Player:sv_spawnEnemy()
+	local char = self.controlled.character
+	if char:isDowned() then
+		char:setTumbling(false)
+		char:setDowned(false)
+		self.health = self.maxHealth
+		self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+		return
+	end
+
+	local pos = char.worldPosition
+	local dir = VEC3_Y --char.direction
+
+	for i = 1, 9 do
+		local _dir = dir:rotate(math.rad(40 * i), VEC3_UP) * 20
+		local yaw = getYawPitch(-_dir)
+		sm.unit.createUnit(unit_totebot_green, pos + _dir, yaw)
+	end
 end
 
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
@@ -125,6 +215,40 @@ function Player:client_onUpdate(dt)
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
+end
+
+function Player:client_onFixedUpdate(dt)
+	if not self.isLocal or self.isDead then return end
+
+	local controlledChar = self.cl_controlled
+	if not controlledChar or not sm.exists(controlledChar) then return end
+
+	local controlledPos = controlledChar.worldPosition
+	self.enemyTrigger:setWorldPosition(controlledPos)
+
+	local target = self:getClosestEnemy(controlledChar, controlledPos)
+	for k, v in pairs(self.weapons) do
+		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
+	end
+end
+
+function Player:getClosestEnemy(ignored, pos)
+	local closest, target
+	for k, v in pairs(self.enemyTrigger:getContents()) do
+		if sm.exists(v) and v ~= ignored then
+			local enemyPos = v.worldPosition
+			local hit, result = sm.physics.raycast(pos, enemyPos)
+			if result:getCharacter() == v then
+				local distance = (enemyPos - pos):length2()
+				if not target or distance < closest then
+					closest = distance
+					target = v
+				end
+			end
+		end
+	end
+
+	return target
 end
 
 function Player:cl_cam()

@@ -1,4 +1,26 @@
 {
 	"toolList": [
+		{
+			"name": "ProjectileManager",
+			"previewRenderable": "$GAME_DATA/Character/Char_Tools/char_spudgun_preview.rend",
+			"previewRotation": [
+				1,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				1
+			],
+			"script": {
+				"class": "ProjectileManager",
+				"data": {},
+				"file": "$CONTENT_DATA/Scripts/weapon/ProjectileManager.lua"
+			},
+			"autoTool": true,
+			"uuid": "6f5f5013-e2eb-4678-a862-a8f4b5200ab5"
+		}
 	]
 }

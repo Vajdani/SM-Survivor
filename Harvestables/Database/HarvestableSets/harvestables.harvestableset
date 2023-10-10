@@ -28,7 +28,7 @@
          "material" : "Rock",
          "name" : "rock_mineral",
          "removable" : false,
-         "renderable" : "$CONTENT_DATA/Harvestables/Renderables/rock _mineral.rend",
+         "renderable" : "$CONTENT_DATA/Harvestables/Renderables/rock_mineral.rend",
          "script" : {
             "class" : "MineralFormation",
             "data" : {},
