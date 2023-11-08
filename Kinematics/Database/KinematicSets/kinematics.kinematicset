@@ -63,6 +63,7 @@
          "mass" : 10000.0,
          "material" : "Default",
          "name" : "mineralDrop",
+         "renderable" : "$CONTENT_DATA/Kinematics/Renderables/input.rend",
          "script" : {
             "class" : "MineralDrop",
             "data" : {},

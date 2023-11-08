@@ -54,16 +54,9 @@ function MineralDrop:client_onUpdate(dt)
     end
 end
 
-local fxId = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
-local fxScale = sm.vec3.one() * 0.25
-function MineralDrop:cl_load(data)
-    local _type = data.type
-    self.effect = sm.effect.createEffect("ShapeRenderable", self.harvestable)
-    self.effect:setScale(fxScale)
-    self.effect:setParameter("uuid", fxId)
-    self.effect:setParameter("color", MineralFormation.colours[_type])
-    self.effect:start()
 
+function MineralDrop:cl_load(data)
+    self.harvestable:setColor(MineralFormation.colours[data.type])
     self.mineralData = data
 end
 
