@@ -36,8 +36,8 @@ function Game.server_onPlayerJoined( self, player, isNewPlayer )
 end
 
 function Game:sv_createPlayerCharacter( world, x, y, player, params )
-	local pos = sm.vec3.new( 0, 0, -10 )
-    local character = sm.character.createCharacter( player, world, pos, 0, 0 )
+	local pos = sm.vec3.new( 0, 0, 0 )
+    local character = sm.character.createCharacter( player, world, pos - VEC3_UP * 10, 0, 0 )
 	player:setCharacter( character )
 	sm.event.sendToPlayer(player, "sv_createMiner", pos)
 end

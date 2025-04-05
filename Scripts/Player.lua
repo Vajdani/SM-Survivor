@@ -7,7 +7,7 @@ dofile "gui/Slider.lua"
 ---@field controlled Unit
 Player = class( nil )
 
-local verticalOffset = VEC3_UP * 10
+local verticalOffset = 10
 local moveDirs = {
 	[1] = -VEC3_X,
     [2] = VEC3_X,
@@ -46,7 +46,8 @@ function Player:server_onFixedUpdate(dt)
 
 	if not self.input or not sm.exists(self.input) then return end
 
-	self.input:setPosition(self.controlled.character.worldPosition - verticalOffset)
+	local pos = self.controlled.character.worldPosition
+	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
 	self.controlled:setMovementDirection(self.moveDir)
 
 	local moving = self.moveDir:length2() > 0
@@ -67,7 +68,7 @@ function Player:sv_createMiner(pos)
 	self:sv_initMaterials()
 
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
-	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos + verticalOffset)
+	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos)
 	self.controlled.publicData = { owner = self.player }
 	self:sv_seat()
 end
@@ -211,7 +212,7 @@ function Player:client_onUpdate(dt)
 	if not self.isLocal or not char then return end
 
 	if self.cam ~= 3 then return end
-	local charPos = char.worldPosition + verticalOffset
+	local charPos = char.worldPosition + VEC3_UP * verticalOffset
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
