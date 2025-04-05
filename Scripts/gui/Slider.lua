@@ -1,6 +1,6 @@
 Slider = class()
 
-local path = "$CONTENT_DATA/Gui/Slider/00%s.png"
+local path = "$CONTENT_DATA/Gui/Slider/%s.png"
 local colour_normal = sm.color.new("#df7f00")
 local colour_reloading = sm.color.new("#ff0000")
 
@@ -21,7 +21,7 @@ function Slider:update_shooting(value)
         self:setColour(colour_normal)
     end
 
-    self:update(value / self.steps * 99)
+    self:update(value / self.steps * 100)
 end
 
 function Slider:update_reloading(value)
@@ -29,7 +29,7 @@ function Slider:update_reloading(value)
         self:setColour(colour_reloading)
     end
 
-    self:update(99 - value / self.steps_reloading * 99)
+    self:update(100 - value / self.steps_reloading * 100)
 end
 
 function Slider:update(value)
