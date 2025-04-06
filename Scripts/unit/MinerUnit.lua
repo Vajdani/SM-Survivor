@@ -28,6 +28,8 @@ function MinerUnit:server_onFixedUpdate()
     local char = self.unit.character
     if not char or not sm.exists(char) then return end
 
+    -- char.movementSpeedFraction = 5
+
     local pos = char.worldPosition
     local dir = char.direction
     self.mineBox:setWorldPosition(pos + dir)

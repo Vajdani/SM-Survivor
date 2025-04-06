@@ -1,10 +1,23 @@
 dofile( "$SURVIVAL_DATA/Scripts/terrain/terrain_util2.lua" )
 
+local RAD90 = math.rad(90)
+local VEC3_X = sm.vec3.new(1,0,0)
+local VEC3_Y = sm.vec3.new(0,1,0)
+local VEC3_UP = sm.vec3.new(0,0,1)
+
+local table_insert = table.insert
+local perlin = sm.noise.perlinNoise2d
+local random = math.random
+local abs = math.abs
+local angleAxis = sm.quat.angleAxis
+local vec3 = sm.vec3.new
+
 function Init()
 	print( "Init terrain" )
 end
 
 function Create( xMin, xMax, yMin, yMax, seed, data )
+	math.randomseed( seed )
 
 	g_uuidToPath = {}
 	g_cellData = {
@@ -14,7 +27,10 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		uid = {},
 		xOffset = {},
 		yOffset = {},
-		rotation = {}
+		rotation = {},
+
+		mineralSeed = seed + math.random() * 500,
+		rocks = {},
 	}
 
 	for cellY = yMin, yMax do
@@ -23,11 +39,15 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		g_cellData.yOffset[cellY] = {}
 		g_cellData.rotation[cellY] = {}
 
+		g_cellData.rocks[cellY] = {}
+
 		for cellX = xMin, xMax do
 			g_cellData.uid[cellY][cellX] = sm.uuid.getNil()
 			g_cellData.xOffset[cellY][cellX] = 0
 			g_cellData.yOffset[cellY][cellX] = 0
 			g_cellData.rotation[cellY][cellX] = 0
+
+			g_cellData.rocks[cellY][cellX] = {}
 		end
 	end
 
@@ -121,11 +141,26 @@ end
 
 function GetNodesForCell( cellX, cellY )
 	local nodes = sm.terrainTile.getNodesForCell( GetTileLoadParamsFromCellPos( cellX, cellY ) )
+	local hasReflectionProbe = false
 	for _, node in ipairs( nodes ) do
 		local rx, ry = RotateLocal( cellX, cellY, node.pos.x, node.pos.y )
 		node.pos = sm.vec3.new( rx, ry, node.pos.z )
 		node.rot = GetRotationQuat( cellX, cellY ) * node.rot
+
+		hasReflectionProbe = hasReflectionProbe or ValueExists( node.tags, "REFLECTION" )
 	end
+
+	if not hasReflectionProbe then
+		local x = ( cellX + 0.5 ) * CELL_SIZE
+		local y = ( cellY + 0.5 ) * CELL_SIZE
+		table_insert(nodes, {
+			pos = sm.vec3.new( 32, 32, 32 ),
+			rot = sm.quat.new( 0.707107, 0, 0, 0.707107 ),
+			scale = sm.vec3.new( 64, 64, 64 ),
+			tags = { "REFLECTION" }
+		})
+	end
+
 	return nodes
 end
 
@@ -146,14 +181,111 @@ function GetCreationsForCell( cellX, cellY )
 	return {}
 end
 
-function GetHarvestablesForCell( cellX, cellY, lod )
-	local harvestables = sm.terrainTile.getHarvestablesForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
-	for _, harvestable in ipairs( harvestables ) do
-		local rx, ry = RotateLocal( cellX, cellY, harvestable.pos.x, harvestable.pos.y )
-		harvestable.pos = sm.vec3.new( rx, ry, harvestable.pos.z )
-		harvestable.rot = GetRotationQuat( cellX, cellY ) * harvestable.rot
+
+
+local rockId = sm.uuid.new("0c01f246-0090-43e4-8453-c1390322a7e4")
+local mineralId = sm.uuid.new("e731dede-34df-467f-8beb-315985179860")
+local types = {
+    { type = "gold", health = 5 },
+    { type = "nitra", health = 4 },
+}
+local rockRot = sm.quat.angleAxis(RAD90, VEC3_X)
+
+local function getMineral(val)
+    if val > 0.3 and val < 0.31 then
+        return true, 2
+    elseif val > 0.33 and val < 0.35 then
+        return true, 1
+    end
+
+    return false, -1
+end
+
+local rockMin = 0
+local rockMax = 65
+
+local function IsBorder(cellX, cellY, x, y)
+	-- if x == y and (x == rockMin or x == rockMax or x == rockMin + 1 or x == rockMax - 1) then
+	-- 	return false
+	-- end
+
+	if cellX == g_cellData.bounds.xMax and x == rockMax then
+		return true
 	end
-	return harvestables
+
+	if cellX == g_cellData.bounds.xMin and x == rockMin then
+		return true
+	end
+
+	if cellY == g_cellData.bounds.yMax and y == rockMax then
+		return true
+	end
+
+	if cellY == g_cellData.bounds.yMin and y == rockMin then
+		return true
+	end
+
+	return false
+end
+
+function GetHarvestablesForCell( cellX, cellY, lod )
+	-- local harvestables = sm.terrainTile.getHarvestablesForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
+	-- for _, harvestable in ipairs( harvestables ) do
+	-- 	local rx, ry = RotateLocal( cellX, cellY, harvestable.pos.x, harvestable.pos.y )
+	-- 	harvestable.pos = sm.vec3.new( rx, ry, harvestable.pos.z )
+	-- 	harvestable.rot = GetRotationQuat( cellX, cellY ) * harvestable.rot
+	-- end
+	-- return harvestables
+
+	-- if true then return {} end
+
+	if #g_cellData.rocks[cellY][cellX] > 0 then return {} end
+
+	local seed, mineralSeed = g_cellData.seed, g_cellData.mineralSeed
+
+	---@type TerrainHarvestable[]
+	local rocks = {}
+
+	sm.log.info(cellX, cellY)
+    local corner = vec3(cellX, cellY, 0)
+    for x = rockMin, rockMax do
+        for y = rockMin, rockMax do
+			if IsBorder(cellX, cellY, x, y) then
+				local rock = {
+					uuid = rockId,
+					pos = corner + vec3(x, y, 0.75),
+					rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
+					color = sm.color.new(0,0,0),
+					tags = {},
+					params = { type = "border", health = 0 }
+				}
+
+				table_insert(rocks, rock)
+			elseif false then
+				local final_x, final_y = (cellX + x) / 8, (cellY + y) / 8
+				if abs(perlin(final_x, final_y, seed)) > 0.15 then
+					local mineralNoise = abs(perlin(final_x, final_y, mineralSeed))
+					local isMineral, mineralType = getMineral(mineralNoise)
+
+					---@type TerrainHarvestable
+					local rock = {
+						uuid = isMineral and mineralId or rockId,
+						pos = corner + vec3(x, y, 0.75),
+						rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
+						color = sm.color.new(0,0,0),
+						tags = {},
+						params = isMineral and types[mineralType] or nil
+					}
+
+					table_insert(rocks, rock)
+				end
+			end
+        end
+    end
+
+	g_cellData.rocks[cellY][cellX] = rocks
+
+	return rocks
 end
 
 function GetKinematicsForCell( cellX, cellY, lod )

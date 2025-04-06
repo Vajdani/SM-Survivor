@@ -19,7 +19,7 @@
             <Widget type="TextBox" skin="TextBox" position="5 5 315 30" name="title">
                 <Property key="FontName" value="SM_ButtonSmallBold"/>
                 <Property key="TextAlign" value="Left VCenter"/>
-                <Property key="Caption" value="KISS ANNE :3"/>
+                <Property key="Caption" value="find trb"/>
             </Widget>
             <Widget type="TextBox" skin="TextBox" position="325 5 40 30" name="progress">
                 <Property key="FontName" value="SM_ButtonSmallBold"/>

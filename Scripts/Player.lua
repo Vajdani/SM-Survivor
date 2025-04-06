@@ -41,6 +41,7 @@ function Player:sv_takeDamage(damage)
 end
 
 function Player:server_onFixedUpdate(dt)
+	-- print(#sm.unit.getAllUnits())
 	local char = self.player.character
 	if not char or not sm.exists(char) then return end
 
@@ -153,9 +154,12 @@ function Player:client_onClientDataUpdate(data, channel)
 end
 
 function Player:client_onReload()
-	self.weapons = {}
-	self.weapons[1] = Spudgun():init(1, self.hud)
-	self.weapons[2] = Shotgun():init(2, self.hud)
+	if #self.weapons > 0 then
+		self.weapons = {}
+	else
+		self.weapons[1] = Spudgun():init(1, self.hud)
+		self.weapons[2] = Shotgun():init(2, self.hud)
+	end
 
 	self:cl_updateWeaponHud()
 
@@ -216,6 +220,9 @@ function Player:client_onUpdate(dt)
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
+
+	-- sm.camera.setPosition(char.worldPosition + VEC3_UP * (verticalOffset + char:getHeight() * 1.5))
+	-- sm.camera.setDirection(char.direction)
 end
 
 function Player:client_onFixedUpdate(dt)

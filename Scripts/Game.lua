@@ -42,10 +42,6 @@ function Game:sv_createPlayerCharacter( world, x, y, player, params )
 	sm.event.sendToPlayer(player, "sv_createMiner", pos)
 end
 
-function Game:sv_gen()
-    sm.event.sendToWorld(self.sv.saved.world, "sv_generateTerrain")
-end
-
 function Game:sv_recreate(data, player)
 	self.sv.saved.world:destroy()
 	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
@@ -97,13 +93,13 @@ function Game:setLighting(time)
 end
 
 function Game:initCMD()
-    sm.game.bindChatCommand("/gen", {}, "cl_gen", "Generate terrain")
     sm.game.bindChatCommand("/cam", {}, "cl_cam", "Switch camera mode")
+    sm.game.bindChatCommand("/render", {}, "cl_render", "Switch render mode")
     sm.game.bindChatCommand("/recreate", {}, "cl_recreate", "Recreate terrain")
 end
 
-function Game:cl_gen()
-    self.network:sendToServer("sv_gen")
+function Game:cl_render()
+    World.renderMode = World.renderMode == "warehouse" and "indoor" or "warehouse"
 end
 
 function Game:cl_cam()

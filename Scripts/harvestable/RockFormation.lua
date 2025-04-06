@@ -3,11 +3,17 @@ RockFormation = class()
 RockFormation.poseWeightCount = 2
 
 function RockFormation:server_onCreate()
-    self.sv = self.storage:load() or { type = "generic", health = 3 }
+    local params = self.params
+    if params then
+        self.sv = params
+        self.storage:save(self.sv)
+    else
+        self.sv = self.storage:load() or { type = "generic", health = 3 }
+    end
 end
 
 function RockFormation:sv_onHit()
-    if not sm.exists(self.harvestable) then return end
+    if not sm.exists(self.harvestable) or self.sv.type == "border" then return end
 
     self.sv.health = self.sv.health - 1
     if self.sv.health <= 0 then
@@ -53,14 +59,12 @@ MineralFormation.colours = {
 }
 
 function MineralFormation:server_onCreate()
-    self.sv = {}
-
     local params = self.params
     if params then
         self.sv = params
         self.storage:save(self.sv)
     else
-        self.sv = self.storage:load()
+        self.sv = self.storage:load() or {}
     end
 
     self.network:sendToClients("cl_colour", self.sv.type)
