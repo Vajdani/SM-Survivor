@@ -14,7 +14,7 @@ Weapon.pelletCount = 1
 Weapon.spreadAngle = 0
 Weapon.level = 1
 
-Weapon.renderable = { uuid = blk_scrapwood, color = sm.color.new(1,1,0) }
+Weapon.renderable = { uuid = blk_plastic, color = sm.color.new(1,1,0) }
 Weapon.icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png"
 
 function Weapon:init(id, hud)
@@ -77,15 +77,15 @@ end
 
 
 Spudgun = class(Weapon)
-Spudgun.fireCooldown = 0.25
-Spudgun.clipSize = 25
-Spudgun.reloadTime = 2
-Spudgun.damage = 25
+Spudgun.fireCooldown = 0
+Spudgun.clipSize = 1000
+Spudgun.reloadTime = 0.1
+Spudgun.damage = 500
 
 Shotgun = class(Weapon)
-Shotgun.fireCooldown = 0.75
-Shotgun.clipSize = 5
-Shotgun.reloadTime = 2.5
-Shotgun.damage = 50
-Shotgun.pelletCount = 5
-Shotgun.spreadAngle = 30
+Shotgun.fireCooldown = 0
+Shotgun.clipSize = 1000
+Shotgun.reloadTime = 0.1
+Shotgun.damage = 500
+Shotgun.pelletCount = 10
+Shotgun.spreadAngle = 3

@@ -203,7 +203,7 @@ function Player:sv_spawnEnemy()
 	local pos = char.worldPosition
 	local dir = VEC3_Y --char.direction
 
-	for i = 1, 9 do
+	for i = 1, 1 do
 		local _dir = dir:rotate(math.rad(40 * i), VEC3_UP) * 20
 		local yaw = getYawPitch(-_dir)
 		sm.unit.createUnit(unit_totebot_green, pos + _dir, yaw)
