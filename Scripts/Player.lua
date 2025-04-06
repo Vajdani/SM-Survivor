@@ -17,7 +17,7 @@ local moveDirs = {
 
 function Player:server_onCreate()
 	print("Player.server_onCreate")
-	self.moveDir = sm.vec3.zero()
+	self.moveKeys = {}
 
 	self.health = 100
 	self.maxHealth = 100
@@ -49,11 +49,13 @@ function Player:server_onFixedUpdate(dt)
 
 	local pos = self.controlled.character.worldPosition
 	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
-	self.controlled:setMovementDirection(self.moveDir)
 
-	local moving = self.moveDir:length2() > 0
+	local moveDir = self:getMoveDir()
+	self.controlled:setMovementDirection(moveDir)
+
+	local moving = moveDir:length2() > 0
 	if moving then
-		self.controlled:setFacingDirection(self.moveDir)
+		self.controlled:setFacingDirection(moveDir)
 	end
 
 	self.controlled:setMovementType(moving and "walk" or "stand")
@@ -85,12 +87,7 @@ function Player:sv_seat()
 end
 
 function Player:sv_onMove(data)
-	local dir = moveDirs[data.key]
-	if data.state then
-		self.moveDir = self.moveDir + dir
-	else
-		self.moveDir = self.moveDir - dir
-	end
+	self.moveKeys[data.key] = data.state
 end
 
 function Player:sv_initMaterials()
@@ -271,11 +268,24 @@ function Player:cl_increaseZoom()
 end
 
 function Player:cl_decreaseZoom()
-	self.zoom = self.zoom < 10 and self.zoom + 1 or 10
+	self.zoom = self.zoom < 100 and self.zoom + 1 or 100
 end
 
 function Player:cl_updateMineralCount(data)
 	for k, v in pairs(data) do
 		self.hud:setText("amount_"..k, tostring(v))
 	end
+end
+
+
+
+function Player:getMoveDir()
+	local moveDir = sm.vec3.zero()
+	for k, v in pairs(self.moveKeys) do
+		if v then
+			moveDir = moveDir + moveDirs[k]
+		end
+	end
+
+	return moveDir
 end
