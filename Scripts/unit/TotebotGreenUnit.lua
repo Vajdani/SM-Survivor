@@ -1,17 +1,19 @@
 dofile "$CONTENT_DATA/Scripts/Timer.lua"
--- dofile "$SURVIVAL_DATA/Scripts/game/units/states/PathingState.lua"
+dofile "$CONTENT_DATA/Scripts/unit/PathingState.lua"
 
 ---@class TotebotGreenUnit : UnitClass
 ---@field forgetTimer Timer
 ---@field attackTimer Timer
 ---@field target Character?	
 ---@field lastTargetPosition Vec3
+---@field isPathing boolean
 TotebotGreenUnit = class()
 
+local attackUuid = sm.uuid.new( "7315c96b-c3bc-4e28-9294-36cb0082d8e4" )
 local Damage = 5
 
 local targetForgetTime = 4 * 8
-local attackTime = 0.5 * 8
+local attackTime = 0.75 * 8
 local stopDistance = 2.5
 
 function TotebotGreenUnit:server_onCreate()
@@ -32,6 +34,7 @@ function TotebotGreenUnit:server_onCreate()
 		{ 40.0, math.rad( 20.0 ), math.rad( 20.0 ) }
 	}
 	self.unit:setWhiskerData( 3, math.rad( 60.0 ), 1.5, 5.0 )
+	self.unit:setWhiskerData( 0, 0, 0, 0 )
 
 	self.forgetTimer = Timer()
 	self.forgetTimer:start( targetForgetTime )
@@ -41,12 +44,13 @@ function TotebotGreenUnit:server_onCreate()
 	self.attackTimer:start( attackTime )
 	self.attackTimer:complete()
 
-	-- self.pathingState = PathingState()
-	-- self.pathingState:sv_onCreate( self.unit )
-	-- self.pathingState:sv_setTolerance( 1.0 )
-	-- self.pathingState:sv_setMovementType( "sprint" )
-	-- self.pathingState:sv_setWaterAvoidance( false )
-	-- self.pathingState.debugName = "pathingState"
+	self.pathingState = PathingState()
+	self.pathingState:sv_onCreate( self.unit )
+	self.pathingState:sv_setTolerance( 1.0 )
+	self.pathingState:sv_setMovementType( "sprint" )
+	self.pathingState:sv_setWaterAvoidance( false )
+	self.pathingState.debugName = "pathingState"
+	self.pathingState:start()
 
 	self.target = nil
 
@@ -60,18 +64,10 @@ function TotebotGreenUnit.server_onUnitUpdate( self, dt )
 			print("totebot forgor", self.target)
 			self.target = nil
 			self.shouldForget = false
+			self.lastTargetPosition = nil
 			self.forgetTimer:reset()
 		end
 	end
-
-	-- self.pathingState:sv_setConditions({
-	-- 	{ variable = sm.pathfinder.conditionProperty.target, value = ( self.lastTargetPosition and 1 or 0 ) }
-	-- })
-	-- if self.target then
-	-- 	self.pathingState:sv_setDestination( self.target.worldPosition )
-	-- elseif self.lastTargetPosition then
-	-- 	self.pathingState:sv_setDestination( self.lastTargetPosition )
-	-- end
 
 	self.attackTimer:tick()
 
@@ -95,6 +91,12 @@ function TotebotGreenUnit.server_onUnitUpdate( self, dt )
 		end
 	end
 
+	self.pathingState:sv_setConditions({
+		{ variable = sm.pathfinder.conditionProperty.target, value = ( self.lastTargetPosition and 1 or 0 ) }
+	})
+	self.pathingState:sv_setDestination( self.lastTargetPosition )
+	self.pathingState:onUnitUpdate( dt )
+
 	if self.target and self.attackTimer:done() then
 		if not self.shouldForget then
 			self.lastTargetPosition = self.target.worldPosition
@@ -105,27 +107,35 @@ function TotebotGreenUnit.server_onUnitUpdate( self, dt )
 		if (self.target.worldPosition - ownPos):length2() < stopDistance then
 			self.unit:setMovementType("stand")
 
-			sm.melee.meleeAttack(
-				sm.uuid.new( "7315c96b-c3bc-4e28-9294-36cb0082d8e4" ),
-				Damage,
-				ownPos,
-				toLastTargetPos:normalize() * 2,
-				self.unit,
-				0,
-				10
-			)
+			local dir = toLastTargetPos:normalize()
+			self.unit:setFacingDirection(dir)
+
+			sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 0, 10)
 
 			self.unit:sendCharacterEvent("melee")
 
 			self.attackTimer:reset()
+			self.isPathing = false
 		elseif (toLastTargetPos):length2() < stopDistance then
 			self.unit:setMovementType("stand")
+			self.isPathing = false
 		else
-			local dir = toLastTargetPos:normalize()
-			self.unit:setFacingDirection(dir)
-			self.unit:setMovementDirection(dir)
-			self.unit:setMovementType("sprint")
+			-- local dir = toLastTargetPos:normalize()
+			-- self.unit:setFacingDirection(dir)
+			-- self.unit:setMovementDirection(dir)
+			-- self.unit:setMovementType("sprint")
+			self.isPathing = true
 		end
+	end
+end
+
+function TotebotGreenUnit:server_onFixedUpdate(dt)
+	if self.isPathing and self.pathingState.destination then
+		self.pathingState:onFixedUpdate( dt )
+		self.unit:setMovementDirection( self.pathingState:getMovementDirection() )
+		self.unit:setMovementType( self.pathingState:getMovementType() )
+		self.unit:setFacingDirection( self.pathingState:getFacingDirection() )
+		-- print(self.pathingState:getMovementType())
 	end
 end
 
