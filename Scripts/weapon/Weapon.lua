@@ -1,6 +1,21 @@
 dofile "weaponUtil.lua"
 dofile "../gui/Slider.lua"
 
+---@class Weapon
+---@field fireCooldown number
+---@field damageType number
+---@field damage number
+---@field piercing boolean
+---@field pierceLimit number
+---@field projectileVelocity number
+---@field clipSize number
+---@field reloadTime number
+---@field pelletCount number
+---@field spreadAngle number
+---@field level number
+---@field renderable { uuid: Uuid, color: Color }
+---@field icon string
+---@field id number
 Weapon = class()
 Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.kinetic
@@ -77,15 +92,15 @@ end
 
 
 Spudgun = class(Weapon)
-Spudgun.fireCooldown = 0
-Spudgun.clipSize = 1000
-Spudgun.reloadTime = 0.1
-Spudgun.damage = 500
+Spudgun.fireCooldown = 0.25
+Spudgun.clipSize = 25
+Spudgun.reloadTime = 2
+Spudgun.damage = 25
 
 Shotgun = class(Weapon)
-Shotgun.fireCooldown = 0
-Shotgun.clipSize = 1000
-Shotgun.reloadTime = 0.1
-Shotgun.damage = 500
-Shotgun.pelletCount = 10
-Shotgun.spreadAngle = 3
+Shotgun.fireCooldown = 0.75
+Shotgun.clipSize = 5
+Shotgun.reloadTime = 2.5
+Shotgun.damage = 50
+Shotgun.pelletCount = 5
+Shotgun.spreadAngle = 30

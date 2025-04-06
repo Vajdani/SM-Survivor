@@ -5,6 +5,8 @@ dofile "gui/Slider.lua"
 ---@class Player : PlayerClass
 ---@field input Harvestable
 ---@field controlled Unit
+---@field cl_controlled Character
+---@field weapons Weapon[]
 Player = class( nil )
 
 local verticalOffset = 10
@@ -22,6 +24,8 @@ function Player:server_onCreate()
 	self.health = 100
 	self.maxHealth = 100
 	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+
+	self.player.publicData = {}
 
 	self:sv_initMaterials()
 end
@@ -73,6 +77,7 @@ function Player:sv_createMiner(pos)
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
 	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos)
 	self.controlled.publicData = { owner = self.player }
+	self.player.publicData.miner = self.controlled
 	self:sv_seat()
 end
 
@@ -179,15 +184,11 @@ end
 
 function Player:client_onInteract(char, state)
 	if not state then return end
-	self.network:sendToServer("sv_spawnEnemy")
+	self.network:sendToServer("sv_revive")
 	return true
 end
 
-function getYawPitch( direction )
-    return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
-end
-
-function Player:sv_spawnEnemy()
+function Player:sv_revive()
 	local char = self.controlled.character
 	if char:isDowned() then
 		char:setTumbling(false)
@@ -195,15 +196,6 @@ function Player:sv_spawnEnemy()
 		self.health = self.maxHealth
 		self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
 		return
-	end
-
-	local pos = char.worldPosition
-	local dir = VEC3_Y --char.direction
-
-	for i = 1, 1 do
-		local _dir = dir:rotate(math.rad(40 * i), VEC3_UP) * 20
-		local yaw = getYawPitch(-_dir)
-		sm.unit.createUnit(unit_totebot_green, pos + _dir, yaw)
 	end
 end
 
@@ -232,11 +224,21 @@ function Player:client_onFixedUpdate(dt)
 	self.enemyTrigger:setWorldPosition(controlledPos)
 
 	local target = self:getClosestEnemy(controlledChar, controlledPos)
+	--local velocity = target and target.velocity
 	for k, v in pairs(self.weapons) do
+		-- local distance = sm.vec3.zero()
+		-- if target then
+		-- 	distance = target.worldPosition + velocity * dt - controlledPos
+		-- 	distance = distance + velocity * v.projectileVelocity / distance:length() * dt
+		-- 	sm.particle.createParticle("paint_smoke",  target.worldPosition + velocity * dt)
+		-- end
+
+		-- v:update(dt, controlledPos, target and distance:normalize())
 		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
 	end
 end
 
+---@return Character character
 function Player:getClosestEnemy(ignored, pos)
 	local closest, target
 	for k, v in pairs(self.enemyTrigger:getContents()) do
