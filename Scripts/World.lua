@@ -1,5 +1,5 @@
 dofile "util.lua"
-dofile "$SURVIVAL_DATA/Scripts/game/worlds/BaseWorld.lua"
+dofile "survival_spawns.lua"
 
 ---@class SpawnData
 ---@field chunks table
@@ -18,13 +18,26 @@ World.cellMaxY = 0
 World.worldBorder = true
 -- World.renderMode = "warehouse"
 
-function World.server_onCreate( self )
+local spawnDelay = 10 * 40
+
+function World:server_onCreate()
     print("World.server_onCreate")
 end
 
--- function World:server_onFixedUpdate()
+function World:server_onCellCreated(x, y)
+    local tags = sm.cell.getTags( x, y )
+	local cell = { x = x, y = y, worldId = self.world.id, isStartArea = false, isPoi = false }
 
--- end
+	SpawnFromNodeOnCellLoaded( cell, "TOTEBOT_GREEN" )
+end
+
+function World:server_onFixedUpdate()
+    for k, v in pairs(sm.player.getAllPlayers()) do
+        if (sm.game.getCurrentTick() % (spawnDelay + 20 * v.id)) == 0 then
+            self:sv_spawnEnemies(v.publicData.miner)
+        end
+    end
+end
 
 local mineralDrop = sm.uuid.new("a09539ba-95d3-4f65-989d-83d1e9c32d0f")
 function World:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, target, uuid)
@@ -36,14 +49,39 @@ end
 
 
 
-function World.client_onUpdate( self, dt )
+function World:client_onUpdate( dt )
 	g_effectManager:cl_onWorldUpdate( self )
 end
 
-function World.client_onCellLoaded( self, x, y )
+function World:client_onCellLoaded( x, y )
 	g_effectManager:cl_onWorldCellLoaded( self, x, y )
 end
 
-function World.client_onCellUnloaded( self, x, y )
+function World:client_onCellUnloaded( x, y )
 	g_effectManager:cl_onWorldCellUnloaded( self, x, y )
+end
+
+
+
+function World:sv_spawnEnemies(miner)
+    if not miner or not sm.exists(miner) then return end
+
+	local char = miner.character
+    if not char or not sm.exists(char) then return end
+
+	local pos = char.worldPosition
+	local dir = VEC3_Y
+
+    local cycles = 9
+    local anglePerCycle = 360 / cycles
+    local distance = function() return math.random(10, 20) end
+	for i = 1, cycles do
+		local _dir = dir:rotate(math.rad(anglePerCycle * i), VEC3_UP) * distance()
+        local spawnPos = pos + _dir
+        local hit, result = sm.physics.raycast(spawnPos + VEC3_UP * 2.5, spawnPos)
+        if result.type == "unknown" then
+            local yaw = GetYawPitch(-_dir)
+            sm.unit.createUnit(unit_totebot_green, spawnPos, yaw, { target = char })
+        end
+	end
 end

@@ -150,14 +150,14 @@ function Projectile:onHit(manager, result)
 
     if sm.isHost then
         manager.network:sendToServer("sv_onHit",
-        {
-            char = char,
-            stats = {
-                damage = self.damage,
-                damageType = self.damageType,
-                hitPos = result.pointWorld
+            {
+                char = char,
+                stats = {
+                    damage = self.damage,
+                    damageType = self.damageType,
+                    hitPos = result.pointWorld
+                }
             }
-        }
-    )
+        )
     end
 end

@@ -33,7 +33,7 @@ function TotebotGreenUnit:server_onCreate()
 		{ 20.0, math.rad( 40.0 ), math.rad( 35.0 ) },
 		{ 40.0, math.rad( 20.0 ), math.rad( 20.0 ) }
 	}
-	self.unit:setWhiskerData( 3, math.rad( 60.0 ), 1.5, 5.0 )
+	-- self.unit:setWhiskerData( 3, math.rad( 60.0 ), 1.5, 5.0 )
 	self.unit:setWhiskerData( 0, 0, 0, 0 )
 
 	self.forgetTimer = Timer()
@@ -52,7 +52,10 @@ function TotebotGreenUnit:server_onCreate()
 	self.pathingState.debugName = "pathingState"
 	self.pathingState:start()
 
-	self.target = nil
+	self.target = (self.params or {}).target
+	if self.target then
+		self.lastTargetPosition = self.target.worldPosition
+	end
 
 	self.destroyed = false
 end

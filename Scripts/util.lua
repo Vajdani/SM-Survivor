@@ -20,7 +20,9 @@ abs = math.abs
 angleAxis = sm.quat.angleAxis
 vec3 = sm.vec3.new
 
-
+function GetYawPitch( direction )
+    return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
+end
 
 ---@class VisualizedTrigger
 ---@field trigger AreaTrigger
