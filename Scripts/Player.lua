@@ -225,9 +225,16 @@ function Player:client_onFixedUpdate(dt)
 	local controlledPos = controlledChar.worldPosition
 	self.enemyTrigger:setWorldPosition(controlledPos)
 
-	local target = self:getClosestEnemy(controlledChar, controlledPos)
+	local enemies = self.enemyTrigger:getContents()
+	local targets = {}
 	--local velocity = target and target.velocity
 	for k, v in pairs(self.weapons) do
+		local funcId = v.targetFunctionId
+		if targets[funcId] == nil then
+			targets[funcId] = { target = WeaponTargetFunctions[funcId](enemies, controlledPos, controlledChar) }
+		end
+
+		local target = targets[funcId].target
 		-- local distance = sm.vec3.zero()
 		-- if target then
 		-- 	distance = target.worldPosition + velocity * dt - controlledPos
@@ -238,26 +245,6 @@ function Player:client_onFixedUpdate(dt)
 		-- v:update(dt, controlledPos, target and distance:normalize())
 		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
 	end
-end
-
----@return Character character
-function Player:getClosestEnemy(ignored, pos)
-	local closest, target
-	for k, v in pairs(self.enemyTrigger:getContents()) do
-		if sm.exists(v) and v ~= ignored then
-			local enemyPos = v.worldPosition
-			local hit, result = sm.physics.raycast(pos, enemyPos)
-			if result:getCharacter() == v then
-				local distance = (enemyPos - pos):length2()
-				if not target or distance < closest then
-					closest = distance
-					target = v
-				end
-			end
-		end
-	end
-
-	return target
 end
 
 function Player:cl_cam()

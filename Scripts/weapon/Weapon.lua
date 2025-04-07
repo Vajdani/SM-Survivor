@@ -17,6 +17,7 @@ dofile "../gui/Slider.lua"
 ---@field renderable ProjectileRenderable|string
 ---@field icon string
 ---@field id number
+---@field targetFunctionId number
 Weapon = class()
 Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.kinetic
@@ -30,6 +31,7 @@ Weapon.pelletCount = 1
 Weapon.sliceAngle = 0
 Weapon.spreadAngle = 0
 Weapon.level = 1
+Weapon.targetFunctionId = 0
 
 Weapon.renderable = { uuid = blk_plastic, color = sm.color.new(1,1,0) }
 Weapon.icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png"
@@ -90,6 +92,31 @@ function Weapon:update(dt, pos, dir)
         )
     end
 end
+
+
+---@alias WeaponTargetFunction fun(enemies: Character[], position: Vec3, owner: Character): Character
+
+---@type WeaponTargetFunction[]
+WeaponTargetFunctions = {
+    [0] = function(enemies, position, owner) --[[@as WeaponTargetFunction]]
+        local closest, target
+        for k, v in pairs(enemies) do
+            if sm.exists(v) and v ~= owner then
+                local enemyPos = v.worldPosition
+                local hit, result = sm.physics.raycast(position, enemyPos)
+                if result:getCharacter() == v then
+                    local distance = (enemyPos - position):length2()
+                    if not target or distance < closest then
+                        closest = distance
+                        target = v
+                    end
+                end
+            end
+        end
+
+        return target
+    end
+}
 
 
 
