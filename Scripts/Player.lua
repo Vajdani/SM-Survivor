@@ -142,7 +142,9 @@ function Player:client_onCreate()
 		}
 	)
 	for k, v in pairs(MINERALS) do
-		self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
+		if k ~= ROCKTYPE.XP then
+			self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
+		end
 	end
 
 	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100, { sm.color.new("#ff0000") })
@@ -209,6 +211,7 @@ function Player:cl_updateWeaponHud()
 				self.hud:setIconImage(widget.."_icon", icon)
 			else
 				self.hud:setImage(widget.."_icon", weapon.icon --[[@as string]])
+				-- self.hud:playEffect(widget.."_icon", "Weapon")
 			end
 
 			self.hud:setText(widget.."_level", tostring(weapon.level))

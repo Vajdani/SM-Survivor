@@ -1,110 +1,108 @@
 <MyGUI type="Layout" version="3.2.0">
-	<Widget type="Widget" skin="PanelEmpty" name="BackPanel" position="0 0 1920 1080">
-		<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position="50 105 175 40">
-			<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position="5 5 30 30" />
-			<Widget type="TextBox" skin="TextBox" name="amount_gold" position="35 5 40 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Center" />
-				<Property key="Caption" value="1" />
-			</Widget>
-			<Widget type="ImageBox" skin="ImageBox" name="icon_nitra" position="100 5 30 30" />
-			<Widget type="TextBox" skin="TextBox" name="amount_nitra" position="130 5 40 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Center" />
-				<Property key="Caption" value="1" />
+	<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position="50 50 175 40">
+		<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position="5 5 30 30" />
+		<Widget type="TextBox" skin="TextBox" name="amount_gold" position="35 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="icon_nitra" position="100 5 30 30" />
+		<Widget type="TextBox" skin="TextBox" name="amount_nitra" position="130 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+	</Widget>
+	<Widget type="Widget" skin="gui_keybinds_bg" name="objectivePanel" position="1470 50 400 40">
+		<Widget type="TextBox" skin="TextBox" name="title" position="5 5 315 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Left VCenter" />
+			<Property key="Caption" value="find trb" />
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="progress" position="325 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="0/1" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="icon" position="365 5 30 30" />
+		<Widget type="Widget" skin="WhiteSkin" position="5 35 390 1">
+			<Property key="Colour" value="1 0.585938 0" />
+		</Widget>
+	</Widget>
+	<Widget type="Canvas" skin="Canvas" name="weaponPanel" position="535 820 800 200">
+		<Widget type="Widget" skin="gui_keybinds_bg" position="5 0 790 50">
+			<Widget type="ImageBox" skin="ImageBox" name="healthBar" position="5 5 780 40">
+				<Widget type="TextBox" skin="TextBox" name="healthText" position="5 5 770 30">
+					<Property key="FontName" value="SM_ButtonSmallBold" />
+					<Property key="TextAlign" value="Center" />
+					<Property key="Caption" value="HP 100/100" />
+				</Widget>
 			</Widget>
 		</Widget>
-		<Widget type="Widget" skin="gui_keybinds_bg" name="objectivePanel" position="1480 105 400 40">
-			<Widget type="TextBox" skin="TextBox" name="title" position="5 5 315 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Left VCenter" />
-				<Property key="Caption" value="find trb" />
-			</Widget>
-			<Widget type="TextBox" skin="TextBox" name="progress" position="325 5 40 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Center" />
-				<Property key="Caption" value="0/1" />
-			</Widget>
-			<Widget type="ImageBox" skin="ImageBox" name="icon" position="365 5 30 30" />
-			<Widget type="Widget" skin="WhiteSkin" position="5 35 390 1">
-				<Property key="Colour" value="1 0.585938 0" />
-			</Widget>
-		</Widget>
-		<Widget type="Canvas" skin="Canvas" name="weaponPanel" position="535 820 800 200">
-			<Widget type="Widget" skin="gui_keybinds_bg" position="5 0 790 50">
-				<Widget type="ImageBox" skin="ImageBox" name="healthBar" position="5 5 780 40">
-					<Widget type="TextBox" skin="TextBox" name="healthText" position="5 5 770 30">
+		<Widget type="Widget" skin="gui_keybinds_bg" name="weapon1" position="5 60 190 125">
+			<Widget type="ImageBox" skin="ImageBox" name="weapon1_icon" position="5 5 180 95">
+				<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+					<Property key="Colour" value="1 0.584314 0" />
+					<Widget type="TextBox" skin="TextBox" name="weapon1_level" position="0 0 35 35">
 						<Property key="FontName" value="SM_ButtonSmallBold" />
 						<Property key="TextAlign" value="Center" />
-						<Property key="Caption" value="HP 100/100" />
+						<Property key="Caption" value="0" />
 					</Widget>
 				</Widget>
 			</Widget>
-			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon1" position="5 60 190 125">
-				<Widget type="ImageBox" skin="ImageBox" name="weapon1_icon" position="5 5 180 95">
-					<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
-						<Property key="Colour" value="1 0.584314 0" />
-						<Widget type="TextBox" skin="TextBox" name="weapon1_level" position="0 0 35 35">
-							<Property key="FontName" value="SM_ButtonSmallBold" />
-							<Property key="TextAlign" value="Center" />
-							<Property key="Caption" value="0" />
-						</Widget>
-					</Widget>
-				</Widget>
-				<Widget type="ImageBox" skin="ImageBox" name="weapon1_ammo" position="5 102 180 20" />
-			</Widget>
-			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon2" position="205 60 190 125">
-				<Widget type="ImageBox" skin="ImageBox" name="weapon2_icon" position="5 5 180 95">
-					<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
-						<Property key="Colour" value="1 0.584314 0" />
-						<Widget type="TextBox" skin="TextBox" name="weapon2_level" position="0 0 35 35">
-							<Property key="FontName" value="SM_ButtonSmallBold" />
-							<Property key="TextAlign" value="Center" />
-							<Property key="Caption" value="0" />
-						</Widget>
-					</Widget>
-				</Widget>
-				<Widget type="ImageBox" skin="ImageBox" name="weapon2_ammo" position="5 102 180 20" />
-			</Widget>
-			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon3" position="405 60 190 125">
-				<Widget type="ImageBox" skin="ImageBox" name="weapon3_icon" position="5 5 180 95">
-					<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
-						<Property key="Colour" value="1 0.584314 0" />
-						<Widget type="TextBox" skin="TextBox" name="weapon3_level" position="0 0 35 35">
-							<Property key="FontName" value="SM_ButtonSmallBold" />
-							<Property key="TextAlign" value="Center" />
-							<Property key="Caption" value="0" />
-						</Widget>
-					</Widget>
-				</Widget>
-				<Widget type="ImageBox" skin="ImageBox" name="weapon3_ammo" position="5 102 180 20" />
-			</Widget>
-			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon4" position="605 60 190 125">
-				<Widget type="ImageBox" skin="ImageBox" name="weapon4_icon" position="5 5 180 95">
-					<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
-						<Property key="Colour" value="1 0.584314 0" />
-						<Widget type="TextBox" skin="TextBox" name="weapon4_level" position="0 0 35 35">
-							<Property key="FontName" value="SM_ButtonSmallBold" />
-							<Property key="TextAlign" value="Center" />
-							<Property key="Caption" value="0" />
-						</Widget>
-					</Widget>
-				</Widget>
-				<Widget type="ImageBox" skin="ImageBox" name="weapon4_ammo" position="5 102 180 20" />
-			</Widget>
+			<Widget type="ImageBox" skin="ImageBox" name="weapon1_ammo" position="5 102 180 20" />
 		</Widget>
-		<Widget type="Widget" skin="gui_keybinds_bg" name="levelPanel" position="0 1040 1920 40">
-			<Widget type="ImageBox" skin="ImageBox" name="icon_xp" position="5 5 1910 30" />
-			<Widget type="TextBox" skin="TextBox" name="amount_xp" position="940 5 40 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Center" />
-				<Property key="Caption" value="1" />
+		<Widget type="Widget" skin="gui_keybinds_bg" name="weapon2" position="205 60 190 125">
+			<Widget type="ImageBox" skin="ImageBox" name="weapon2_icon" position="5 5 180 95">
+				<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+					<Property key="Colour" value="1 0.584314 0" />
+					<Widget type="TextBox" skin="TextBox" name="weapon2_level" position="0 0 35 35">
+						<Property key="FontName" value="SM_ButtonSmallBold" />
+						<Property key="TextAlign" value="Center" />
+						<Property key="Caption" value="0" />
+					</Widget>
+				</Widget>
 			</Widget>
-			<Widget type="TextBox" skin="TextBox" name="level" position="15 5 200 30">
-				<Property key="FontName" value="SM_ButtonSmallBold" />
-				<Property key="TextAlign" value="Left VCenter" />
-				<Property key="Caption" value="1" />
+			<Widget type="ImageBox" skin="ImageBox" name="weapon2_ammo" position="5 102 180 20" />
+		</Widget>
+		<Widget type="Widget" skin="gui_keybinds_bg" name="weapon3" position="405 60 190 125">
+			<Widget type="ImageBox" skin="ImageBox" name="weapon3_icon" position="5 5 180 95">
+				<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+					<Property key="Colour" value="1 0.584314 0" />
+					<Widget type="TextBox" skin="TextBox" name="weapon3_level" position="0 0 35 35">
+						<Property key="FontName" value="SM_ButtonSmallBold" />
+						<Property key="TextAlign" value="Center" />
+						<Property key="Caption" value="0" />
+					</Widget>
+				</Widget>
 			</Widget>
+			<Widget type="ImageBox" skin="ImageBox" name="weapon3_ammo" position="5 102 180 20" />
+		</Widget>
+		<Widget type="Widget" skin="gui_keybinds_bg" name="weapon4" position="605 60 190 125">
+			<Widget type="ImageBox" skin="ImageBox" name="weapon4_icon" position="5 5 180 95">
+				<Widget type="Widget" skin="WhiteSkin" position="145 0 35 35">
+					<Property key="Colour" value="1 0.584314 0" />
+					<Widget type="TextBox" skin="TextBox" name="weapon4_level" position="0 0 35 35">
+						<Property key="FontName" value="SM_ButtonSmallBold" />
+						<Property key="TextAlign" value="Center" />
+						<Property key="Caption" value="0" />
+					</Widget>
+				</Widget>
+			</Widget>
+			<Widget type="ImageBox" skin="ImageBox" name="weapon4_ammo" position="5 102 180 20" />
+		</Widget>
+	</Widget>
+	<Widget type="Widget" skin="gui_keybinds_bg" name="levelPanel" position="0 1040 1920 40">
+		<Widget type="ImageBox" skin="ImageBox" name="icon_xp" position="5 5 1910 30" />
+		<Widget type="TextBox" skin="TextBox" name="amount_xp" position="940 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="level" position="15 5 200 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Left VCenter" />
+			<Property key="Caption" value="1" />
 		</Widget>
 	</Widget>
 </MyGUI>

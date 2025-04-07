@@ -156,7 +156,7 @@ Spudgun.fireCooldown = 0.25
 Spudgun.clipSize = 25
 Spudgun.reloadTime = 2
 Spudgun.damage = 25
-Spudgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "c5ea0c2f-185b-48d6-b4df-45c386a575cc" }
+-- Spudgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "c5ea0c2f-185b-48d6-b4df-45c386a575cc" }
 
 Shotgun = class(Weapon)
 Shotgun.fireCooldown = 0.75
@@ -167,7 +167,7 @@ Shotgun.pelletCount = 5
 Shotgun.sliceAngle = 30
 Shotgun.renderable = { uuid = blk_plastic, color = sm.color.new(0,1,0) }
 Shotgun.gravityForce = 0.5
-Shotgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "f6250bf4-9726-406f-a29a-945c06e460e5" }
+-- Shotgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "f6250bf4-9726-406f-a29a-945c06e460e5" }
 
 Gatling = class(Weapon)
 Gatling.fireCooldown = 0.1
@@ -178,4 +178,4 @@ Gatling.spreadAngle = 7.5
 Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
 Gatling.pierceLimit = 3
 Gatling.targetFunctionId = 1
-Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }
+-- Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }

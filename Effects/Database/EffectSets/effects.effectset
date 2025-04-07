@@ -24,5 +24,41 @@
 				"delay": 0.0
 			}
 		]
+	},
+	"Weapon":
+	{
+		"parameterList":
+		{
+			"offsetRotation": [0.0, 0.0, 0.0],
+			"Scale": [0.25, 0.25, 0.25]
+		},
+		"parameterCurves":
+		{
+			"offsetRotation":
+			{
+				"loop": 4.0,
+				"speed": 1.2,
+				"timeline":
+				[
+					{ "time":0.0, "value":[ 0, -75, -90 ],	"easing":"linear" },
+					{ "time":1.0, "value":[ 0, -90, -90 ],	"easing":"linear" },
+					{ "time":2.0, "value":[ 0, -105, -90 ], "easing":"linear" },
+					{ "time":3.0, "value":[ 0, -90, -90 ],	"easing":"linear" },
+					{ "time":4.0, "value":[ 0, -75, -90 ]					  }
+				]
+			}
+		},
+		"effectList":
+		[
+			{
+				"type": "renderable",
+				"name": "$GAME_DATA/Character/Char_Tools/char_spudgun_preview.rend",
+				"parameters":
+				[
+					"offsetRotation",
+					"Scale"
+				]
+			}			
+		]
 	}
 }
