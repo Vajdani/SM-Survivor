@@ -79,8 +79,8 @@ function World:sv_spawnEnemies(miner)
 	for i = 1, cycles do
 		local _dir = dir:rotate(math.rad(anglePerCycle * i), VEC3_UP) * distance()
         local spawnPos = pos + _dir
-        local hit, result = sm.physics.raycast(spawnPos + VEC3_UP * 2.5, spawnPos)
-        if result.type == "unknown" then
+        local hit, result = sm.physics.raycast(spawnPos + VEC3_UP * 2.5, spawnPos - VEC3_UP)
+        if result.type == "terrainSurface" then
             local yaw = GetYawPitch(-_dir)
             sm.unit.createUnit(unit_totebot_green, spawnPos, yaw, { target = char })
         end

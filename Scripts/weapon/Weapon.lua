@@ -172,7 +172,7 @@ Gatling.fireCooldown = 0.1
 Gatling.clipSize = 50
 Gatling.reloadTime = 3
 Gatling.damage = 35
-Gatling.spreadAngle = 10
+Gatling.spreadAngle = 7.5
 Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
 Gatling.pierceLimit = 3
 Gatling.targetFunctionId = 1

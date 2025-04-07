@@ -85,12 +85,12 @@ function TotebotGreenUnit.server_onUnitUpdate( self, dt )
 
 			self.forgetTimer:reset()
 		else
-			-- if self.target:isDowned() then
-			-- 	self.target = nil
-			-- 	self.unit:setMovementType("stand")
-			-- else
-			-- 	self.shouldForget = true
-			-- end
+			if self.target:isDowned() then
+				self.target = nil
+				self.unit:setMovementType("stand")
+			else
+				--self.shouldForget = true
+			end
 		end
 	end
 

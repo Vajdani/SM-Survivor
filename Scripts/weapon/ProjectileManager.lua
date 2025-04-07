@@ -122,7 +122,15 @@ function Projectile:update(manager, dt)
     end
 
     local newPos = self.position + self.velocity * dt
-    local hit, result = sm.physics.spherecast(self.position, newPos, 0.1)
+    local hit, result
+    for i = 1, max(#self.hitObjs, 1) do
+        local obj = self.hitObjs[i]
+        hit, result = sm.physics.spherecast(self.position, newPos, 0.05, sm.exists(obj) and obj or nil)
+        if result.type == "character" then
+            break
+        end
+    end
+
     if hit or self.lifeTime <= 0 then
         self:onHit(manager, result)
 
@@ -143,6 +151,8 @@ end
 function Projectile:onHit(manager, result)
     local char = result:getCharacter()
     if not char or not sm.exists(char) then return end
+
+    table_insert(self.hitObjs, char)
 
     if sm.isHost then
         manager.network:sendToServer("sv_onHit",

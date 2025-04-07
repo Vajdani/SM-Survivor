@@ -160,9 +160,15 @@ function Player:client_onReload()
 	if #self.weapons > 0 then
 		self.weapons = {}
 	else
-		self.weapons[1] = Spudgun():init(1, self.hud)
-		self.weapons[2] = Shotgun():init(2, self.hud)
-		self.weapons[3] = Gatling():init(3, self.hud)
+		local weapons = {
+			Spudgun,
+			Shotgun,
+			Gatling
+		}
+
+		for k, v in pairs(weapons) do
+			self.weapons[k] = v():init(k, self.hud)
+		end
 	end
 
 	self:cl_updateWeaponHud()
@@ -179,13 +185,13 @@ function Player:cl_updateWeaponHud()
 
 		if display then
 			local icon = weapon.icon
-			if type(icon) == "table" then
-				print(icon)
+			local iconType = type(icon)
+			if iconType == "table" then
 				self.hud:setItemIcon(widget.."_icon", icon[1], icon[2], icon[3])
-			elseif type(icon) == "Uuid" then
+			elseif iconType == "Uuid" then
 				self.hud:setIconImage(widget.."_icon", icon)
 			else
-				self.hud:setImage(widget.."_icon", weapon.icon)
+				self.hud:setImage(widget.."_icon", weapon.icon --[[@as string]])
 			end
 
 			self.hud:setText(widget.."_level", tostring(weapon.level))
