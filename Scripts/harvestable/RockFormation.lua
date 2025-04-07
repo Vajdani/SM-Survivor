@@ -54,10 +54,6 @@ end
 ---@class MineralFormation : RockFormation
 MineralFormation = class(RockFormation)
 MineralFormation.poseWeightCount = 2
-MineralFormation.colours = {
-    [ROCKTYPE.GOLD]  = sm.color.new(1,1,0),
-    [ROCKTYPE.NITRA] = sm.color.new(1,0,0),
-}
 
 function MineralFormation:server_onCreate()
     local params = self.params
@@ -72,7 +68,7 @@ function MineralFormation:server_onCreate()
     self.network:sendToClients("cl_colour", self.sv.type)
 end
 
-local mineralDrop = sm.uuid.new("a09539ba-95d3-4f65-989d-83d1e9c32d0f") --sm.uuid.new("f6cc2b7a-fa4c-42e5-b272-604549028149")
+--local mineralDrop = sm.uuid.new("f6cc2b7a-fa4c-42e5-b272-604549028149")
 function MineralFormation:sv_onHit()
     if not sm.exists(self.harvestable) then return end
 
@@ -91,7 +87,7 @@ function MineralFormation:sv_onHit()
         --     self.harvestable, 0
         -- )
 
-        local drop = sm.harvestable.create(mineralDrop, vec3(worldPos.x, worldPos.y, 0.1), angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
+        local drop = sm.harvestable.create(hvs_mineralDrop, vec3(worldPos.x, worldPos.y, 0.1), angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
         drop:setParams({ type = self.sv.type, amount = math.random(1, 4) })
 
         self.harvestable:destroy()
@@ -104,5 +100,5 @@ end
 
 
 function MineralFormation:cl_colour(_type)
-    self.harvestable:setColor(self.colours[_type])
+    self.harvestable:setColor(MINERALCOLOURS[_type])
 end

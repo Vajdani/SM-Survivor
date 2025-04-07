@@ -39,10 +39,9 @@ function World:server_onFixedUpdate()
     end
 end
 
-local mineralDrop = sm.uuid.new("a09539ba-95d3-4f65-989d-83d1e9c32d0f")
 function World:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, target, uuid)
     if projectileName == "mineral" then
-        local drop = sm.harvestable.create(mineralDrop, position, angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
+        local drop = sm.harvestable.create(hvs_mineralDrop, position, angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
         drop:setParams(customData)
     end
 end

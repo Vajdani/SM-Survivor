@@ -70,6 +70,25 @@
             "file" : "$CONTENT_DATA/Scripts/harvestable/MineralDrop.lua"
          },
          "uuid" : "a09539ba-95d3-4f65-989d-83d1e9c32d0f"
+      },
+      {
+         "col" : "$GAME_DATA/Mesh/cube.mesh",
+         "collides" : {
+            "body" : true,
+            "character" : false,
+            "melee" : false,
+            "projectile" : false
+         },
+         "mass" : 10000.0,
+         "material" : "Default",
+         "name" : "xpDrop",
+         "renderable" : "$CONTENT_DATA/Kinematics/Renderables/input.rend",
+         "script" : {
+            "class" : "MineralDrop",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/harvestable/MineralDrop.lua"
+         },
+         "uuid" : "24b899a3-a663-4da5-b1bf-670ea4bf16a2"
       }
    ]
 }

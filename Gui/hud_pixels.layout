@@ -1,5 +1,5 @@
 <MyGUI type="Layout" version="3.2.0">
-	<Widget type="Widget" skin="PanelEmpty" name="BackPanel" position="0 2 1920 1080">
+	<Widget type="Widget" skin="PanelEmpty" name="BackPanel" position="0 0 1920 1080">
 		<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position="50 105 175 40">
 			<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position="5 5 30 30" />
 			<Widget type="TextBox" skin="TextBox" name="amount_gold" position="35 5 40 30">
@@ -31,11 +31,13 @@
 			</Widget>
 		</Widget>
 		<Widget type="Canvas" skin="Canvas" name="weaponPanel" position="535 820 800 200">
-			<Widget type="ImageBox" skin="ImageBox" name="healthBar" position="0 0 800 50">
-				<Widget type="TextBox" skin="TextBox" name="healthText" position="5 5 790 40">
-					<Property key="FontName" value="SM_ButtonSmallBold" />
-					<Property key="TextAlign" value="Center" />
-					<Property key="Caption" value="HP 100/100" />
+			<Widget type="Widget" skin="gui_keybinds_bg" position="5 0 790 50">
+				<Widget type="ImageBox" skin="ImageBox" name="healthBar" position="5 5 780 40">
+					<Widget type="TextBox" skin="TextBox" name="healthText" position="5 5 770 30">
+						<Property key="FontName" value="SM_ButtonSmallBold" />
+						<Property key="TextAlign" value="Center" />
+						<Property key="Caption" value="HP 100/100" />
+					</Widget>
 				</Widget>
 			</Widget>
 			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon1" position="5 60 190 125">
@@ -89,6 +91,19 @@
 					</Widget>
 				</Widget>
 				<Widget type="ImageBox" skin="ImageBox" name="weapon4_ammo" position="5 102 180 20" />
+			</Widget>
+		</Widget>
+		<Widget type="Widget" skin="gui_keybinds_bg" name="levelPanel" position="0 1040 1920 40">
+			<Widget type="ImageBox" skin="ImageBox" name="icon_xp" position="5 5 1910 30" />
+			<Widget type="TextBox" skin="TextBox" name="amount_xp" position="940 5 40 30">
+				<Property key="FontName" value="SM_ButtonSmallBold" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="Caption" value="1" />
+			</Widget>
+			<Widget type="TextBox" skin="TextBox" name="level" position="15 5 200 30">
+				<Property key="FontName" value="SM_ButtonSmallBold" />
+				<Property key="TextAlign" value="Left VCenter" />
+				<Property key="Caption" value="1" />
 			</Widget>
 		</Widget>
 	</Widget>

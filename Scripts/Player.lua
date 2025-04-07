@@ -7,6 +7,7 @@ dofile "gui/Slider.lua"
 ---@field controlled Unit
 ---@field cl_controlled Character
 ---@field weapons Weapon[]
+---@field xpBar Slider
 Player = class( nil )
 
 local verticalOffset = 10
@@ -20,6 +21,8 @@ local moveDirs = {
 function Player:server_onCreate()
 	print("Player.server_onCreate")
 	self.moveKeys = {}
+
+	self.level = 0
 
 	self.health = 100
 	self.maxHealth = 100
@@ -104,9 +107,22 @@ function Player:sv_initMaterials()
 end
 
 function Player:sv_collectMineral(data)
-	print(data, self.minerals)
-	self.minerals[data.type] = self.minerals[data.type] + data.amount
+	local type = data.type
+	local newAmount = self.minerals[type] + data.amount
+	local lastLevel = self.level
+	if type == ROCKTYPE.XP and newAmount >= 100 then
+		for i = 1, math.floor(newAmount / 100) do
+			newAmount = newAmount - 100
+			self.level = self.level + 1
+		end
+	end
+
+	self.minerals[type] = newAmount
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
+
+	if self.level ~= lastLevel then
+		self.network:sendToClient(self.player, "cl_updateLevelCount", self.level)
+	end
 end
 
 
@@ -129,8 +145,7 @@ function Player:client_onCreate()
 		self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
 	end
 
-	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100)
-	self.healthSlider:setColour(sm.color.new("#ff0000"))
+	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100, { sm.color.new("#ff0000") })
 
 	self.hud:open()
 
@@ -140,6 +155,8 @@ function Player:client_onCreate()
 	self:cl_updateWeaponHud()
 
 	self.isDead = false
+
+	self:cl_updateLevelCount(0)
 end
 
 function Player:client_onClientDataUpdate(data, channel)
@@ -279,8 +296,22 @@ end
 
 function Player:cl_updateMineralCount(data)
 	for k, v in pairs(data) do
-		self.hud:setText("amount_"..MINERALS[k], tostring(v))
+		if k == ROCKTYPE.XP then
+			if not self.xpBar then
+				self.xpBar = Slider():init(self.hud, "icon_xp", 100, 100, { MINERALCOLOURS[ROCKTYPE.XP] })
+			end
+
+			self.xpBar:update(v)
+			self.hud:setText("amount_"..MINERALS[k], ("%s%%"):format(v))
+		else
+			self.hud:setText("amount_"..MINERALS[k], tostring(v))
+		end
 	end
+end
+
+function Player:cl_updateLevelCount(level)
+	self.cl_level = level
+	self.hud:setText("level", ("Level %s"):format(level))
 end
 
 

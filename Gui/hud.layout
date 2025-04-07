@@ -1,5 +1,5 @@
 <MyGUI type="Layout" version="3.2.0">
-	<Widget type="Widget" skin="PanelEmpty" name="BackPanel" position_real="0 0.001851851851851852 1 1">
+	<Widget type="Widget" skin="PanelEmpty" name="BackPanel" position_real="0 0 1 1">
 		<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position_real="0.026041666666666668 0.09722222222222222 0.09114583333333333 0.037037037037037035">
 			<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position_real="0.02857142857142857 0.125 0.17142857142857143 0.75" />
 			<Widget type="TextBox" skin="TextBox" name="amount_gold" position_real="0.2 0.125 0.22857142857142856 0.75">
@@ -31,11 +31,13 @@
 			</Widget>
 		</Widget>
 		<Widget type="Canvas" skin="Canvas" name="weaponPanel" position_real="0.2786458333333333 0.7592592592592593 0.4166666666666667 0.18518518518518517">
-			<Widget type="ImageBox" skin="ImageBox" name="healthBar" position_real="0 0 1 0.25">
-				<Widget type="TextBox" skin="TextBox" name="healthText" position_real="0.00625 0.1 0.9875 0.8">
-					<Property key="FontName" value="SM_ButtonSmallBold" />
-					<Property key="TextAlign" value="Center" />
-					<Property key="Caption" value="HP 100/100" />
+			<Widget type="Widget" skin="gui_keybinds_bg" position_real="0.00625 0 0.9875 0.25">
+				<Widget type="ImageBox" skin="ImageBox" name="healthBar" position_real="0.006329113924050633 0.1 0.9873417721518988 0.8">
+					<Widget type="TextBox" skin="TextBox" name="healthText" position_real="0.00641025641025641 0.125 0.9871794871794872 0.75">
+						<Property key="FontName" value="SM_ButtonSmallBold" />
+						<Property key="TextAlign" value="Center" />
+						<Property key="Caption" value="HP 100/100" />
+					</Widget>
 				</Widget>
 			</Widget>
 			<Widget type="Widget" skin="gui_keybinds_bg" name="weapon1" position_real="0.00625 0.3 0.2375 0.625">
@@ -89,6 +91,19 @@
 					</Widget>
 				</Widget>
 				<Widget type="ImageBox" skin="ImageBox" name="weapon4_ammo" position_real="0.02631578947368421 0.816 0.9473684210526315 0.16" />
+			</Widget>
+		</Widget>
+		<Widget type="Widget" skin="gui_keybinds_bg" name="levelPanel" position_real="0 0.9629629629629629 1 0.037037037037037035">
+			<Widget type="ImageBox" skin="ImageBox" name="icon_xp" position_real="0.0026041666666666665 0.125 0.9947916666666666 0.75" />
+			<Widget type="TextBox" skin="TextBox" name="amount_xp" position_real="0.4895833333333333 0.125 0.020833333333333332 0.75">
+				<Property key="FontName" value="SM_ButtonSmallBold" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="Caption" value="1" />
+			</Widget>
+			<Widget type="TextBox" skin="TextBox" name="level" position_real="0.0078125 0.125 0.10416666666666667 0.75">
+				<Property key="FontName" value="SM_ButtonSmallBold" />
+				<Property key="TextAlign" value="Left VCenter" />
+				<Property key="Caption" value="1" />
 			</Widget>
 		</Widget>
 	</Widget>

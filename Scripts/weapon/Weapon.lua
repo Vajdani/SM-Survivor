@@ -18,6 +18,7 @@ dofile "../gui/Slider.lua"
 ---@field icon string|Uuid|string[] The icon of the gun (Path to the image/Uuid of the item/ItemIcon definition)
 ---@field id number The id of the gun
 ---@field targetFunctionId number The targeting function's id
+---@field sliderColours Color[] A 2 element array that defines the colours that will be used for the gun's progressbar
 Weapon = class()
 Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.kinetic
@@ -35,10 +36,11 @@ Weapon.targetFunctionId = 0
 
 Weapon.renderable = { uuid = blk_plastic, color = sm.color.new(1,1,0) }
 Weapon.icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png"
+Weapon.sliderColours = { sm.color.new("#df7f00"), sm.color.new("#ff0000") }
 
 function Weapon:init(id, hud)
     self.id = id
-    self.slider = Slider():init(hud, "weapon"..id.."_ammo", self.clipSize, self.reloadTime)
+    self.slider = Slider():init(hud, "weapon"..id.."_ammo", self.clipSize, self.reloadTime, self.sliderColours)
 
     self.fireCooldownTimer = self.fireCooldown
     self.clip = self.clipSize

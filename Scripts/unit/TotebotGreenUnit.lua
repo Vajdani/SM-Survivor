@@ -201,7 +201,12 @@ function TotebotGreenUnit.sv_onDeath( self, impact )
 	local character = self.unit:getCharacter()
 	if not self.destroyed then
 		self.unit:sendCharacterEvent( "death" )
-		g_unitManager:sv_addDeathMarker( character.worldPosition )
+
+		local pos = character.worldPosition
+		g_unitManager:sv_addDeathMarker( pos )
+
+		DropXP(pos)
+
 		self.saved.stats.hp = 0
 		self.unit:destroy()
 		print("'TotebotGreenUnit' killed!")

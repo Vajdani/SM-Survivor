@@ -56,7 +56,7 @@ end
 
 
 function MineralDrop:cl_load(data)
-    self.harvestable:setColor(MineralFormation.colours[data.type])
+    self.harvestable:setColor(MINERALCOLOURS[data.type])
     self.mineralData = data
 end
 
