@@ -310,7 +310,7 @@ function GetAssetsForCell( cellX, cellY, lod )
 end
 
 function GetNodesForCell( cellX, cellY )
-	local nodes = {} --sm.terrainTile.getNodesForCell( GetTileLoadParamsFromCellPos( cellX, cellY ) )
+	local nodes = sm.terrainTile.getNodesForCell( GetTileLoadParamsFromCellPos( cellX, cellY ) )
 	local hasReflectionProbe = false
 	for _, node in ipairs( nodes ) do
 		local rx, ry = RotateLocal( cellX, cellY, node.pos.x, node.pos.y )
