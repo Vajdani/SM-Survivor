@@ -80,9 +80,9 @@ local function DisplayNoise(cellX, cellY, x, y, noise)
 	})
 end
 
-local function AddRock(cellX, cellY, x, y, corner, seed)
+local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, seed)
 	local rock = {
-		rockType = getMineral(abs(perlin(x, y, seed))),
+		rockType = getMineral(abs(perlin(noise_x, noise_y, seed))),
 		pos = corner + vec3(x, y, 0.75),
 		rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
 	}
@@ -115,7 +115,7 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 		-- DisplayNoise(cellX, cellY, x, y, rockNoise)
 
 		if rockNoise > 0.15 then
-			AddRock(cellX, cellY, final_x, final_y, corner, mineralSeed)
+			AddRock(cellX, cellY, x, y, final_x, final_y, corner, mineralSeed)
 		else
 			AddWaypoint(cellX, cellY, x, y)
 
