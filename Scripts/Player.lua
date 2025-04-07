@@ -98,12 +98,13 @@ end
 function Player:sv_initMaterials()
 	self.minerals = {}
 	for k, v in pairs(MINERALS) do
-		self.minerals[v] = 0
+		self.minerals[k] = 0
 	end
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 end
 
 function Player:sv_collectMineral(data)
+	print(data, self.minerals)
 	self.minerals[data.type] = self.minerals[data.type] + data.amount
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 end
@@ -159,8 +160,9 @@ function Player:client_onReload()
 	if #self.weapons > 0 then
 		self.weapons = {}
 	else
-		self.weapons[1] = Spudgun():init(1, self.hud)
-		self.weapons[2] = Shotgun():init(2, self.hud)
+		--self.weapons[1] = Spudgun():init(1, self.hud)
+		--self.weapons[2] = Shotgun():init(2, self.hud)
+		self.weapons[1] = Gatling():init(1, self.hud)
 	end
 
 	self:cl_updateWeaponHud()
@@ -274,8 +276,9 @@ function Player:cl_decreaseZoom()
 end
 
 function Player:cl_updateMineralCount(data)
+	print(MINERALS)
 	for k, v in pairs(data) do
-		self.hud:setText("amount_"..k, tostring(v))
+		self.hud:setText("amount_"..MINERALS[k], tostring(v))
 	end
 end
 

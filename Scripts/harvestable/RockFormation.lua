@@ -5,15 +5,16 @@ RockFormation.poseWeightCount = 2
 function RockFormation:server_onCreate()
     local params = self.params
     if params then
-        self.sv = params
+        self.sv = { type = params[1], health = params[2] }
         self.storage:save(self.sv)
     else
-        self.sv = self.storage:load() or { type = "generic", health = 3 }
+        local rockType = ROCKTYPES[ROCKTYPE.ROCK]
+        self.sv = self.storage:load() or { type = rockType[1], health = rockType[2] }
     end
 end
 
 function RockFormation:sv_onHit()
-    if not sm.exists(self.harvestable) or self.sv.type == "border" then return end
+    if not sm.exists(self.harvestable) or self.sv.type == ROCKTYPE.BORDER then return end
 
     self.sv.health = self.sv.health - 1
     if self.sv.health <= 0 then
@@ -54,17 +55,18 @@ end
 MineralFormation = class(RockFormation)
 MineralFormation.poseWeightCount = 2
 MineralFormation.colours = {
-    gold = sm.color.new(1,1,0),
-    nitra = sm.color.new(1,0,0),
+    [ROCKTYPE.GOLD]  = sm.color.new(1,1,0),
+    [ROCKTYPE.NITRA] = sm.color.new(1,0,0),
 }
 
 function MineralFormation:server_onCreate()
     local params = self.params
     if params then
-        self.sv = params
+        self.sv = { type = params[1], health = params[2] }
         self.storage:save(self.sv)
     else
-        self.sv = self.storage:load() or {}
+        local rockType = ROCKTYPES[ROCKTYPE.GOLD]
+        self.sv = self.storage:load() or { type = rockType[1], health = rockType[2] }
     end
 
     self.network:sendToClients("cl_colour", self.sv.type)

@@ -1,4 +1,5 @@
 dofile( "$SURVIVAL_DATA/Scripts/terrain/terrain_util2.lua" )
+dofile "util.lua"
 
 local rockMin = 0
 local rockMax = 64
@@ -17,21 +18,17 @@ local vec3 = sm.vec3.new
 
 local rockId = sm.uuid.new("0c01f246-0090-43e4-8453-c1390322a7e4")
 local mineralId = sm.uuid.new("e731dede-34df-467f-8beb-315985179860")
-local rockTypes = {
-    [0] = { type = "border" },
-    [1] = { type = "gold", health = 5 },
-    [2] = { type = "nitra", health = 4 },
-}
+
 local rockRot = sm.quat.angleAxis(RAD90, VEC3_X)
 
-local function getMineral(val)
+local function GetRockType(val)
     if val > 0.3 and val < 0.31 then
-        return 2
+        return ROCKTYPE.GOLD
     elseif val > 0.33 and val < 0.35 then
-        return 1
+        return ROCKTYPE.NITRA
     end
 
-    return -1
+    return ROCKTYPE.ROCK
 end
 
 local function IsBorder(cellX, cellY, x, y)
@@ -82,7 +79,7 @@ end
 
 local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, seed)
 	local rock = {
-		rockType = getMineral(abs(perlin(noise_x, noise_y, seed))),
+		rockType = GetRockType(abs(perlin(noise_x, noise_y, seed))),
 		pos = corner + vec3(x, y, 0.75),
 		rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
 	}
@@ -103,7 +100,7 @@ end
 local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 	if IsBorder(cellX, cellY, x, y) then
 		local rock = {
-			rockType = 0,
+			rockType = ROCKTYPE.BORDER,
 			pos = corner + vec3(x, y, 0.75),
 			rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
 		}
@@ -140,7 +137,7 @@ local function AssembleGrid(cellX, cellY, seed, mineralSeed)
 	for x = rockMin, rockMax do
 		for y = rockMin, rockMax do
 			-- local rock = {
-			-- 	rockType = -1,
+			-- 	rockType = ROCKTYPE.ROCK,
 			-- 	pos = corner + vec3(x, y, 0.75),
 			-- 	rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
 			-- }
@@ -359,13 +356,14 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 	local rocks = {}
 	for k, v in pairs(g_cellData.gridData[cellY][cellX].rocks) do
 		local rockType = v.rockType
+		local isMineral = MINERALS[rockType] ~= nil
 		local rock = {
-			uuid = rockType > 0 and mineralId or rockId,
+			uuid = isMineral and mineralId or rockId,
 			pos = v.pos,
 			rot = v.rot,
 			color = sm.color.new(0,0,0),
 			tags = {},
-			params = rockType > -1 and rockTypes[rockType] or nil
+			params = isMineral and ROCKTYPES[rockType] or nil
 		}
 
 		table_insert(rocks, rock)

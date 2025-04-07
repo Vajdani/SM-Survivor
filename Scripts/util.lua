@@ -1,9 +1,23 @@
 MINERALDROPS = MINERALDROPS or {}
-MINERALS = {
-    "gold",
-    "nitra"
+
+ROCKTYPES = {
+    [0] = { 0,  3 }, --Rock
+    [1] = { 1     }, --Border
+    [2] = { 2,  5 }, --Gold
+    [3] = { 3,  4 }, --Nitra
 }
 
+ROCKTYPE = {
+    ROCK    = 0,
+    BORDER  = 1,
+    GOLD    = 2,
+    NITRA   = 3,
+}
+
+MINERALS = {
+    [ROCKTYPE.GOLD]  = "gold",
+    [ROCKTYPE.NITRA] = "nitra",
+}
 
 VEC3_X = sm.vec3.new(1,0,0)
 VEC3_Y = sm.vec3.new(0,1,0)
@@ -22,62 +36,4 @@ vec3 = sm.vec3.new
 
 function GetYawPitch( direction )
     return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
-end
-
----@class VisualizedTrigger
----@field trigger AreaTrigger
----@field effect Effect
----@field setPosition function
----@field setRotation function
----@field setScale function
----@field destroy function
----@field setVisible function
----@field show function
----@field hide function
-
----Create an AreaTrigger that has a visualization
----@param position Vec3
----@param scale Vec3
----@return VisualizedTrigger
-function CreateVisualizedTrigger(position, scale)
-    local effect = sm.effect.createEffect("ShapeRenderable")
-    effect:setParameter("uuid", blk_glass)
-    effect:setParameter("visualization", true)
-    effect:setScale(scale)
-    effect:setPosition(position)
-    effect:start()
-
-    return {
-        trigger = sm.areaTrigger.createBox(scale * 0.5, position),
-        effect = effect,
-        setPosition = function(self, position)
-            self.trigger:setWorldPosition(position)
-            self.effect:setPosition(position)
-        end,
-        setRotation = function(self, rotation)
-            self.trigger:setWorldRotation(rotation)
-            self.effect:setRotation(rotation)
-        end,
-        setScale = function(self, scale)
-            self.trigger:setScale(scale * 0.5)
-            self.effect:setScale(scale)
-        end,
-        destroy = function(self)
-            sm.areaTrigger.destroy(self.trigger)
-            self.effect:destroy()
-        end,
-        setVisible = function(self, state)
-            if state then
-                self.effect:start()
-            else
-                self.effect:stop()
-            end
-        end,
-        show = function(self)
-            self.effect:start()
-        end,
-        hide = function(self)
-            self.effect:stop()
-        end
-    }
 end

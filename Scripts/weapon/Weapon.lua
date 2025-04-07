@@ -104,3 +104,11 @@ Shotgun.reloadTime = 2.5
 Shotgun.damage = 50
 Shotgun.pelletCount = 5
 Shotgun.spreadAngle = 30
+
+Gatling = class(Weapon)
+Gatling.fireCooldown = 0.1
+Gatling.clipSize = 50
+Gatling.reloadTime = 3
+Gatling.damage = 35
+Gatling.pelletCount = 1
+Gatling.spreadAngle = 0
