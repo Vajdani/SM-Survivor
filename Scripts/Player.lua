@@ -160,9 +160,9 @@ function Player:client_onReload()
 	if #self.weapons > 0 then
 		self.weapons = {}
 	else
-		--self.weapons[1] = Spudgun():init(1, self.hud)
-		--self.weapons[2] = Shotgun():init(2, self.hud)
-		self.weapons[1] = Gatling():init(1, self.hud)
+		self.weapons[1] = Spudgun():init(1, self.hud)
+		self.weapons[2] = Shotgun():init(2, self.hud)
+		self.weapons[3] = Gatling():init(3, self.hud)
 	end
 
 	self:cl_updateWeaponHud()

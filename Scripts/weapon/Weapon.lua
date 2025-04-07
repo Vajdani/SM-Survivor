@@ -11,9 +11,10 @@ dofile "../gui/Slider.lua"
 ---@field clipSize number
 ---@field reloadTime number
 ---@field pelletCount number
+---@field sliceAngle number
 ---@field spreadAngle number
 ---@field level number
----@field renderable { uuid: Uuid, color: Color }
+---@field renderable ProjectileRenderable|string
 ---@field icon string
 ---@field id number
 Weapon = class()
@@ -26,6 +27,7 @@ Weapon.projectileVelocity = 25
 Weapon.clipSize = 1
 Weapon.reloadTime = 1
 Weapon.pelletCount = 1
+Weapon.sliceAngle = 0
 Weapon.spreadAngle = 0
 Weapon.level = 1
 
@@ -71,7 +73,7 @@ function Weapon:update(dt, pos, dir)
     local spawnPos = pos + dir * 0.15
     local velocity = dir * self.projectileVelocity
     local pelletCount = self.pelletCount
-    local angleSlice, halfAngle = self.spreadAngle / pelletCount, self.spreadAngle * 0.5
+    local angleSlice, halfAngle = self.sliceAngle / pelletCount, self.sliceAngle * 0.5
     for i = 1, pelletCount do
         sm.event.sendToTool(
             g_projectileManager, "cl_fireProjectile",
@@ -83,7 +85,7 @@ function Weapon:update(dt, pos, dir)
                 gravity = false,
                 renderable = self.renderable,
                 position = spawnPos,
-                velocity = velocity:rotate(math.rad(angleSlice * i - halfAngle), VEC3_UP)
+                velocity = velocity:rotate(math.rad(angleSlice * i - halfAngle + math.random(-self.spreadAngle, self.spreadAngle)), VEC3_UP)
             }
         )
     end
@@ -103,7 +105,8 @@ Shotgun.clipSize = 5
 Shotgun.reloadTime = 2.5
 Shotgun.damage = 50
 Shotgun.pelletCount = 5
-Shotgun.spreadAngle = 30
+Shotgun.sliceAngle = 30
+Shotgun.renderable = { uuid = blk_plastic, color = sm.color.new(0,1,0) }
 
 Gatling = class(Weapon)
 Gatling.fireCooldown = 0.1
@@ -111,4 +114,5 @@ Gatling.clipSize = 50
 Gatling.reloadTime = 3
 Gatling.damage = 35
 Gatling.pelletCount = 1
-Gatling.spreadAngle = 0
+Gatling.spreadAngle = 10
+Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
