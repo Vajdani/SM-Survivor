@@ -7,9 +7,8 @@ dofile "weaponUtil.lua"
 ---@class ProjectileParams
 ---@field damage number The damage that the projectile deals to enemies
 ---@field damageType number The damage type that the projectile has
----@field piercing boolean Whether the projectile can go through enemies 
 ---@field pierceLimit number How many times the projectiles can pierce through enemies
----@field gravity boolean Whether the projectile has gravity
+---@field gravity number The amount of gravity the projectile recieves
 ---@field renderable ProjectileRenderable|string Describes how the projectile will look
 ---@field position Vec3 The projectile's position
 ---@field velocity Vec3 The projectile's velocity(m/s)
@@ -55,7 +54,6 @@ function ProjectileManager:cl_addProjectile(data)
     proj:init(
         data.damage,
         data.damageType,
-        data.piercing,
         data.pierceLimit,
         data.gravity,
         data.renderable,
@@ -77,24 +75,21 @@ end
 Projectile = class()
 Projectile.damage = 0
 Projectile.damageType = DAMAGETYPES.kinetic
-Projectile.piercing = false
 Projectile.pierceLimit = 0
-Projectile.gravity = false
+Projectile.gravity = 0
 Projectile.lifeTime = 10
 
 
 ---Sets up the projectile
 ---@param damage number The damage that the projectile deals to enemies
 ---@param damageType number The damage type that the projectile has
----@param piercing boolean Whether the projectile can go through enemies 
 ---@param pierceLimit number How many times the projectiles can pierce through enemies
 ---@param renderable ProjectileRenderable|string Describes how the projectile will look
 ---@param position Vec3 The projectile's initial position
 ---@param velocity Vec3 The projectile's initial velocity
-function Projectile:init(damage, damageType, piercing, pierceLimit, gravity, renderable, position, velocity)
+function Projectile:init(damage, damageType, pierceLimit, gravity, renderable, position, velocity)
     self.damage = damage
     self.damageType = damageType
-    self.piercing = piercing
     self.pierceLimit = pierceLimit
     self.gravity = gravity
 
@@ -115,23 +110,24 @@ function Projectile:init(damage, damageType, piercing, pierceLimit, gravity, ren
 
     self.position = position
     self.velocity = velocity
+
+    self.hitObjs = {}
 end
 
 function Projectile:update(manager, dt)
     self.lifeTime = self.lifeTime - dt
 
-    if self.gravity then
-        self.velocity = self.velocity * 0.99 - GRAVITY * dt
+    if self.gravity ~= 0 then
+        self.velocity = self.velocity * 0.99 - GRAVITY * self.gravity * dt
     end
 
     local newPos = self.position + self.velocity * dt
-    local hit, result = sm.physics.raycast(self.position, newPos)
+    local hit, result = sm.physics.spherecast(self.position, newPos, 0.1)
     if hit or self.lifeTime <= 0 then
         self:onHit(manager, result)
 
-        if self.piercing then
-            self.pierceLimit = self.pierceLimit - 1
-        else
+        self.pierceLimit = self.pierceLimit - 1
+        if self.pierceLimit <= 0 or result.type ~= "character" then
             self.effect:stop()
             return true
         end

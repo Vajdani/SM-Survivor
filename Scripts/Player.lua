@@ -178,7 +178,16 @@ function Player:cl_updateWeaponHud()
 		self.hud:setVisible(widget, display)
 
 		if display then
-			self.hud:setImage(widget.."_icon", weapon.icon)
+			local icon = weapon.icon
+			if type(icon) == "table" then
+				print(icon)
+				self.hud:setItemIcon(widget.."_icon", icon[1], icon[2], icon[3])
+			elseif type(icon) == "Uuid" then
+				self.hud:setIconImage(widget.."_icon", icon)
+			else
+				self.hud:setImage(widget.."_icon", weapon.icon)
+			end
+
 			self.hud:setText(widget.."_level", tostring(weapon.level))
 		end
 	end
@@ -222,7 +231,7 @@ function Player:client_onFixedUpdate(dt)
 	local controlledChar = self.cl_controlled
 	if not controlledChar or not sm.exists(controlledChar) then return end
 
-	local controlledPos = controlledChar.worldPosition
+	local controlledPos = controlledChar.worldPosition + controlledChar.velocity * dt
 	self.enemyTrigger:setWorldPosition(controlledPos)
 
 	local enemies = self.enemyTrigger:getContents()
@@ -231,10 +240,10 @@ function Player:client_onFixedUpdate(dt)
 	for k, v in pairs(self.weapons) do
 		local funcId = v.targetFunctionId
 		if targets[funcId] == nil then
-			targets[funcId] = { target = WeaponTargetFunctions[funcId](enemies, controlledPos, controlledChar) }
+			targets[funcId] = { WeaponTargetFunctions[funcId](enemies, controlledPos, controlledChar) }
 		end
 
-		local target = targets[funcId].target
+		local target = targets[funcId][1]
 		-- local distance = sm.vec3.zero()
 		-- if target then
 		-- 	distance = target.worldPosition + velocity * dt - controlledPos
@@ -263,7 +272,6 @@ function Player:cl_decreaseZoom()
 end
 
 function Player:cl_updateMineralCount(data)
-	print(MINERALS)
 	for k, v in pairs(data) do
 		self.hud:setText("amount_"..MINERALS[k], tostring(v))
 	end

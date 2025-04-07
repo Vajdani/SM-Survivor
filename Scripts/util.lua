@@ -22,8 +22,11 @@ MINERALS = {
 VEC3_X = sm.vec3.new(1,0,0)
 VEC3_Y = sm.vec3.new(0,1,0)
 VEC3_UP = sm.vec3.new(0,0,1)
+VEC3_ONE = sm.vec3.one()
 
 RAD90 = math.rad(90)
+
+QUAT_IDENTITY = sm.quat.identity()
 
 unit_miner = sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b")
 

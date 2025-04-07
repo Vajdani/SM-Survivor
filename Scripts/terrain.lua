@@ -4,22 +4,10 @@ dofile "util.lua"
 local rockMin = 0
 local rockMax = 64
 
-local RAD90 = math.rad(90)
-local VEC3_X = sm.vec3.new(1,0,0)
-local VEC3_Y = sm.vec3.new(0,1,0)
-local VEC3_UP = sm.vec3.new(0,0,1)
-
-local table_insert = table.insert
-local perlin = sm.noise.perlinNoise2d
-local random = math.random
-local abs = math.abs
-local angleAxis = sm.quat.angleAxis
-local vec3 = sm.vec3.new
-
 local rockId = sm.uuid.new("0c01f246-0090-43e4-8453-c1390322a7e4")
 local mineralId = sm.uuid.new("e731dede-34df-467f-8beb-315985179860")
 
-local rockRot = sm.quat.angleAxis(RAD90, VEC3_X)
+local rockRot = angleAxis(RAD90, VEC3_X)
 
 local function GetRockType(val)
     if val > 0.3 and val < 0.31 then
@@ -51,12 +39,6 @@ local function IsBorder(cellX, cellY, x, y)
 	return false
 end
 
-local function concat( a, b )
-	for _, v in ipairs( b ) do
-		a[#a+1] = v;
-	end
-end
-
 local function DisplayNoise(cellX, cellY, x, y, noise)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
 		pos = vec3(cellX + x, cellY + y, 25),
@@ -77,11 +59,11 @@ local function DisplayNoise(cellX, cellY, x, y, noise)
 	})
 end
 
-local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, seed)
+local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed)
 	local rock = {
-		rockType = GetRockType(abs(perlin(noise_x, noise_y, seed))),
+		rockType = GetRockType(abs(perlin(noise_x, noise_y, mineralSeed))),
 		pos = corner + vec3(x, y, 0.75),
-		rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
+		rot = random(0, 3),
 	}
 
 	table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
@@ -90,9 +72,6 @@ end
 local function AddWaypoint(cellX, cellY, x, y)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
 		pos = vec3(cellX + x, cellY + y, 0),
-		rot = sm.quat.identity(),
-		scale = sm.vec3.one(),
-		params = {},
 		tags = { "WAYPOINT" },
 	})
 end
@@ -102,7 +81,7 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 		local rock = {
 			rockType = ROCKTYPE.BORDER,
 			pos = corner + vec3(x, y, 0.75),
-			rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
+			rot = random(0, 3),
 		}
 
 		table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
@@ -120,8 +99,6 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 				-- g_cellData.gridData[cellY][cellX].water[x.."_"..y] = true
 				-- table_insert(g_cellData.gridData[cellY][cellX].nodes, {
 				-- 	pos = vec3(cellX + x, cellY + y, 0.5),
-				-- 	rot = sm.quat.identity(),
-				-- 	scale = sm.vec3.one(),
 				-- 	params = {
 				-- 		guaranteed = true
 				-- 	},
@@ -139,7 +116,7 @@ local function AssembleGrid(cellX, cellY, seed, mineralSeed)
 			-- local rock = {
 			-- 	rockType = ROCKTYPE.ROCK,
 			-- 	pos = corner + vec3(x, y, 0.75),
-			-- 	rot = rockRot * angleAxis(RAD90 * random(0, 3), VEC3_Y),
+			-- 	rot = random(0, 3),
 			-- }
 
 			-- table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
@@ -326,7 +303,15 @@ function GetNodesForCell( cellX, cellY )
 		})
 	end
 
-	concat(nodes, g_cellData.gridData[cellY][cellX].nodes)
+	for k, v in pairs(g_cellData.gridData[cellY][cellX].nodes) do
+		table_insert(nodes, {
+			pos = v.pos,
+			rot = v.rot or QUAT_IDENTITY,
+			scale = v.scale or VEC3_ONE,
+			params = v.params,
+			tags = v.tags
+		})
+	end
 
 	return nodes
 end
@@ -357,16 +342,18 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 	for k, v in pairs(g_cellData.gridData[cellY][cellX].rocks) do
 		local rockType = v.rockType
 		local isMineral = MINERALS[rockType] ~= nil
-		local rock = {
+
+		local rot = rockRot
+		if v.rot ~= 0 then
+			rot = rot * angleAxis(RAD90 * v.rot, VEC3_Y)
+		end
+
+		table_insert(rocks, {
 			uuid = isMineral and mineralId or rockId,
 			pos = v.pos,
-			rot = v.rot,
-			color = sm.color.new(0,0,0),
-			tags = {},
+			rot = rot,
 			params = isMineral and ROCKTYPES[rockType] or nil
-		}
-
-		table_insert(rocks, rock)
+		})
 	end
 
 	g_cellData.cellLoaded[cellY][cellX] = true

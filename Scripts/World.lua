@@ -63,11 +63,12 @@ end
 
 
 
+---@param miner Unit
 function World:sv_spawnEnemies(miner)
     if not miner or not sm.exists(miner) then return end
 
 	local char = miner.character
-    if not char or not sm.exists(char) then return end
+    if not char or not sm.exists(char) or char:isDowned() then return end
 
 	local pos = char.worldPosition
 	local dir = VEC3_Y
