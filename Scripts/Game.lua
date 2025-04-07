@@ -50,7 +50,10 @@ function Game:sv_recreate(data, player)
 	if not sm.exists( self.sv.saved.world ) then
 		sm.world.loadWorld( self.sv.saved.world )
 	end
-	self.sv.saved.world:loadCell( 0, 0, player, "sv_createPlayerCharacter" )
+
+	for k, v in pairs(sm.player.getAllPlayers()) do
+		self.sv.saved.world:loadCell( 0, 0, v, "sv_createPlayerCharacter" )
+	end
 end
 
 
