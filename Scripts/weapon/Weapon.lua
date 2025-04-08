@@ -2,6 +2,7 @@ dofile "weaponUtil.lua"
 dofile "../gui/Slider.lua"
 
 ---@class Weapon
+---@field type WEAPONTYPE
 ---@field fireCooldown number How many seconds pass between each shot
 ---@field damageType number The damage type, inflicts various effects
 ---@field damage number The amount of damage the projectile deals
@@ -20,8 +21,9 @@ dofile "../gui/Slider.lua"
 ---@field targetFunctionId number The targeting function's id
 ---@field sliderColours Color[] A 2 element array that defines the colours that will be used for the gun's progressbar
 Weapon = class()
+Weapon.type = WEAPONTYPE.PROJECTILE
 Weapon.fireCooldown = 0
-Weapon.damageType = DAMAGETYPES.kinetic
+Weapon.damageType = DAMAGETYPES.KINETIC
 Weapon.damage = 0
 Weapon.gravityForce = 0
 Weapon.pierceLimit = 0
@@ -146,6 +148,31 @@ WeaponTargetFunctions = {
         end
 
         return target
+    end,
+    ---Shoot in the diection of the most dense area
+    ---@param enemies Character[]
+    ---@param position Vec3
+    ---@param owner Character
+    ---@return Character
+    [2] = function(enemies, position, owner)
+        local lookDir = owner.direction
+        local closest, target
+        for k, v in pairs(enemies) do
+            if sm.exists(v) and v ~= owner then
+                local enemyPos = v.worldPosition
+                local hit, result = sm.physics.raycast(position, enemyPos)
+                if result:getCharacter() == v then
+                    local toEnemy = enemyPos - position
+                    local distance = toEnemy:length2()
+                    if (not target or distance < closest) and lookDir:dot(toEnemy:normalize()) < -0.707107 then
+                        closest = distance
+                        target = v
+                    end
+                end
+            end
+        end
+
+        return target
     end
 }
 
@@ -156,7 +183,7 @@ Spudgun.fireCooldown = 0.25
 Spudgun.clipSize = 25
 Spudgun.reloadTime = 2
 Spudgun.damage = 25
--- Spudgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "c5ea0c2f-185b-48d6-b4df-45c386a575cc" }
+Spudgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "c5ea0c2f-185b-48d6-b4df-45c386a575cc" }
 
 Shotgun = class(Weapon)
 Shotgun.fireCooldown = 0.75
@@ -166,8 +193,7 @@ Shotgun.damage = 50
 Shotgun.pelletCount = 5
 Shotgun.sliceAngle = 30
 Shotgun.renderable = { uuid = blk_plastic, color = sm.color.new(0,1,0) }
-Shotgun.gravityForce = 0.5
--- Shotgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "f6250bf4-9726-406f-a29a-945c06e460e5" }
+Shotgun.icon = { "ItemIconsSetSurvival0", "ItemIcons", "f6250bf4-9726-406f-a29a-945c06e460e5" }
 
 Gatling = class(Weapon)
 Gatling.fireCooldown = 0.1
@@ -178,4 +204,15 @@ Gatling.spreadAngle = 7.5
 Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
 Gatling.pierceLimit = 3
 Gatling.targetFunctionId = 1
--- Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }
+Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }
+
+WeldTool = class(Weapon)
+Gatling.fireCooldown = 0.1
+Gatling.clipSize = 50
+Gatling.reloadTime = 3
+Gatling.damage = 35
+Gatling.spreadAngle = 7.5
+Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
+Gatling.pierceLimit = 3
+Gatling.targetFunctionId = 1
+Gatling.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }

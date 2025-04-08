@@ -38,7 +38,9 @@ function MinerUnit:server_onFixedUpdate()
 
     local oldSwinging = self.swinging
     local contents = self.mineBox:getContents()
-    local _, colResult = sm.physics.spherecast(pos, pos + dir * 1.5, 0.2, char)
+
+    pos = pos + VEC3_UP * char:getHeight() * 0.25
+    local _, colResult = sm.physics.spherecast(pos, pos + dir * 1.5, 0.1, char)
     if colResult.type == "harvestable" then
         self.swinging = true
         self.timer = self.timer - 1

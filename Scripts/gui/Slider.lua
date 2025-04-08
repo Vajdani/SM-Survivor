@@ -50,7 +50,7 @@ end
 
 ---@param value number
 function Slider:update(value)
-    self.gui:setImage(self.name, path:format(round(value)))
+    self.gui:setImage(self.name, path:format(min(round(value), 100)))
 end
 
 ---@param colour Color

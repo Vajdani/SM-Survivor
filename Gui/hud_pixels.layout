@@ -105,4 +105,12 @@
 			<Property key="Caption" value="1" />
 		</Widget>
 	</Widget>
+	<Widget type="Widget" skin="gui_keybinds_bg" name="abilityPanel" position="0 990 80 40">
+		<Widget type="ImageBox" skin="ImageBox" name="icon_magnet" position="5 5 30 30" />
+		<Widget type="TextBox" skin="TextBox" name="amount_magnet" position="35 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+	</Widget>
 </MyGUI>

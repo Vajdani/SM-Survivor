@@ -74,7 +74,7 @@ end
 ---@field effect Effect The projectile's effect
 Projectile = class()
 Projectile.damage = 0
-Projectile.damageType = DAMAGETYPES.kinetic
+Projectile.damageType = DAMAGETYPES.KINETIC
 Projectile.pierceLimit = 0
 Projectile.gravity = 0
 Projectile.lifeTime = 10

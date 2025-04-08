@@ -18,7 +18,7 @@ World.cellMaxY = 0
 World.worldBorder = true
 -- World.renderMode = "warehouse"
 
-local spawnDelay = 10 * 40
+local spawnDelay = 5 * 40
 
 function World:server_onCreate()
     print("World.server_onCreate")
@@ -32,6 +32,8 @@ function World:server_onCellCreated(x, y)
 end
 
 function World:server_onFixedUpdate()
+    if #sm.unit.getAllUnits() >= 200 then return end
+
     for k, v in pairs(sm.player.getAllPlayers()) do
         if (sm.game.getCurrentTick() % (spawnDelay + 20 * v.id)) == 0 then
             self:sv_spawnEnemies(v.publicData.miner)
@@ -72,7 +74,7 @@ function World:sv_spawnEnemies(miner)
 	local pos = char.worldPosition
 	local dir = VEC3_Y
 
-    local cycles = 9
+    local cycles = 30
     local anglePerCycle = 360 / cycles
     local distance = function() return math.random(10, 20) end
 	for i = 1, cycles do

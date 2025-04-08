@@ -1,0 +1,282 @@
+<MyGUI type="Layout" version="3.2.0">
+	<Widget type="Button" skin="HudBackgroundLarge" name="card1" position="45 290 350 500">
+		<Widget type="Widget" skin="PrimaryButton" position="-5 -5 360 55">
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card1_title" position="10 10 340 35">
+				<Property key="NeedMouse" value="false" />
+				<Property key="NeedKey" value="false" />
+				<Property key="Caption" value="Card Title" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="FontName" value="SM_SubHeader" />
+				<Property key="TextColour" value="#191919" />
+			</Widget>
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card1_icon_general" position="125 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card1_weaponIcon" position="75 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card1_icon_weapon" position="175 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="WhiteSkin" name="card1_tierColour" position="75 165 200 35">
+			<Property key="Colour" value="#8E00D6" />
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card1_tierTitle" position="10 0 180 30">
+				<Property key="Caption" value="Epic" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="TextColour" value="#191919" />
+				<Property key="FontName" value="SM_Header" />
+				<Property key="NeedKey" value="false" />
+				<Property key="NeedMouse" value="false" />
+			</Widget>
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="card1_bonusTitle" position="5 210 340 30">
+			<Property key="Caption" value="+9% XP Gain" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="FontName" value="SM_HeaderTiny" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="EditBox" skin="EditBoxEmpty" name="card1_bonusDescription" position="50 250 250 200">
+			<Property key="Caption" value="Increases the XP gained during a dive" />
+			<Property key="TextAlign" value="HCenter Top" />
+			<Property key="Colour" value="#000000" />
+			<Property key="FontName" value="SM_LabelTiny" />
+			<Property key="WordWrap" value="true" />
+			<Property key="ReadOnly" value="true" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+	</Widget>
+	<Widget type="Button" skin="HudBackgroundLarge" name="card2" position="415 290 350 500">
+		<Widget type="Widget" skin="PrimaryButton" position="-5 -5 360 55">
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card2_title" position="10 10 340 35">
+				<Property key="NeedMouse" value="false" />
+				<Property key="NeedKey" value="false" />
+				<Property key="Caption" value="Card Title" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="FontName" value="SM_SubHeader" />
+				<Property key="TextColour" value="#191919" />
+			</Widget>
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card2_icon_general" position="125 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card2_weaponIcon" position="75 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card2_icon_weapon" position="175 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="WhiteSkin" name="card2_tierColour" position="75 165 200 35">
+			<Property key="Colour" value="#8E00D6" />
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card2_tierTitle" position="10 0 180 30">
+				<Property key="Caption" value="Epic" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="TextColour" value="#191919" />
+				<Property key="FontName" value="SM_Header" />
+				<Property key="NeedKey" value="false" />
+				<Property key="NeedMouse" value="false" />
+			</Widget>
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="card2_bonusTitle" position="5 210 340 30">
+			<Property key="Caption" value="+9% XP Gain" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="FontName" value="SM_HeaderTiny" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="EditBox" skin="EditBoxEmpty" name="card2_bonusDescription" position="50 250 250 200">
+			<Property key="Caption" value="Increases the XP gained during a dive" />
+			<Property key="TextAlign" value="HCenter Top" />
+			<Property key="Colour" value="#000000" />
+			<Property key="FontName" value="SM_LabelTiny" />
+			<Property key="WordWrap" value="true" />
+			<Property key="ReadOnly" value="true" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+	</Widget>
+	<Widget type="Button" skin="HudBackgroundLarge" name="card3" position="785 290 350 500">
+		<Widget type="Widget" skin="PrimaryButton" position="-5 -5 360 55">
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card3_title" position="10 10 340 35">
+				<Property key="NeedMouse" value="false" />
+				<Property key="NeedKey" value="false" />
+				<Property key="Caption" value="Card Title" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="FontName" value="SM_SubHeader" />
+				<Property key="TextColour" value="#191919" />
+			</Widget>
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card3_icon_general" position="125 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card3_weaponIcon" position="75 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card3_icon_weapon" position="175 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="WhiteSkin" name="card3_tierColour" position="75 165 200 35">
+			<Property key="Colour" value="#8E00D6" />
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card3_tierTitle" position="10 0 180 30">
+				<Property key="Caption" value="Epic" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="TextColour" value="#191919" />
+				<Property key="FontName" value="SM_Header" />
+				<Property key="NeedKey" value="false" />
+				<Property key="NeedMouse" value="false" />
+			</Widget>
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="card3_bonusTitle" position="5 210 340 30">
+			<Property key="Caption" value="+9% XP Gain" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="FontName" value="SM_HeaderTiny" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="EditBox" skin="EditBoxEmpty" name="card3_bonusDescription" position="50 250 250 200">
+			<Property key="Caption" value="Increases the XP gained during a dive" />
+			<Property key="TextAlign" value="HCenter Top" />
+			<Property key="Colour" value="#000000" />
+			<Property key="FontName" value="SM_LabelTiny" />
+			<Property key="WordWrap" value="true" />
+			<Property key="ReadOnly" value="true" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+	</Widget>
+	<Widget type="Button" skin="HudBackgroundLarge" name="card4" position="1155 290 350 500">
+		<Widget type="Widget" skin="PrimaryButton" position="-5 -5 360 55">
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card4_title" position="10 10 340 35">
+				<Property key="NeedMouse" value="false" />
+				<Property key="NeedKey" value="false" />
+				<Property key="Caption" value="Card Title" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="FontName" value="SM_SubHeader" />
+				<Property key="TextColour" value="#191919" />
+			</Widget>
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card4_icon_general" position="125 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card4_weaponIcon" position="75 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card4_icon_weapon" position="175 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="WhiteSkin" name="card4_tierColour" position="75 165 200 35">
+			<Property key="Colour" value="#8E00D6" />
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card4_tierTitle" position="10 0 180 30">
+				<Property key="Caption" value="Epic" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="TextColour" value="#191919" />
+				<Property key="FontName" value="SM_Header" />
+				<Property key="NeedKey" value="false" />
+				<Property key="NeedMouse" value="false" />
+			</Widget>
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="card4_bonusTitle" position="5 210 340 30">
+			<Property key="Caption" value="+9% XP Gain" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="FontName" value="SM_HeaderTiny" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="EditBox" skin="EditBoxEmpty" name="card4_bonusDescription" position="50 250 250 200">
+			<Property key="Caption" value="Increases the XP gained during a dive" />
+			<Property key="TextAlign" value="HCenter Top" />
+			<Property key="Colour" value="#000000" />
+			<Property key="FontName" value="SM_LabelTiny" />
+			<Property key="WordWrap" value="true" />
+			<Property key="ReadOnly" value="true" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+	</Widget>
+	<Widget type="Button" skin="HudBackgroundLarge" name="card5" position="1525 290 350 500">
+		<Widget type="Widget" skin="PrimaryButton" position="-5 -5 360 55">
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card5_title" position="10 10 340 35">
+				<Property key="NeedMouse" value="false" />
+				<Property key="NeedKey" value="false" />
+				<Property key="Caption" value="Card Title" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="FontName" value="SM_SubHeader" />
+				<Property key="TextColour" value="#191919" />
+			</Widget>
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card5_icon_general" position="125 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card5_weaponIcon" position="75 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="card5_icon_weapon" position="175 55 100 100">
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="ImageBox" skin="WhiteSkin" name="card5_tierColour" position="75 165 200 35">
+			<Property key="Colour" value="#8E00D6" />
+			<Property key="NeedMouse" value="false" />
+			<Property key="NeedKey" value="false" />
+			<Widget type="TextBox" skin="TextBox" name="card5_tierTitle" position="10 0 180 30">
+				<Property key="Caption" value="Epic" />
+				<Property key="TextAlign" value="Center" />
+				<Property key="TextColour" value="#191919" />
+				<Property key="FontName" value="SM_Header" />
+				<Property key="NeedKey" value="false" />
+				<Property key="NeedMouse" value="false" />
+			</Widget>
+		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="card5_bonusTitle" position="5 210 340 30">
+			<Property key="Caption" value="+9% XP Gain" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="FontName" value="SM_HeaderTiny" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+		<Widget type="EditBox" skin="EditBoxEmpty" name="card5_bonusDescription" position="50 250 250 200">
+			<Property key="Caption" value="Increases the XP gained during a dive" />
+			<Property key="TextAlign" value="HCenter Top" />
+			<Property key="Colour" value="#000000" />
+			<Property key="FontName" value="SM_LabelTiny" />
+			<Property key="WordWrap" value="true" />
+			<Property key="ReadOnly" value="true" />
+			<Property key="NeedKey" value="false" />
+			<Property key="NeedMouse" value="false" />
+		</Widget>
+	</Widget>
+</MyGUI>

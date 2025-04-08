@@ -23,6 +23,7 @@ function Player:server_onCreate()
 	self.moveKeys = {}
 
 	self.level = 0
+	self.collectCharges = 0
 
 	self.health = 100
 	self.maxHealth = 100
@@ -57,7 +58,7 @@ function Player:server_onFixedUpdate(dt)
 	local pos = self.controlled.character.worldPosition
 	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
 
-	local moveDir = self:getMoveDir()
+	local moveDir = self:GetMoveDir()
 	self.controlled:setMovementDirection(moveDir)
 
 	local moving = moveDir:length2() > 0
@@ -121,9 +122,31 @@ function Player:sv_collectMineral(data)
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 
 	if self.level ~= lastLevel then
-		self.network:sendToClient(self.player, "cl_updateLevelCount", self.level)
+		if self.level % 5 == 0 then
+			self.collectCharges = self.collectCharges + 1
+		end
+
+		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, self.level - lastLevel, self.collectCharges })
 	end
 end
+
+function Player:sv_interact()
+	local char = self.controlled.character
+	if char:isDowned() then
+		char:setTumbling(false)
+		char:setDowned(false)
+		self.health = self.maxHealth
+		self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+		return
+	end
+
+	if self.collectCharges > 0 then
+		self.collectCharges = self.collectCharges - 1
+
+		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+	end
+end
+
 
 
 function Player:client_onCreate()
@@ -146,6 +169,7 @@ function Player:client_onCreate()
 			self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
 		end
 	end
+	self.hud:setImage("icon_magnet", "$GAME_DATA/Gui/Editor/ed_icon_transform_origin.png")
 
 	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100, { sm.color.new("#ff0000") })
 
@@ -158,7 +182,8 @@ function Player:client_onCreate()
 
 	self.isDead = false
 
-	self:cl_updateLevelCount(0)
+	self:cl_updateLevelCount({ 0, 0, 0 })
+	self.upgradeQueue = 0
 end
 
 function Player:client_onClientDataUpdate(data, channel)
@@ -204,16 +229,7 @@ function Player:cl_updateWeaponHud()
 
 		if display then
 			local icon = weapon.icon
-			local iconType = type(icon)
-			if iconType == "table" then
-				self.hud:setItemIcon(widget.."_icon", icon[1], icon[2], icon[3])
-			elseif iconType == "Uuid" then
-				self.hud:setIconImage(widget.."_icon", icon)
-			else
-				self.hud:setImage(widget.."_icon", weapon.icon --[[@as string]])
-				-- self.hud:playEffect(widget.."_icon", "Weapon")
-			end
-
+			SetGuiIcon(self.hud, widget.."_icon", icon)
 			self.hud:setText(widget.."_level", tostring(weapon.level))
 		end
 	end
@@ -221,23 +237,13 @@ end
 
 function Player:client_onInteract(char, state)
 	if not state then return end
-	self.network:sendToServer("sv_revive")
+	self.network:sendToServer("sv_interact")
 	return true
-end
-
-function Player:sv_revive()
-	local char = self.controlled.character
-	if char:isDowned() then
-		char:setTumbling(false)
-		char:setDowned(false)
-		self.health = self.maxHealth
-		self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
-		return
-	end
 end
 
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
+	-- print(self.weapons[2].fireCooldown)
 	local char = self.player.character
 	if not self.isLocal or not char then return end
 
@@ -312,14 +318,133 @@ function Player:cl_updateMineralCount(data)
 	end
 end
 
-function Player:cl_updateLevelCount(level)
+function Player:cl_updateLevelCount(data)
+	local level, diff = data[1], data[2]
 	self.cl_level = level
-	self.hud:setText("level", ("Level %s"):format(level))
+	self.hud:setText("level",			("Level %s"):format(level))
+	self.hud:setText("amount_magnet",	data[3])
+
+	if diff == 0 then return end
+
+	self.upgradeQueue = self.upgradeQueue + diff
+	if self.upgradesGui:isActive() then return end
+
+	self:cl_processUpgradeQueue()
+end
+
+function Player:cl_processUpgradeQueue()
+	self.hud:close()
+	if not self.upgradesGui then
+		self.upgradesGui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/upgrades.layout", false, {
+			isHud = false,
+			isInteractive = true,
+			needsCursor = true,
+			hidesHotbar = true,
+			isOverlapped = true,
+			backgroundAlpha = 0.5,
+		})
+
+		self.upgradesGui:setOnCloseCallback("cl_upgradeClosed")
+		for i = 1, 5 do
+			self.upgradesGui:setButtonCallback("card"..i, "cl_upgradeSelected")
+		end
+	end
+
+	local weaponsByRestriction = self:GetWeaponRestrictionList()
+
+	self.rolledUpgrades = {}
+	for i = 1, 5 do
+		local weapon, upgrade, upgradeId, rarity
+		repeat
+			upgradeId = math.random(#UPGRADES)
+			local rolled = UPGRADES[upgradeId]
+			local weapons = weaponsByRestriction[rolled.restriction]
+			if not rolled.weaponUpgrade or weapons and #weapons > 0 then
+				upgrade = rolled
+
+				local chance = math.random()
+				for k, v in ipairs( rolled.rarities ) do
+					if chance >= v[1] then
+						rarity = k
+						break
+					end
+				end
+
+				if rolled.weaponUpgrade then
+					weapon = self.weapons[weapons[math.random(#weapons)]]
+				end
+			end
+		until (upgrade ~= nil)
+
+		local widget = "card"..i
+		self.rolledUpgrades[widget] = { upgradeId, rarity, weapon and weapon.id }
+
+		self.upgradesGui:setText(widget.."_title", 				upgrade.cardTitle)
+
+		local isWeaponUpgrade = upgrade.weaponUpgrade
+		self.upgradesGui:setVisible(widget.."_weaponIcon", 		isWeaponUpgrade)
+		self.upgradesGui:setVisible(widget.."_icon_weapon",		isWeaponUpgrade)
+		self.upgradesGui:setVisible(widget.."_icon_general", 	not isWeaponUpgrade)
+		if isWeaponUpgrade then
+			SetGuiIcon(self.upgradesGui, widget.."_weaponIcon",		weapon.icon)
+			SetGuiIcon(self.upgradesGui, widget.."_icon_weapon",	upgrade.icon)
+		else
+			SetGuiIcon(self.upgradesGui, widget.."_icon_general",	upgrade.icon)
+		end
+
+		SetGuiIcon(self.upgradesGui, widget.."_icon", 			upgrade.icon)
+
+		local tier = UPGRADETIERDATA[rarity]
+		self.upgradesGui:setColor(widget.."_tierColour", 		tier[2])
+		self.upgradesGui:setText(widget.."_tierTitle", 			tier[1])
+
+		self.upgradesGui:setText(widget.."_bonusTitle", 		upgrade.bonusTitle(upgrade.rarities[rarity][2]))
+		self.upgradesGui:setText(widget.."_bonusDescription", 	upgrade.bonusDescription)
+	end
+
+	self.upgradesGui:open()
+end
+
+function Player:cl_upgradeSelected(button)
+	local data = self.rolledUpgrades[button]
+	local upgradeId = data[1]
+	local upgrade = UPGRADES[upgradeId]
+	if upgrade.weaponUpgrade then
+		local weaponId = data[3]
+		local lastLevel = self.weapons[weaponId].level
+		upgrade:upgradeWeapon(self.weapons[weaponId], data[2])
+
+		if math.floor(lastLevel / 6) ~= math.floor(self.weapons[weaponId].level / 6) then
+			print("overclock")
+			-- for i = 1, math.floor(self.weapons[weaponId].level / 6) do
+			-- 	self.weapons[weaponId].level = self.weapons[weaponId].level - 6
+			-- 	print("overclock")
+			-- end
+		end
+	else
+
+	end
+
+	self.upgradeQueue = self.upgradeQueue - 1
+	if self.upgradeQueue == 0 then
+		self:cl_updateWeaponHud()
+
+		self.upgradesGui:close()
+		self.hud:open()
+	else
+		self:cl_processUpgradeQueue()
+	end
+end
+
+function Player:cl_upgradeClosed()
+	if not self.hud:isActive() then
+		self.hud:open()
+	end
 end
 
 
 
-function Player:getMoveDir()
+function Player:GetMoveDir()
 	local moveDir = sm.vec3.zero()
 	for k, v in pairs(self.moveKeys) do
 		if v then
@@ -328,4 +453,19 @@ function Player:getMoveDir()
 	end
 
 	return moveDir
+end
+
+function Player:GetWeaponRestrictionList()
+	local weaponsByRestriction = {
+		[-1] = {}
+	}
+	for k, v in pairs(self.weapons) do
+		local type = v.damageType
+		weaponsByRestriction[type] = weaponsByRestriction[type] or {}
+
+		table_insert(weaponsByRestriction[type], v.id)
+		table_insert(weaponsByRestriction[-1], v.id)
+	end
+
+	return weaponsByRestriction
 end

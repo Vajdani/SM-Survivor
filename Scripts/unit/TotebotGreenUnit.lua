@@ -17,7 +17,7 @@ local attackTime = 0.75 * 8
 local stopDistance = 2.5
 
 function TotebotGreenUnit:server_onCreate()
-	print("totebot create")
+	-- print("totebot create")
 
 	self.saved = self.storage:load()
 	if self.saved == nil then
@@ -181,7 +181,7 @@ function TotebotGreenUnit.sv_takeDamage( self, damage, impact, hitPos )
 	if self.saved.stats.hp > 0 then
 		self.saved.stats.hp = self.saved.stats.hp - damage
 		self.saved.stats.hp = math.max( self.saved.stats.hp, 0 )
-		print( "'TotebotGreenUnit' received:", damage, "damage.", self.saved.stats.hp, "/", self.saved.stats.maxhp, "HP" )
+		-- print( "'TotebotGreenUnit' received:", damage, "damage.", self.saved.stats.hp, "/", self.saved.stats.maxhp, "HP" )
 
 		local effectRotation = sm.quat.identity()
 		if hitPos and impact and impact:length() >= FLT_EPSILON then
@@ -209,7 +209,7 @@ function TotebotGreenUnit.sv_onDeath( self, impact )
 
 		self.saved.stats.hp = 0
 		self.unit:destroy()
-		print("'TotebotGreenUnit' killed!")
+		-- print("'TotebotGreenUnit' killed!")
 
 		self.destroyed = true
 	end
