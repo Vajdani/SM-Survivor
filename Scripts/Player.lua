@@ -260,8 +260,9 @@ function Player:client_onClientDataUpdate(data, channel)
 
 	if channel == 1 then
 		local health = data.health
-		self.hud:setText("healthText", ("HP %s/%s"):format(math.max(health, 0), data.maxHealth))
-		self.healthSlider:update(math.max(health - 1, 0))
+		local maxHealth = data.maxHealth
+		self.hud:setText("healthText", ("%sHP %s/%s       "):format(("   "):rep(#tostring(maxHealth) - #tostring(health)), math.max(health, 0), maxHealth))
+		self.healthSlider:update(math.max(health, 0))
 		self.isDead = health <= 0
 	else
 		self.cl_controlled = data.controlled
@@ -326,6 +327,7 @@ function Player:client_onUpdate(dt)
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
+	sm.camera.setFov(sm.camera.getDefaultFov())
 
 	-- sm.camera.setPosition(char.worldPosition + VEC3_UP * (verticalOffset + char:getHeight() * 1.5))
 	-- sm.camera.setDirection(char.direction)
