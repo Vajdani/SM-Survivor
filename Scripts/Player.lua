@@ -127,7 +127,10 @@ function Player:sv_collectMineral(data)
 		end
 
 		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, self.level - lastLevel, self.collectCharges })
+		return true
 	end
+
+	return false
 end
 
 function Player:sv_interact()
@@ -141,9 +144,23 @@ function Player:sv_interact()
 	end
 
 	if self.collectCharges > 0 then
+		local pos = self.controlled.character.worldPosition
+		sm.effect.playEffect("Part - Upgrade", pos)
+
 		self.collectCharges = self.collectCharges - 1
 
-		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+		local xp = 0
+		local contacts = sm.physics.getSphereContacts(pos, 100)
+		for k, v in pairs(contacts.harvestables) do
+			if MINERALDROPS[v.id] == true then
+				xp = xp + v.publicData.amount
+				v:destroy()
+			end
+		end
+
+		if not self:sv_collectMineral({ type = ROCKTYPE.XP, amount = xp }) then
+			self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+		end
 	end
 end
 
@@ -182,8 +199,22 @@ function Player:client_onCreate()
 
 	self.isDead = false
 
-	self:cl_updateLevelCount({ 0, 0, 0 })
 	self.upgradeQueue = 0
+	self.upgradesGui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/upgrades.layout", false, {
+		isHud = false,
+		isInteractive = true,
+		needsCursor = true,
+		hidesHotbar = true,
+		isOverlapped = true,
+		backgroundAlpha = 0.5,
+	})
+
+	self.upgradesGui:setOnCloseCallback("cl_upgradeClosed")
+	for i = 1, 5 do
+		self.upgradesGui:setButtonCallback("card"..i, "cl_upgradeSelected")
+	end
+
+	self:cl_updateLevelCount({ 0, 0, 0 })
 end
 
 function Player:client_onClientDataUpdate(data, channel)
@@ -207,7 +238,8 @@ function Player:client_onReload()
 		local weapons = {
 			Spudgun,
 			Shotgun,
-			Gatling
+			Gatling,
+			WeldTool
 		}
 
 		for k, v in pairs(weapons) do
@@ -284,7 +316,7 @@ function Player:client_onFixedUpdate(dt)
 		-- end
 
 		-- v:update(dt, controlledPos, target and distance:normalize())
-		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
+		v:update(dt, controlledPos, VEC3_X) --target and (target.worldPosition - controlledPos):normalize())
 	end
 end
 
@@ -322,7 +354,7 @@ function Player:cl_updateLevelCount(data)
 	local level, diff = data[1], data[2]
 	self.cl_level = level
 	self.hud:setText("level",			("Level %s"):format(level))
-	self.hud:setText("amount_magnet",	data[3])
+	self.hud:setText("amount_magnet",	tostring(data[3]))
 
 	if diff == 0 then return end
 
@@ -334,21 +366,6 @@ end
 
 function Player:cl_processUpgradeQueue()
 	self.hud:close()
-	if not self.upgradesGui then
-		self.upgradesGui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/upgrades.layout", false, {
-			isHud = false,
-			isInteractive = true,
-			needsCursor = true,
-			hidesHotbar = true,
-			isOverlapped = true,
-			backgroundAlpha = 0.5,
-		})
-
-		self.upgradesGui:setOnCloseCallback("cl_upgradeClosed")
-		for i = 1, 5 do
-			self.upgradesGui:setButtonCallback("card"..i, "cl_upgradeSelected")
-		end
-	end
 
 	local weaponsByRestriction = self:GetWeaponRestrictionList()
 

@@ -55,9 +55,10 @@ UPGRADETYPE = {
     DAMAGE   = 1,
     RELOAD   = 2,
     PIERCE   = 3,
-    RANGE    = 4,
+    -- RANGE    = 4,
     LEVEL    = 5,
     FIRERATE = 6,
+    CLIPSIZE = 7,
 }
 
 ---@enum UPGRADES
@@ -125,27 +126,27 @@ UPGRADES = {
             weapon.pierceLimit = weapon.pierceLimit  + self.rarities[rarity][2]
         end
     },
-    [UPGRADETYPE.RANGE] = {
-        cardTitle = "Range",
-        icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
-        rarities = {
-            [UPGRADETIER.COMMON]    = { 0.75, 0.10 },
-            [UPGRADETIER.UNCOMMON]  = { 0.50, 0.15 },
-            [UPGRADETIER.RARE]      = { 0.25, 0.25 },
-            [UPGRADETIER.EPIC]      = { 0.15, 0.35 },
-            [UPGRADETIER.LEGENDARY] = { 0.00, 0.50 },
-        },
-        bonusTitle = function(amount)
-            return ("+%s%% #149dffRANGE"):format(amount * 100)
-        end,
-        bonusDescription = "Increase Weapon Level by 1",
-        restriction = -1,
-        weaponUpgrade = true,
-        upgradeWeapon = function(self, weapon, rarity)
-            weapon.level = weapon.level + 1
-            -- weapon.damage = weapon.damage * (1 + self.rarities[rarity][2])
-        end
-    },
+    -- [UPGRADETYPE.RANGE] = {
+    --     cardTitle = "Range",
+    --     icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
+    --     rarities = {
+    --         [UPGRADETIER.COMMON]    = { 0.75, 0.10 },
+    --         [UPGRADETIER.UNCOMMON]  = { 0.50, 0.15 },
+    --         [UPGRADETIER.RARE]      = { 0.25, 0.25 },
+    --         [UPGRADETIER.EPIC]      = { 0.15, 0.35 },
+    --         [UPGRADETIER.LEGENDARY] = { 0.00, 0.50 },
+    --     },
+    --     bonusTitle = function(amount)
+    --         return ("+%s%% #149dffRANGE"):format(amount * 100)
+    --     end,
+    --     bonusDescription = "Increase Weapon Level by 1",
+    --     restriction = -1,
+    --     weaponUpgrade = true,
+    --     upgradeWeapon = function(self, weapon, rarity)
+    --         weapon.level = weapon.level + 1
+    --         -- weapon.damage = weapon.damage * (1 + self.rarities[rarity][2])
+    --     end
+    -- },
     [UPGRADETYPE.LEVEL] = {
         cardTitle = "Level",
         icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
@@ -185,6 +186,27 @@ UPGRADES = {
         upgradeWeapon = function(self, weapon, rarity)
             weapon.level = weapon.level + 1
             weapon.fireCooldown = weapon.fireCooldown * self.rarities[rarity][2]
+        end
+    },
+    [UPGRADETYPE.CLIPSIZE] = {
+        cardTitle = "Clipsize",
+        icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
+        rarities = {
+            [UPGRADETIER.COMMON]    = { 0.75, 1 },
+            [UPGRADETIER.UNCOMMON]  = { 0.50, 3 },
+            [UPGRADETIER.RARE]      = { 0.25, 6 },
+            [UPGRADETIER.EPIC]      = { 0.15, 9 },
+            [UPGRADETIER.LEGENDARY] = { 0.00, 12 },
+        },
+        bonusTitle = function(amount)
+            return ("+%s #149dffCLIPSIZE"):format(amount)
+        end,
+        bonusDescription = "Increase Weapon Level by 1",
+        restriction = -1,
+        weaponUpgrade = true,
+        upgradeWeapon = function(self, weapon, rarity)
+            weapon.level = weapon.level + 1
+            weapon.clipSize = weapon.clipSize + self.rarities[rarity][2]
         end
     },
 }

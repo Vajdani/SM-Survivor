@@ -35,7 +35,7 @@ function World:server_onFixedUpdate()
     if #sm.unit.getAllUnits() >= 200 then return end
 
     for k, v in pairs(sm.player.getAllPlayers()) do
-        if (sm.game.getCurrentTick() % (spawnDelay + 20 * v.id)) == 0 then
+        if (sm.game.getCurrentTick() % (spawnDelay + 20000 * v.id)) == 0 then
             self:sv_spawnEnemies(v.publicData.miner)
         end
     end

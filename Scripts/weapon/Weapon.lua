@@ -7,6 +7,7 @@ dofile "../gui/Slider.lua"
 ---@field damageType number The damage type, inflicts various effects
 ---@field damage number The amount of damage the projectile deals
 ---@field gravityForce number How much gravity affects the projectile
+---@field bounceLimit number How many times the can projectile bounce before dying
 ---@field pierceLimit number The amount of targets the projecitle pierces before dying
 ---@field projectileVelocity number The velocity of the projectile
 ---@field clipSize number The amount of bullets stored in the gun
@@ -25,8 +26,9 @@ Weapon.type = WEAPONTYPE.PROJECTILE
 Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.KINETIC
 Weapon.damage = 0
-Weapon.gravityForce = 0
-Weapon.pierceLimit = 0
+Weapon.bounceLimit = 1000
+Weapon.gravityForce = 0.01
+Weapon.pierceLimit = 1000
 Weapon.projectileVelocity = 25
 Weapon.clipSize = 1
 Weapon.reloadTime = 1
@@ -77,7 +79,6 @@ function Weapon:update(dt, pos, dir)
     self.slider:update_shooting(self.clip)
 
     local spawnPos = pos + dir * 0.15
-    local velocity = dir * self.projectileVelocity
     local pelletCount = self.pelletCount
     local angleSlice, halfAngle = self.sliceAngle / pelletCount, self.sliceAngle * 0.5
     for i = 1, pelletCount do
@@ -86,11 +87,13 @@ function Weapon:update(dt, pos, dir)
             {
                 damage = self.damage,
                 damageType = self.damageType,
+                bounceLimit = self.bounceLimit,
                 pierceLimit = self.pierceLimit,
                 gravity = self.gravityForce,
                 renderable = self.renderable,
                 position = spawnPos,
-                velocity = velocity:rotate(math.rad(angleSlice * i - halfAngle + math.random(-self.spreadAngle, self.spreadAngle)), VEC3_UP)
+                projectileVelocity = self.projectileVelocity,
+                direction = dir:rotate(math.rad(angleSlice * i - halfAngle + math.random(-self.spreadAngle, self.spreadAngle)), VEC3_UP)
             }
         )
     end
@@ -202,17 +205,18 @@ Gatling.reloadTime = 3
 Gatling.damage = 35
 Gatling.spreadAngle = 7.5
 Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
-Gatling.pierceLimit = 3
+-- Gatling.pierceLimit = 3
 Gatling.targetFunctionId = 1
 Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }
 
 WeldTool = class(Weapon)
-Gatling.fireCooldown = 0.1
-Gatling.clipSize = 50
-Gatling.reloadTime = 3
-Gatling.damage = 35
-Gatling.spreadAngle = 7.5
-Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
-Gatling.pierceLimit = 3
-Gatling.targetFunctionId = 1
-Gatling.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }
+-- WeldTool.projectileVelocity = 50
+WeldTool.fireCooldown = 0.75
+WeldTool.clipSize = 3
+WeldTool.reloadTime = 3
+WeldTool.damage = 100
+WeldTool.renderable = { uuid = blk_plastic, color = sm.color.new(0,0,1) }
+-- WeldTool.pierceLimit = 100
+WeldTool.bounceLimit = 5
+WeldTool.targetFunctionId = 1
+WeldTool.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }

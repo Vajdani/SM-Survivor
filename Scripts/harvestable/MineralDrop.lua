@@ -3,18 +3,13 @@
 MineralDrop = class()
 
 function MineralDrop:server_onCreate()
-    local params = self.params
-    if params then
-        self.storage:save(params)
-    else
-        local data = self.storage:load()
-        if data then
-            self.network:sendToClients("cl_load", data)
-        end
-    end
+    self.sv_data = self.params or self.storage:load()
+    self.harvestable.publicData = self.sv_data
 
     self.mineralId = self.harvestable.id
     MINERALDROPS[self.mineralId] = true
+
+    self.network:sendToClients("cl_load", self.sv_data.type)
 end
 
 function MineralDrop:server_onDestroy()
@@ -25,19 +20,12 @@ function MineralDrop:sv_onCollect(char)
     self.network:sendToClients("cl_onCollect", char)
 end
 
-function MineralDrop:sv_hitDestination(data)
-    sm.event.sendToPlayer(self.destination:getUnit().publicData.owner, "sv_collectMineral", data)
+function MineralDrop:sv_hitDestination()
+    sm.event.sendToPlayer(self.destination:getUnit().publicData.owner, "sv_collectMineral", self.sv_data)
     self.harvestable:destroy()
 end
 
 
-
-function MineralDrop:client_onCreate()
-    local params = self.params
-    if params then
-        self:cl_load(params)
-    end
-end
 
 function MineralDrop:client_onUpdate(dt)
     if not self.destination or self.destroyed then return end
@@ -47,7 +35,7 @@ function MineralDrop:client_onUpdate(dt)
     self.harvestable:setPosition(newPos)
     if (destination - newPos):length2() < 0.1 then
         if sm.isHost then
-            self.network:sendToServer("sv_hitDestination", self.mineralData)
+            self.network:sendToServer("sv_hitDestination")
         end
 
         self.destroyed = true
@@ -55,9 +43,8 @@ function MineralDrop:client_onUpdate(dt)
 end
 
 
-function MineralDrop:cl_load(data)
-    self.harvestable:setColor(MINERALCOLOURS[data.type])
-    self.mineralData = data
+function MineralDrop:cl_load(type)
+    self.harvestable:setColor(MINERALCOLOURS[type])
 end
 
 function MineralDrop:cl_onCollect(char)
