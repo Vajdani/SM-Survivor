@@ -29,7 +29,7 @@ Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.KINETIC
 Weapon.damage = 0
 Weapon.bounceLimit = 0
-Weapon.bounceAxes = sm.vec3.zero()
+Weapon.bounceAxes = sm.vec3.new(1,1,0)
 Weapon.gravityForce = 0
 Weapon.airDrag = 0
 Weapon.collisionMomentumLoss = 0
@@ -60,7 +60,7 @@ end
 
 ---@param dt number
 ---@param pos Vec3
----@param dir Vec3
+---@param dir? Vec3
 function Weapon:update(dt, pos, dir)
     self.fireCooldownTimer = math.max(self.fireCooldownTimer - dt, 0)
 
@@ -225,7 +225,6 @@ WeldTool.reloadTime = 3
 WeldTool.damage = 100
 WeldTool.renderable = { uuid = blk_plastic, color = sm.color.new(0,0,1) }
 WeldTool.pierceLimit = 100
-WeldTool.bounceAxes = sm.vec3.new(1,1,0)
 WeldTool.bounceLimit = 5
 WeldTool.targetFunctionId = 1
 WeldTool.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }

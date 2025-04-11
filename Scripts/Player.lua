@@ -331,7 +331,13 @@ function Player:client_onFixedUpdate(dt)
 
 		-- v:update(dt, controlledPos, target and distance:normalize())
 		-- v:update(dt, controlledPos, controlledChar.direction)
-		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
+		if target then
+			local dir = target.worldPosition - controlledPos
+			dir.z = 0
+			v:update(dt, controlledPos, dir:normalize())
+		else
+			v:update(dt, controlledPos)
+		end
 	end
 end
 
