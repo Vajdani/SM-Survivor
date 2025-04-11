@@ -12,15 +12,38 @@ Player = class( nil )
 
 local verticalOffset = 10
 local moveDirs = {
-	[1] = -VEC3_X,
-    [2] = VEC3_X,
-    [3] = VEC3_Y,
-    [4] = -VEC3_Y,
+	[0] = {
+		[1] = function() return -VEC3_X end,
+		[2] = function() return VEC3_X end,
+		[3] = function() return VEC3_Y end,
+		[4] = function() return -VEC3_Y end,
+	},
+	[1] = {
+		[1] = function() return -VEC3_X:rotate(math.rad(-30), VEC3_UP) end,
+		[2] = function() return VEC3_X:rotate(math.rad(-30), VEC3_UP) end,
+		[3] = function() return VEC3_Y:rotate(math.rad(-30), VEC3_UP) end,
+		[4] = function() return -VEC3_Y:rotate(math.rad(-30), VEC3_UP) end,
+	},
+	[2] = {
+		[1] = function(char)
+			return char.direction:rotate(math.rad(90), VEC3_UP)
+		end,
+		[2] = function(char)
+			return char.direction:rotate(math.rad(-90), VEC3_UP)
+		end,
+		[3] = function(char)
+			return char.direction
+		end,
+		[4] = function(char)
+			return -char.direction
+		end,
+	},
 }
 
 function Player:server_onCreate()
 	print("Player.server_onCreate")
 	self.moveKeys = {}
+	self.controlMethod = 0
 
 	self.level = 0
 	self.collectCharges = 0
@@ -62,7 +85,11 @@ function Player:server_onFixedUpdate(dt)
 	self.controlled:setMovementDirection(moveDir)
 
 	local moving = moveDir:length2() > 0
-	if moving then
+	if self.controlMethod == 2 then
+		local dir = char.direction
+		dir.z = 0
+		self.controlled:setFacingDirection(dir:normalize())
+	elseif moving then
 		self.controlled:setFacingDirection(moveDir)
 	end
 
@@ -162,7 +189,6 @@ function Player:sv_interact()
 		-- 	self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
 		-- end
 
-		local xp = 0
 		local contacts = sm.physics.getSphereContacts(pos, 100)
 		for k, v in pairs(contacts.harvestables) do
 			if MINERALDROPS[v.id] == true then
@@ -170,6 +196,10 @@ function Player:sv_interact()
 			end
 		end
 	end
+end
+
+function Player:sv_setControlMethod(method)
+	self.controlMethod = method
 end
 
 
@@ -196,9 +226,7 @@ function Player:client_onCreate()
 		end
 	end
 	self.hud:setImage("icon_magnet", "$GAME_DATA/Gui/Editor/ed_icon_transform_origin.png")
-
 	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100, { sm.color.new("#ff0000") })
-
 	self.hud:open()
 
 	self:cl_cam()
@@ -356,6 +384,11 @@ function Player:cl_decreaseZoom()
 	self.zoom = self.zoom < 100 and self.zoom + 1 or 100
 end
 
+function Player:cl_setControlMethod(method)
+	self.cl_controlMethod = method
+	self.network:sendToServer("sv_setControlMethod", method)
+end
+
 function Player:cl_updateMineralCount(data)
 	for k, v in pairs(data) do
 		if k == ROCKTYPE.XP then
@@ -487,10 +520,12 @@ end
 
 
 function Player:GetMoveDir()
+	local char = self.controlled.character
 	local moveDir = sm.vec3.zero()
+	local moveDirSet = moveDirs[self.controlMethod]
 	for k, v in pairs(self.moveKeys) do
 		if v then
-			moveDir = moveDir + moveDirs[k]
+			moveDir = moveDir + moveDirSet[k](char)
 		end
 	end
 

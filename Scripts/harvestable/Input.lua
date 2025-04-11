@@ -20,6 +20,12 @@ function Input:client_onAction(action, state)
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_increaseZoom")
     elseif action == 21 then
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_decreaseZoom")
+    elseif action == sm.interactable.actions.item0 then
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 0)
+    elseif action == sm.interactable.actions.item1 then
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 1)
+    elseif action == sm.interactable.actions.item2 then
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 2)
     end
 
     return false
