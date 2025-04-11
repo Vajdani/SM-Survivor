@@ -7,6 +7,8 @@ dofile "../gui/Slider.lua"
 ---@field damageType number The damage type, inflicts various effects
 ---@field damage number The amount of damage the projectile deals
 ---@field gravityForce number How much gravity affects the projectile
+---@field airDrag number How much drag affects the projectile
+---@field collisionMomentumLoss number How much momentum the projectile loses on collision
 ---@field bounceLimit number How many times the can projectile bounce before dying
 ---@field pierceLimit number The amount of targets the projecitle pierces before dying
 ---@field projectileVelocity number The velocity of the projectile
@@ -26,9 +28,12 @@ Weapon.type = WEAPONTYPE.PROJECTILE
 Weapon.fireCooldown = 0
 Weapon.damageType = DAMAGETYPES.KINETIC
 Weapon.damage = 0
-Weapon.bounceLimit = 1000
-Weapon.gravityForce = 0.01
-Weapon.pierceLimit = 1000
+Weapon.bounceLimit = 0
+Weapon.bounceAxes = sm.vec3.zero()
+Weapon.gravityForce = 0
+Weapon.airDrag = 0
+Weapon.collisionMomentumLoss = 0
+Weapon.pierceLimit = 0
 Weapon.projectileVelocity = 25
 Weapon.clipSize = 1
 Weapon.reloadTime = 1
@@ -90,6 +95,9 @@ function Weapon:update(dt, pos, dir)
                 bounceLimit = self.bounceLimit,
                 pierceLimit = self.pierceLimit,
                 gravity = self.gravityForce,
+                drag = self.airDrag,
+                bounceAxes = self.bounceAxes,
+                collisionMomentumLoss = self.collisionMomentumLoss,
                 renderable = self.renderable,
                 position = spawnPos,
                 projectileVelocity = self.projectileVelocity,
@@ -205,18 +213,19 @@ Gatling.reloadTime = 3
 Gatling.damage = 35
 Gatling.spreadAngle = 7.5
 Gatling.renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) }
--- Gatling.pierceLimit = 3
+Gatling.pierceLimit = 3
 Gatling.targetFunctionId = 1
 Gatling.icon = { "ItemIconsSetSurvival0", "ItemIcons", "9fde0601-c2ba-4c70-8d5c-2a7a9fdd122b" }
 
 WeldTool = class(Weapon)
--- WeldTool.projectileVelocity = 50
+WeldTool.projectileVelocity = 50
 WeldTool.fireCooldown = 0.75
 WeldTool.clipSize = 3
 WeldTool.reloadTime = 3
 WeldTool.damage = 100
 WeldTool.renderable = { uuid = blk_plastic, color = sm.color.new(0,0,1) }
--- WeldTool.pierceLimit = 100
+WeldTool.pierceLimit = 100
+WeldTool.bounceAxes = sm.vec3.new(1,1,0)
 WeldTool.bounceLimit = 5
 WeldTool.targetFunctionId = 1
 WeldTool.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }

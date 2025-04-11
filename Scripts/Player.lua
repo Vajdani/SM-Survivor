@@ -144,22 +144,30 @@ function Player:sv_interact()
 	end
 
 	if self.collectCharges > 0 then
-		local pos = self.controlled.character.worldPosition
+		local pos = char.worldPosition
 		sm.effect.playEffect("Part - Upgrade", pos)
 
 		self.collectCharges = self.collectCharges - 1
+
+		-- local xp = 0
+		-- local contacts = sm.physics.getSphereContacts(pos, 100)
+		-- for k, v in pairs(contacts.harvestables) do
+		-- 	if MINERALDROPS[v.id] == true then
+		-- 		xp = xp + v.publicData.amount
+		-- 		v:destroy()
+		-- 	end
+		-- end
+
+		-- if not self:sv_collectMineral({ type = ROCKTYPE.XP, amount = xp }) then
+		-- 	self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+		-- end
 
 		local xp = 0
 		local contacts = sm.physics.getSphereContacts(pos, 100)
 		for k, v in pairs(contacts.harvestables) do
 			if MINERALDROPS[v.id] == true then
-				xp = xp + v.publicData.amount
-				v:destroy()
+				sm.event.sendToHarvestable(v, "sv_onCollect", char)
 			end
-		end
-
-		if not self:sv_collectMineral({ type = ROCKTYPE.XP, amount = xp }) then
-			self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
 		end
 	end
 end
@@ -181,6 +189,7 @@ function Player:client_onCreate()
 			backgroundAlpha = 0,
 		}
 	)
+
 	for k, v in pairs(MINERALS) do
 		if k ~= ROCKTYPE.XP then
 			self.hud:setImage("icon_"..v, string.format("$CONTENT_DATA/Gui/MineralIcons/%s.png",v))
@@ -199,6 +208,7 @@ function Player:client_onCreate()
 
 	self.isDead = false
 
+	self.cl_collectCharges = 0
 	self.upgradeQueue = 0
 	self.upgradesGui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/upgrades.layout", false, {
 		isHud = false,
@@ -279,6 +289,10 @@ function Player:client_onUpdate(dt)
 	local char = self.player.character
 	if not self.isLocal or not char then return end
 
+	if self.cl_collectCharges > 0 then
+		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
+	end
+
 	if self.cam ~= 3 then return end
 	local charPos = char.worldPosition + VEC3_UP * verticalOffset
 	local newPos = charPos + camOffset * self.zoom
@@ -316,7 +330,8 @@ function Player:client_onFixedUpdate(dt)
 		-- end
 
 		-- v:update(dt, controlledPos, target and distance:normalize())
-		v:update(dt, controlledPos, VEC3_X) --target and (target.worldPosition - controlledPos):normalize())
+		-- v:update(dt, controlledPos, controlledChar.direction)
+		v:update(dt, controlledPos, target and (target.worldPosition - controlledPos):normalize())
 	end
 end
 
@@ -354,6 +369,8 @@ function Player:cl_updateLevelCount(data)
 	local level, diff = data[1], data[2]
 	self.cl_level = level
 	self.hud:setText("level",			("Level %s"):format(level))
+
+	self.cl_collectCharges = data[3]
 	self.hud:setText("amount_magnet",	tostring(data[3]))
 
 	if diff == 0 then return end
@@ -377,8 +394,6 @@ function Player:cl_processUpgradeQueue()
 			local rolled = UPGRADES[upgradeId]
 			local weapons = weaponsByRestriction[rolled.restriction]
 			if not rolled.weaponUpgrade or weapons and #weapons > 0 then
-				upgrade = rolled
-
 				local chance = math.random()
 				for k, v in ipairs( rolled.rarities ) do
 					if chance >= v[1] then
@@ -387,8 +402,12 @@ function Player:cl_processUpgradeQueue()
 					end
 				end
 
-				if rolled.weaponUpgrade then
-					weapon = self.weapons[weapons[math.random(#weapons)]]
+				if rarity then
+					upgrade = rolled
+
+					if rolled.weaponUpgrade then
+						weapon = self.weapons[weapons[math.random(#weapons)]]
+					end
 				end
 			end
 		until (upgrade ~= nil)

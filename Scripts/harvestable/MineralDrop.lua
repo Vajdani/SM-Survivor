@@ -4,7 +4,7 @@ MineralDrop = class()
 
 function MineralDrop:server_onCreate()
     self.sv_data = self.params or self.storage:load()
-    self.harvestable.publicData = self.sv_data
+    -- self.harvestable.publicData = self.sv_data
 
     self.mineralId = self.harvestable.id
     MINERALDROPS[self.mineralId] = true

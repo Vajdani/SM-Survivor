@@ -83,6 +83,9 @@ function Projectile:init(data)
     self.bounceLimit = data.bounceLimit
     self.pierceLimit = data.pierceLimit
     self.gravity = data.gravity
+    self.drag = data.drag
+    self.bounceAxes = data.bounceAxes
+    self.collisionMomentumLoss = data.collisionMomentumLoss
     self.projectileVelocity = data.projectileVelocity
     self.direction = data.direction
 
@@ -106,11 +109,25 @@ function Projectile:init(data)
     self.hitObjs = {}
 end
 
+local terrainTypes = {
+    terrainSurface = true,
+    terrainAsset = true,
+    harvestable = true
+}
+
 function Projectile:update(manager, dt)
     self.lifeTime = self.lifeTime - dt
+    if self.lifeTime <= 0 or self.position.z < 0 then
+        self.effect:stop()
+        return true
+    end
+
+    if self.drag ~= 0 then
+        self.projectileVelocity = self.projectileVelocity - self.projectileVelocity * self.drag * dt
+    end
 
     if self.gravity ~= 0 then
-        self.direction = self.direction * 0.99 - GRAVITY * self.gravity * dt
+        self.direction = (self.direction - GRAVITY * self.gravity * dt):normalize()
     end
 
     local newPos = self.position + self.direction * self.projectileVelocity * dt
@@ -123,46 +140,57 @@ function Projectile:update(manager, dt)
         end
     end
 
-    if hit or self.lifeTime <= 0 then
-        self:onHit(manager, result)
+    local hitTerrain = terrainTypes[result.type] == true
+    if hit then
+        self:onHit(manager, hitTerrain, result)
 
-        -- print(self.pierceLimit, self.bounceLimit)
-        if self.pierceLimit <= 0 or result.type ~= "character" and self.bounceLimit < 0 then
-            -- print("kill")
+        if self.pierceLimit < 0 or hitTerrain and self.bounceLimit < 0 then
             self.effect:stop()
             return true
         end
     end
 
-    self.position = newPos
+    self.position = hitTerrain and result.pointWorld + result.normalWorld * 0.1 or newPos
     self.effect:setPosition(newPos)
 
-    local dir = self.direction:safeNormalize(VEC3_UP)
-    if (VEC3_UP - dir):length2() > 0.1 then
-        self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, dir))
-    end
+    self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, self.direction))
+
+    -- local dir = self.direction:length2() > FLT_EPSILON and self.direction or VEC3_UP
+    -- if (VEC3_UP - dir):length2() > 0.1 then
+    --     self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, dir))
+    -- end
 
     return false
 end
 
 ---@param manager ProjectileManager
+---@param hitTerrain boolean
 ---@param result RaycastResult
-function Projectile:onHit(manager, result)
-    local char = result:getCharacter()
-    if not char or not sm.exists(char) and self.bounceLimit > 0 then
+function Projectile:onHit(manager, hitTerrain, result)
+    if hitTerrain and self.bounceLimit > 0 then
         local normal = result.normalWorld
-        -- print(normal, self.direction)
+        local newDir = self.direction + normal * 2
+        newDir.x = newDir.x * self.bounceAxes.x
+        newDir.y = newDir.y * self.bounceAxes.y
+        newDir.z = newDir.z * self.bounceAxes.z
+
+        self.direction = newDir:normalize()
+
+        self.projectileVelocity = self.projectileVelocity - self.projectileVelocity * self.collisionMomentumLoss
+
         -- if (normal - self.direction):length2() > 0.1 then
-            -- local cross = normal:cross(self.direction)
-            -- self.direction = self.direction:rotate(cross.z, cross)
-            self.direction = normal
-            self.bounceLimit = self.bounceLimit - 1
+        --     local cross = normal:cross(self.direction)
+        --     self.direction = self.direction:rotate(cross.z, cross)
         -- end
+
+        self.bounceLimit = self.bounceLimit - 1
 
         return
     end
 
     self.pierceLimit = self.pierceLimit - 1
+
+    local char = result:getCharacter()
     table_insert(self.hitObjs, char)
 
     if sm.isHost then

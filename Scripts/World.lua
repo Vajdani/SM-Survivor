@@ -18,7 +18,7 @@ World.cellMaxY = 0
 World.worldBorder = true
 -- World.renderMode = "warehouse"
 
-local spawnDelay = 5 * 40
+local spawnDelay = 7 * 40
 
 function World:server_onCreate()
     print("World.server_onCreate")
@@ -35,7 +35,7 @@ function World:server_onFixedUpdate()
     if #sm.unit.getAllUnits() >= 200 then return end
 
     for k, v in pairs(sm.player.getAllPlayers()) do
-        if (sm.game.getCurrentTick() % (spawnDelay + 20000 * v.id)) == 0 then
+        if (sm.game.getCurrentTick() % (spawnDelay + 40 * v.id)) == 0 then
             self:sv_spawnEnemies(v.publicData.miner)
         end
     end
