@@ -14,22 +14,22 @@ local verticalOffset = 10
 local moveDirs = {
 	[0] = {
 		[1] = function() return -VEC3_X end,
-		[2] = function() return VEC3_X end,
-		[3] = function() return VEC3_Y end,
+		[2] = function() return  VEC3_X end,
+		[3] = function() return  VEC3_Y end,
 		[4] = function() return -VEC3_Y end,
 	},
 	[1] = {
-		[1] = function() return -VEC3_X:rotate(math.rad(-30), VEC3_UP) end,
-		[2] = function() return VEC3_X:rotate(math.rad(-30), VEC3_UP) end,
-		[3] = function() return VEC3_Y:rotate(math.rad(-30), VEC3_UP) end,
-		[4] = function() return -VEC3_Y:rotate(math.rad(-30), VEC3_UP) end,
+		[1] = function() return -VEC3_X:rotate(-RAD30, VEC3_UP) end,
+		[2] = function() return  VEC3_X:rotate(-RAD30, VEC3_UP) end,
+		[3] = function() return  VEC3_Y:rotate(-RAD30, VEC3_UP) end,
+		[4] = function() return -VEC3_Y:rotate(-RAD30, VEC3_UP) end,
 	},
 	[2] = {
 		[1] = function(char)
-			return char.direction:rotate(math.rad(90), VEC3_UP)
+			return char.direction:rotate(RAD90, VEC3_UP)
 		end,
 		[2] = function(char)
-			return char.direction:rotate(math.rad(-90), VEC3_UP)
+			return char.direction:rotate(-RAD90, VEC3_UP)
 		end,
 		[3] = function(char)
 			return char.direction

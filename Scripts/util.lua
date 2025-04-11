@@ -241,6 +241,7 @@ VEC3_UP = sm.vec3.new(0,0,1)
 VEC3_ONE = sm.vec3.one()
 
 RAD90 = math.rad(90)
+RAD30 = math.rad(30)
 
 QUAT_IDENTITY = sm.quat.identity()
 
