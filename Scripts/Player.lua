@@ -141,7 +141,11 @@ function Player:sv_collectMineral(data)
 	if type == ROCKTYPE.XP and newAmount >= 100 then
 		for i = 1, math.floor(newAmount / 100) do
 			newAmount = newAmount - 100
+
 			self.level = self.level + 1
+			if self.level % 5 == 0 then
+				self.collectCharges = self.collectCharges + 1
+			end
 		end
 	end
 
@@ -149,10 +153,6 @@ function Player:sv_collectMineral(data)
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 
 	if self.level ~= lastLevel then
-		if self.level % 5 == 0 then
-			self.collectCharges = self.collectCharges + 1
-		end
-
 		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, self.level - lastLevel, self.collectCharges })
 		return true
 	end
@@ -274,21 +274,25 @@ function Player:client_onReload()
 	if #self.weapons > 0 then
 		self.weapons = {}
 	else
-		local weapons = {
-			Spudgun,
-			Shotgun,
-			Gatling,
-			WeldTool
-		}
-
-		for k, v in pairs(weapons) do
-			self.weapons[k] = v():init(k, self.hud)
-		end
+		self:cl_initWeapons()
 	end
 
 	self:cl_updateWeaponHud()
 
 	return true
+end
+
+function Player:cl_initWeapons()
+	local weapons = {
+		Spudgun,
+		Shotgun,
+		Gatling,
+		WeldTool
+	}
+
+	for k, v in pairs(weapons) do
+		self.weapons[k] = v():init(k, self.hud)
+	end
 end
 
 function Player:cl_updateWeaponHud()
@@ -423,6 +427,11 @@ function Player:cl_updateLevelCount(data)
 end
 
 function Player:cl_processUpgradeQueue()
+	if #self.weapons == 0 then
+		self:cl_initWeapons()
+		self:cl_updateWeaponHud()
+	end
+
 	self.hud:close()
 
 	local weaponsByRestriction = self:GetWeaponRestrictionList()
