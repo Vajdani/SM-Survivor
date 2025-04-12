@@ -45,7 +45,7 @@ UPGRADETIER = {
 UPGRADETIERDATA = {
     [UPGRADETIER.COMMON]    = { "COMMON",       sm.color.new(0.4, 0.4, 0.4) },
     [UPGRADETIER.UNCOMMON]  = { "UNCOMMON",     sm.color.new(0, 1, 0)       },
-    [UPGRADETIER.RARE]      = { "RARE",         sm.color.new(0, 0, 1)       },
+    [UPGRADETIER.RARE]      = { "RARE",         sm.color.new("#149dff")     },
     [UPGRADETIER.EPIC]      = { "EPIC",         sm.color.new("#8E00D6")     },
     [UPGRADETIER.LEGENDARY] = { "LEGENDARY",    sm.color.new(1, 0, 0)       },
 }
@@ -60,6 +60,7 @@ UPGRADETYPE = {
     FIRERATE = 6,
     CLIPSIZE = 7,
     BOUNCE   = 8,
+    PELLETS  = 9,
 }
 
 ---@enum UPGRADES
@@ -104,6 +105,8 @@ UPGRADES = {
         upgradeWeapon = function(self, weapon, rarity)
             weapon.level = weapon.level + 1
             weapon.reloadTime = weapon.reloadTime * self.rarities[rarity][2]
+            weapon.reloadTimer = weapon.reloadTime
+            weapon.clip = weapon.clipSize
             weapon.slider.steps_reloading = weapon.reloadTime
         end
     },
@@ -231,6 +234,30 @@ UPGRADES = {
         upgradeWeapon = function(self, weapon, rarity)
             weapon.level = weapon.level + 1
             weapon.bounceLimit = weapon.bounceLimit + self.rarities[rarity][2]
+        end
+    },
+    [UPGRADETYPE.PELLETS] = {
+        cardTitle = "Pellets",
+        icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
+        rarities = {
+            [UPGRADETIER.COMMON]    = { 0.75, 1 },
+            [UPGRADETIER.UNCOMMON]  = { 0.50, 2 },
+            [UPGRADETIER.RARE]      = { 0.25, 3 },
+            [UPGRADETIER.EPIC]      = { 0.15, 4 },
+            [UPGRADETIER.LEGENDARY] = { 0.00, 5 },
+        },
+        bonusTitle = function(amount)
+            return ("+%s #149dffPELLETS FIRED"):format(amount)
+        end,
+        bonusDescription = "Increase Weapon Level by 1",
+        restriction = -1,
+        weaponUpgrade = true,
+        upgradeWeapon = function(self, weapon, rarity)
+            weapon.level = weapon.level + 1
+
+            local pellets = self.rarities[rarity][2]
+            weapon.pelletCount = weapon.pelletCount + pellets
+            weapon.spreadAngle = weapon.spreadAngle + pellets / 2
         end
     },
 }

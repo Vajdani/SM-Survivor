@@ -232,6 +232,7 @@ function Player:client_onCreate()
 	self:cl_cam()
 
 	self.weapons = {}
+	self:cl_initWeapons()
 	self:cl_updateWeaponHud()
 
 	self.isDead = false
@@ -252,6 +253,8 @@ function Player:client_onCreate()
 		self.upgradesGui:setButtonCallback("card"..i, "cl_upgradeSelected")
 	end
 
+	self.selectedUpgrades = {}
+
 	self:cl_updateLevelCount({ 0, 0, 0 })
 end
 
@@ -271,13 +274,9 @@ function Player:client_onClientDataUpdate(data, channel)
 end
 
 function Player:client_onReload()
-	if #self.weapons > 0 then
-		self.weapons = {}
-	else
-		self:cl_initWeapons()
+	for k, v in pairs(self.weapons) do
+		v.clip = 0
 	end
-
-	self:cl_updateWeaponHud()
 
 	return true
 end
@@ -331,7 +330,7 @@ function Player:client_onUpdate(dt)
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
-	sm.camera.setFov(sm.camera.getDefaultFov())
+	-- sm.camera.setFov(sm.camera.getDefaultFov())
 
 	-- sm.camera.setPosition(char.worldPosition + VEC3_UP * (verticalOffset + char:getHeight() * 1.5))
 	-- sm.camera.setDirection(char.direction)
@@ -395,6 +394,32 @@ function Player:cl_setControlMethod(method)
 	self.network:sendToServer("sv_setControlMethod", method)
 end
 
+function Player:cl_toggleWeapons()
+	if #self.weapons > 0 then
+		self.weapons = {}
+	else
+		self:cl_initWeapons()
+	end
+
+	self:cl_updateWeaponHud()
+end
+
+function Player:cl_reapplyUpgrades()
+	self:cl_initWeapons()
+
+	for k, data in ipairs(self.selectedUpgrades) do
+		local upgradeId = data[1]
+		local upgrade = UPGRADES[upgradeId]
+		if upgrade.weaponUpgrade then
+			upgrade:upgradeWeapon(self.weapons[data[3]], data[2])
+		else
+
+		end
+	end
+
+	self:cl_updateWeaponHud()
+end
+
 function Player:cl_updateMineralCount(data)
 	for k, v in pairs(data) do
 		if k == ROCKTYPE.XP then
@@ -437,6 +462,7 @@ function Player:cl_processUpgradeQueue()
 	local weaponsByRestriction = self:GetWeaponRestrictionList()
 
 	self.rolledUpgrades = {}
+	local rolledUpgradeTypes = {}
 	for i = 1, 5 do
 		local weapon, upgrade, upgradeId, rarity
 		repeat
@@ -457,6 +483,13 @@ function Player:cl_processUpgradeQueue()
 
 					if rolled.weaponUpgrade then
 						weapon = self.weapons[weapons[math.random(#weapons)]]
+					end
+
+					local rollId = upgradeId.."_"..(weapon and weapon.id)
+					if not rolledUpgradeTypes[rollId] then
+						upgrade = rolled
+
+						rolledUpgradeTypes[rollId] = true
 					end
 				end
 			end
@@ -493,6 +526,8 @@ end
 
 function Player:cl_upgradeSelected(button)
 	local data = self.rolledUpgrades[button]
+	table_insert(self.selectedUpgrades, data)
+
 	local upgradeId = data[1]
 	local upgrade = UPGRADES[upgradeId]
 	if upgrade.weaponUpgrade then

@@ -84,27 +84,26 @@ function Weapon:update(dt, pos, dir)
     self.slider:update_shooting(self.clip)
 
     local spawnPos = pos + dir * 0.15
-    local pelletCount = self.pelletCount
-    local angleSlice, halfAngle = self.sliceAngle / pelletCount, self.sliceAngle * 0.5
-    for i = 1, pelletCount do
-        sm.event.sendToTool(
-            g_projectileManager, "cl_fireProjectile",
-            {
-                damage = self.damage,
-                damageType = self.damageType,
-                bounceLimit = self.bounceLimit,
-                pierceLimit = self.pierceLimit,
-                gravity = self.gravityForce,
-                drag = self.airDrag,
-                bounceAxes = self.bounceAxes,
-                collisionMomentumLoss = self.collisionMomentumLoss,
-                renderable = self.renderable,
-                position = spawnPos,
-                projectileVelocity = self.projectileVelocity,
-                direction = dir:rotate(math.rad(angleSlice * i - halfAngle + math.random(-self.spreadAngle, self.spreadAngle)), VEC3_UP)
-            }
-        )
-    end
+    sm.event.sendToTool(
+        g_projectileManager, "cl_fireProjectile",
+        {
+            damage = self.damage,
+            damageType = self.damageType,
+            bounceLimit = self.bounceLimit,
+            pierceLimit = self.pierceLimit,
+            gravity = self.gravityForce,
+            drag = self.airDrag,
+            bounceAxes = self.bounceAxes,
+            collisionMomentumLoss = self.collisionMomentumLoss,
+            renderable = self.renderable,
+            position = spawnPos,
+            projectileVelocity = self.projectileVelocity,
+            spreadAngle = self.spreadAngle,
+            sliceAngle = self.sliceAngle,
+            pelletCount = self.pelletCount,
+            aimDir = dir
+        }
+    )
 end
 
 

@@ -13,6 +13,11 @@ dofile "weaponUtil.lua"
 ---@field renderable ProjectileRenderable|string Describes how the projectile will look
 ---@field position Vec3 The projectile's position
 ---@field velocity Vec3 The projectile's velocity(m/s)
+---@field aimDir Vec3 The projectile's starting direction
+---@field direction Vec3 The projectile's direction
+---@field pelletCount number The amount of pellets fired
+---@field sliceAngle number The angle of the slice
+---@field spreadAngle number
 
 ---@class ProjectileManager : ToolClass
 ProjectileManager = class()
@@ -51,10 +56,13 @@ end
 
 ---@param data ProjectileParams
 function ProjectileManager:cl_addProjectile(data)
-    local proj = Projectile()
-    proj:init(data)
+    local dir, sliceAngle, spreadAngle, pellets = data.aimDir, data.sliceAngle, data.spreadAngle, data.pelletCount
+    local angleSlice, halfAngle = sliceAngle / pellets, sliceAngle * 0.5
+    for i = 1, pellets do
+        data.direction = dir:rotate(math.rad(angleSlice * i - halfAngle + math.random(-spreadAngle, spreadAngle)), VEC3_UP)
+        self.projectiles[#self.projectiles+1] = Projectile():init(data)
+    end
 
-    self.projectiles[#self.projectiles+1] = proj
 end
 
 function ProjectileManager:cl_fireProjectile(data)
@@ -107,6 +115,8 @@ function Projectile:init(data)
     self.position = data.position
 
     self.hitObjs = {}
+
+    return self
 end
 
 local terrainTypes = {

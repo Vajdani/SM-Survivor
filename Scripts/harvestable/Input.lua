@@ -20,12 +20,17 @@ function Input:client_onAction(action, state)
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_increaseZoom")
     elseif action == 21 then
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_decreaseZoom")
-    elseif action == sm.interactable.actions.item0 then
+    elseif action == 5 then --Straight
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 0)
-    elseif action == sm.interactable.actions.item1 then
+    elseif action == 6 then --Angled
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 1)
-    elseif action == sm.interactable.actions.item2 then
+    elseif action == 7 then --Mouselook
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setControlMethod", 2)
+    -- dev
+    elseif action == 8 then --Toggle weapons
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_toggleWeapons")
+    elseif action == 9 then --Reapply upgrades
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_reapplyUpgrades")
     end
 
     return false
