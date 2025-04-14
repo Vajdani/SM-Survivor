@@ -59,7 +59,7 @@ function Weapon:init(id, hud)
 end
 
 ---@param dt number
----@param pos Vec3
+---@param pos? Vec3
 ---@param dir? Vec3
 function Weapon:update(dt, pos, dir)
     self.fireCooldownTimer = math.max(self.fireCooldownTimer - dt, 0)
@@ -115,7 +115,7 @@ WeaponTargetFunctions = {
     ---@param enemies Character[]
     ---@param position Vec3
     ---@param owner Character
-    ---@return Character
+    ---@return Character?
     [0] = function(enemies, position, owner)
         local closest, target
         for k, v in pairs(enemies) do
@@ -132,13 +132,13 @@ WeaponTargetFunctions = {
             end
         end
 
-        return target
+        return nil --target
     end,
     ---Shoot at the closest enemy behind the player
     ---@param enemies Character[]
     ---@param position Vec3
     ---@param owner Character
-    ---@return Character
+    ---@return Character?
     [1] = function(enemies, position, owner)
         local lookDir = owner.direction
         local closest, target
@@ -157,25 +157,75 @@ WeaponTargetFunctions = {
             end
         end
 
-        return target
+        return nil --target
     end,
     ---Shoot in the direction of the most dense area
     ---@param enemies Character[]
     ---@param position Vec3
     ---@param owner Character
-    ---@return Character
+    ---@return Character?
     [2] = function(enemies, position, owner)
-        local targets = {}
-        for i = 0, 7 do
-            local angle = i * 45
-            local contacts = sm.physics.getSphereContacts(position + vec3(math.sin(angle), math.cos(angle), 0) * 10, 9)
-            sm.effect.playEffect("Part - Upgrade", position + vec3(math.sin(angle), math.cos(angle), 0) * 10)
-            targets[i] = contacts.characters
+        local maxDistance = 4^2
+        local points = {}
+        for k, v in ipairs(enemies) do
+            if sm.exists(v) and v ~= owner then
+                local pos = v.worldPosition
+                local isClustered = false
+                for _k, _v in ipairs(points) do
+                    if (_v.averagePosition - pos):length2() <= maxDistance --[[and sm.physics.raycastTarget(_v.averagePosition, pos, v)]] then
+                        isClustered = true
+                        break
+                    end
+                end
+
+                if not isClustered then
+                    local positions = {}
+                    for _k, _v in ipairs(enemies) do
+                        if sm.exists(_v) and (_v.worldPosition - pos):length2() < maxDistance --[[and sm.physics.raycastTarget(pos, _v.worldPosition, _v)]] then
+                            table_insert(positions, pos)
+                        end
+                    end
+
+                    if #positions > 0 then
+                        local avg = VEC3_ZERO
+                        for _k, _v in ipairs(positions) do
+                            avg = avg + _v
+                        end
+
+                        table_insert(points, {
+                            averagePosition = avg / #positions,
+                            count = #positions
+                        })
+                    end
+                end
+            end
         end
 
-        table.sort(targets, function(a, b) return #a > #b end)
+        for k, v in ipairs(points) do
+            if sm.game.getCurrentTick()%40 == 0 then
+                sm.effect.playEffect("Part - Upgrade", v.averagePosition)
+            end
 
-        return targets[1]
+            -- local hit, result = sm.physics.raycast(position, v.averagePosition, owner)
+            -- if result.type ~= "character" then
+            --     points[k] = nil
+            -- end
+        end
+
+        table.sort(points, function(a, b)
+            return a.count > b.count --and (a.averagePosition - position):length2() < (b.averagePosition - position):length2()
+        end)
+
+        local point = points[1]
+        if point then
+            if sm.game.getCurrentTick()%40 == 0 then
+                sm.effect.playEffect("Part - Upgrade", point.averagePosition)
+            end
+
+            return { worldPosition = point.averagePosition }
+        end
+
+        return nil
     end
 }
 

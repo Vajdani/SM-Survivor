@@ -268,6 +268,7 @@ VEC3_X = sm.vec3.new(1,0,0)
 VEC3_Y = sm.vec3.new(0,1,0)
 VEC3_UP = sm.vec3.new(0,0,1)
 VEC3_ONE = sm.vec3.one()
+VEC3_ZERO = sm.vec3.zero()
 
 RAD90 = math.rad(90)
 RAD30 = math.rad(30)

@@ -320,10 +320,10 @@ function Player:client_onUpdate(dt)
 	local char = self.player.character
 	if not self.isLocal or not char then return end
 
-	if self.cl_collectCharges > 0 then
-		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
-	elseif self.isDead then
+	if self.isDead then
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Revive", "")
+	elseif self.cl_collectCharges > 0 then
+		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
 	end
 
 	if self.cam ~= 3 then return end
@@ -347,9 +347,18 @@ function Player:client_onFixedUpdate(dt)
 	self.enemyTrigger:setWorldPosition(controlledPos)
 
 	local enemies = self.enemyTrigger:getContents()
+	if #enemies == 1 then --Only self
+		for k, v in pairs(self.weapons) do
+			v:update(dt)
+		end
+
+		return
+	end
+
 	local targets = {}
 	--local velocity = target and target.velocity
 	for k, v in pairs(self.weapons) do
+
 		local funcId = v.targetFunctionId
 		if targets[funcId] == nil then
 			targets[funcId] = { WeaponTargetFunctions[funcId](enemies, controlledPos, controlledChar) }
@@ -370,7 +379,7 @@ function Player:client_onFixedUpdate(dt)
 			dir.z = 0
 			v:update(dt, controlledPos, dir:normalize())
 		else
-			v:update(dt, controlledPos)
+			v:update(dt)
 		end
 	end
 end
