@@ -130,11 +130,6 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 	g_cellData = {
 		bounds = { xMin = xMin, xMax = xMax, yMin = yMin, yMax = yMax },
 		seed = seed,
-		-- Per Cell
-		uid = {},
-		xOffset = {},
-		yOffset = {},
-		rotation = {},
 
 		mineralSeed = seed + math.random() * 500,
 		gridData = {},
@@ -147,20 +142,10 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 	g_yMin = g_cellData.bounds.yMin
 
 	for cellY = yMin, yMax do
-		g_cellData.uid[cellY] = {}
-		g_cellData.xOffset[cellY] = {}
-		g_cellData.yOffset[cellY] = {}
-		g_cellData.rotation[cellY] = {}
-
 		g_cellData.gridData[cellY] = {}
 		g_cellData.cellLoaded[cellY] = {}
 
 		for cellX = xMin, xMax do
-			g_cellData.uid[cellY][cellX] = sm.uuid.getNil()
-			g_cellData.xOffset[cellY][cellX] = 0
-			g_cellData.yOffset[cellY][cellX] = 0
-			g_cellData.rotation[cellY][cellX] = 0
-
 			g_cellData.gridData[cellY][cellX] = {
 				rocks = {},
 				water = {},
@@ -172,20 +157,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		end
 	end
 
-	local jWorld = sm.json.open( "$CONTENT_DATA/Terrain/Worlds/rockFloor.world")
-	for _, cell in pairs( jWorld.cellData ) do
-		if cell.path ~= "" then
-			local uid = sm.terrainTile.getTileUuid( cell.path )
-			g_cellData.uid[cell.y][cell.x] = uid
-			g_cellData.xOffset[cell.y][cell.x] = cell.offsetX
-			g_cellData.yOffset[cell.y][cell.x] = cell.offsetY
-			g_cellData.rotation[cell.y][cell.x] = cell.rotation
-
-			g_uuidToPath[tostring(uid)] = cell.path
-		end
-	end
-
-	sm.terrainData.save( { g_uuidToPath, g_cellData } )
+	sm.terrainData.save( g_cellData )
 end
 
 function Load()
@@ -199,39 +171,7 @@ function Load()
 end
 
 function GetTilePath( uid )
-	if not uid:isNil() then
-		return g_uuidToPath[tostring(uid)]
-	end
 	return ""
-end
-
-function GetCellTileUidAndOffset( cellX, cellY )
-	if InsideCellBounds( cellX, cellY ) then
-		return	g_cellData.uid[cellY][cellX],
-				g_cellData.xOffset[cellY][cellX],
-				g_cellData.yOffset[cellY][cellX]
-	end
-	return sm.uuid.getNil(), 0, 0
-end
-
-function GetTileLoadParamsFromWorldPos( x, y, lod )
-	local cellX, cellY = GetCell( x, y )
-	local uid, tileCellOffsetX, tileCellOffsetY = GetCellTileUidAndOffset( cellX, cellY )
-	local rx, ry = InverseRotateLocal( cellX, cellY, x - cellX * CELL_SIZE, y - cellY * CELL_SIZE )
-	if lod then
-		return  uid, tileCellOffsetX, tileCellOffsetY, lod, rx, ry
-	else
-		return  uid, tileCellOffsetX, tileCellOffsetY, rx, ry
-	end
-end
-
-function GetTileLoadParamsFromCellPos( cellX, cellY, lod )
-	local uid, tileCellOffsetX, tileCellOffsetY = GetCellTileUidAndOffset( cellX, cellY )
-	if lod then
-		return  uid, tileCellOffsetX, tileCellOffsetY, lod
-	else
-		return  uid, tileCellOffsetX, tileCellOffsetY
-	end
 end
 
 function GetHeightAt( x, y, lod )
@@ -266,39 +206,48 @@ function GetMaterialAt( x, y, lod )
 end
 
 function GetClutterIdxAt( x, y )
-	return sm.terrainTile.getClutterIdxAt( GetTileLoadParamsFromWorldPos( x, y ) )
+	return -1
 end
 
 function GetAssetsForCell( cellX, cellY, lod )
-	local assets = sm.terrainTile.getAssetsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
-	for _, asset in ipairs( assets ) do
-		local rx, ry = RotateLocal( cellX, cellY, asset.pos.x, asset.pos.y )
-		asset.pos = vec3( rx, ry, asset.pos.z )
-		asset.rot = GetRotationQuat( cellX, cellY ) * asset.rot
+	return {}
+end
+
+
+
+local defaultNodes = {
+	{
+		pos = vec3( 32, 32, 32 ),
+		rot = sm.quat.new( 0.707107, 0, 0, 0.707107 ),
+		scale = vec3( 64, 64, 64 ),
+		tags = { "REFLECTION" }
+	}
+}
+
+local amount = 3
+for i = 1, amount do
+	for j = 1, amount do
+		table_insert(defaultNodes, {
+			pos = vec3(i * 16, j * 16, 0),
+			rot = QUAT_IDENTITY,
+			scale = VEC3_ONE,
+			params = {
+				effect = {
+					name = "Smoke - GroundSmokeMassive",
+					params = {},
+				}
+			},
+			tags = { "EFFECT" },
+		})
 	end
-	return assets
 end
 
 function GetNodesForCell( cellX, cellY )
-	local nodes = sm.terrainTile.getNodesForCell( GetTileLoadParamsFromCellPos( cellX, cellY ) )
-	local hasReflectionProbe = false
-	for _, node in ipairs( nodes ) do
-		local rx, ry = RotateLocal( cellX, cellY, node.pos.x, node.pos.y )
-		node.pos = vec3( rx, ry, node.pos.z )
-		node.rot = GetRotationQuat( cellX, cellY ) * node.rot
-
-		hasReflectionProbe = hasReflectionProbe or ValueExists( node.tags, "REFLECTION" )
+	if not InsideCellBounds(cellX, cellY) then
+		return {}
 	end
 
-	if not hasReflectionProbe then
-		table_insert(nodes, {
-			pos = vec3( 32, 32, 32 ),
-			rot = sm.quat.new( 0.707107, 0, 0, 0.707107 ),
-			scale = vec3( 64, 64, 64 ),
-			tags = { "REFLECTION" }
-		})
-	end
-
+	local nodes = defaultNodes
 	for k, v in pairs(g_cellData.gridData[cellY][cellX].nodes) do
 		table_insert(nodes, {
 			pos = v.pos,
@@ -313,19 +262,6 @@ function GetNodesForCell( cellX, cellY )
 end
 
 function GetCreationsForCell( cellX, cellY )
-	local uid, tileCellOffsetX, tileCellOffsetY = GetCellTileUidAndOffset( cellX, cellY )
-	if not uid:isNil() then
-		local cellCreations = sm.terrainTile.getCreationsForCell( uid, tileCellOffsetX, tileCellOffsetY )
-		for i,creation in ipairs( cellCreations ) do
-			local rx, ry = RotateLocal( cellX, cellY, creation.pos.x, creation.pos.y )
-
-			creation.pos = vec3( rx, ry, creation.pos.z )
-			creation.rot = GetRotationQuat( cellX, cellY ) * creation.rot
-		end
-
-		return cellCreations
-	end
-
 	return {}
 end
 
@@ -358,21 +294,9 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 end
 
 function GetKinematicsForCell( cellX, cellY, lod )
-	local kinematics = sm.terrainTile.getKinematicsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
-	for _, kinematic in ipairs( kinematics ) do
-		local rx, ry = RotateLocal( cellX, cellY, kinematic.pos.x, kinematic.pos.y )
-		kinematic.pos = vec3( rx, ry, kinematic.pos.z )
-		kinematic.rot = GetRotationQuat( cellX, cellY ) * kinematic.rot
-	end
-	return kinematics
+	return {}
 end
 
 function GetDecalsForCell( cellX, cellY, lod )
-	local decals = sm.terrainTile.getDecalsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
-	for _, decal in ipairs( decals ) do
-		local rx, ry = RotateLocal( cellX, cellY, decal.pos.x, decal.pos.y )
-		decal.pos = vec3( rx, ry, decal.pos.z )
-		decal.rot = GetRotationQuat( cellX, cellY ) * decal.rot
-	end
-	return decals
+	return {}
 end

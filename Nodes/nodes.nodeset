@@ -1,3 +1,55 @@
 {
-	"nodeList": []
+	"nodeList":
+	[
+		// The first tag in "tags" is considered the primary tag and should be unique
+		{
+			"name": "Effect",
+			"tags": [ "EFFECT" ],
+			"params": [ { "name": "effect", "type": "effect", "default": { "name": "Fire - small01" } } ],
+			"optionalParams": [ { "name": "name", "type": "string" } ],
+			"color": [0.7, 0.7, 0.7, 0.6],
+			"billboardColor": [1.0, 1.0, 1.0, 1.0],
+			"initYUp": false,
+			"initScale": 1.0
+		},
+		{
+			"name": "Water",
+			"tags": [ "WATER" ],
+			"color": [0.2, 0.7, 0.9, 0.6],
+			"billboardColor": [0.0, 0.0, 1.0, 1.0]
+		},
+		{
+			"name": "Chemicals",
+			"tags": [ "CHEMICALS" ],
+			"color": [0.871, 0.09, 0.573, 0.6],
+			"billboardColor": [1.0, 0.0, 0.5, 1.0]
+		},
+		{
+			"name": "Oil",
+			"tags": [ "OIL" ],
+			"color": [0.05, 0.05, 0.05, 0.6],
+			"billboardColor": [0.05, 0.05, 0.05, 1.0]
+		},
+		{
+			"name": "Waypoint",
+			"tags": [ "WAYPOINT" ],
+			"params": [ { "name": "connections", "type": "connections" } ],
+			"optionalParams": [ { "name": "name", "type": "string" } ],
+			"renderable": "$GAME_DATA/Nodes/Renderable/node_cylinder_arrow.rend",
+			"color": [0.0, 1.0, 0.0, 0.6],
+			"billboardColor": [0.0, 0.8, 0.0, 1.0],
+			"scaleFlags": "ScaleXZ"
+		},
+		{
+			"name": "Reflection",
+			"tags": [ "REFLECTION" ],
+			"renderable": "$GAME_DATA/Nodes/Renderable/node_reflection.rend",
+			"visualization": false,
+			"useUnitBounds": true,
+			"billboardColor": [0.5, 0.0, 1.0, 1.0],
+			"scale": 0.25,
+			"initYUp": false,
+			"initScale": 20.0
+		}
+	]
 }
