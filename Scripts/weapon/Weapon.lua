@@ -132,7 +132,7 @@ WeaponTargetFunctions = {
             end
         end
 
-        return nil --target
+        return target
     end,
     ---Shoot at the closest enemy behind the player
     ---@param enemies Character[]
@@ -157,7 +157,7 @@ WeaponTargetFunctions = {
             end
         end
 
-        return nil --target
+        return target
     end,
     ---Shoot in the direction of the most dense area
     ---@param enemies Character[]
