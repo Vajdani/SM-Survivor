@@ -317,12 +317,13 @@ end
 
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
-	-- print(self.weapons[2].fireCooldown)
 	local char = self.player.character
 	if not self.isLocal or not char then return end
 
 	if self.cl_collectCharges > 0 then
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
+	elseif self.isDead then
+		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Revive", "")
 	end
 
 	if self.cam ~= 3 then return end

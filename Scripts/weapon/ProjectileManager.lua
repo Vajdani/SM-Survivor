@@ -17,7 +17,7 @@ dofile "weaponUtil.lua"
 ---@field direction Vec3 The projectile's direction
 ---@field pelletCount number The amount of pellets fired
 ---@field sliceAngle number The angle of the slice
----@field spreadAngle number
+---@field spreadAngle number The angle of the spread
 
 ---@class ProjectileManager : ToolClass
 ProjectileManager = class()
@@ -75,11 +75,6 @@ end
 ---@field effect Effect The projectile's effect
 ---@field direction Vec3
 Projectile = class()
-Projectile.damage = 0
-Projectile.damageType = DAMAGETYPES.KINETIC
-Projectile.bounceLimit = 0
-Projectile.pierceLimit = 0
-Projectile.gravity = 0
 Projectile.lifeTime = 10
 
 
@@ -165,11 +160,6 @@ function Projectile:update(manager, dt)
 
     self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, self.direction))
 
-    -- local dir = self.direction:length2() > FLT_EPSILON and self.direction or VEC3_UP
-    -- if (VEC3_UP - dir):length2() > 0.1 then
-    --     self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, dir))
-    -- end
-
     return false
 end
 
@@ -186,7 +176,7 @@ function Projectile:onHit(manager, hitTerrain, result)
 
         self.direction = newDir:normalize()
 
-        self.projectileVelocity = self.projectileVelocity - self.projectileVelocity * self.collisionMomentumLoss
+        self.projectileVelocity = self.projectileVelocity * (1 - self.collisionMomentumLoss)
 
         -- if (normal - self.direction):length2() > 0.1 then
         --     local cross = normal:cross(self.direction)

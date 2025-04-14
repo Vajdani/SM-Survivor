@@ -1,3 +1,5 @@
+---@diagnostic disable:lowercase-global
+
 MINERALDROPS = MINERALDROPS or {}
 
 ---@enum ROCKTYPES
@@ -283,6 +285,8 @@ random = math.random
 abs = math.abs
 angleAxis = sm.quat.angleAxis
 vec3 = sm.vec3.new
+uuid = sm.uuid.new
+colour = sm.color.new
 
 function GetYawPitch( direction )
     return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)

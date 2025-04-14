@@ -4,8 +4,9 @@ dofile "util.lua"
 local rockMin = 0
 local rockMax = 64
 
-local rockId = sm.uuid.new("0c01f246-0090-43e4-8453-c1390322a7e4")
-local mineralId = sm.uuid.new("e731dede-34df-467f-8beb-315985179860")
+local rockId = uuid("0c01f246-0090-43e4-8453-c1390322a7e4")
+local mineralId = uuid("e731dede-34df-467f-8beb-315985179860")
+local plasticId = uuid( "628b2d61-5ceb-43e9-8334-a4135566df7a" )
 
 local rockRot = angleAxis(RAD90, VEC3_X)
 
@@ -20,38 +21,26 @@ local function GetRockType(val)
 end
 
 local function IsBorder(cellX, cellY, x, y)
-	if cellX == g_cellData.bounds.xMax and x == rockMax then
-		return true
-	end
-
-	if cellX == g_cellData.bounds.xMin and x == rockMin then
-		return true
-	end
-
-	if cellY == g_cellData.bounds.yMax and y == rockMax then
-		return true
-	end
-
-	if cellY == g_cellData.bounds.yMin and y == rockMin then
-		return true
-	end
-
-	return false
+	return
+		cellX == g_xMax and x == rockMax or
+		cellX == g_xMin and x == rockMin or
+		cellY == g_yMax and y == rockMax or
+		cellY == g_yMin and y == rockMin
 end
 
 local function DisplayNoise(cellX, cellY, x, y, noise)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
 		pos = vec3(cellX + x, cellY + y, 25),
-		rot = sm.quat.identity(),
-		scale = sm.vec3.one(),
+		rot = QUAT_IDENTITY,
+		scale = VEC3_ONE,
 		params = {
 			effect = {
 				name = "ShapeRenderable",
 				params = {
 					"uuid",
-					sm.uuid.new( "628b2d61-5ceb-43e9-8334-a4135566df7a" ),
+					plasticId,
 					"color",
-					sm.color.new(noise, noise, noise)
+					colour(noise, noise, noise)
 				},
 			}
 		},
@@ -85,26 +74,28 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 		}
 
 		table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
+
+		return
+	end
+
+	local final_x, final_y = (cellX * 64 + x) * 0.125, (cellY * 64 + y) * 0.125
+	local rockNoise = abs(perlin(final_x, final_y, seed))
+	-- DisplayNoise(cellX, cellY, x, y, rockNoise)
+
+	if rockNoise > 0.15 then
+		AddRock(cellX, cellY, x, y, final_x, final_y, corner, mineralSeed)
 	else
-		local final_x, final_y = (cellX * 64 + x) / 8, (cellY * 64 + y) / 8
-		local rockNoise = abs(perlin(final_x, final_y, seed))
-		-- DisplayNoise(cellX, cellY, x, y, rockNoise)
+		AddWaypoint(cellX, cellY, x, y)
 
-		if rockNoise > 0.15 then
-			AddRock(cellX, cellY, x, y, final_x, final_y, corner, mineralSeed)
-		else
-			AddWaypoint(cellX, cellY, x, y)
-
-			if rockNoise > 0.14 then
-				-- g_cellData.gridData[cellY][cellX].water[x.."_"..y] = true
-				-- table_insert(g_cellData.gridData[cellY][cellX].nodes, {
-				-- 	pos = vec3(cellX + x, cellY + y, 0.5),
-				-- 	params = {
-				-- 		guaranteed = true
-				-- 	},
-				-- 	tags = { "TOTEBOT_GREEN" },
-				-- })
-			end
+		if rockNoise > 0.14 then
+			-- g_cellData.gridData[cellY][cellX].water[x.."_"..y] = true
+			-- table_insert(g_cellData.gridData[cellY][cellX].nodes, {
+			-- 	pos = vec3(cellX + x, cellY + y, 0.5),
+			-- 	params = {
+			-- 		guaranteed = true
+			-- 	},
+			-- 	tags = { "TOTEBOT_GREEN" },
+			-- })
 		end
 	end
 end
@@ -149,6 +140,11 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		gridData = {},
 		cellLoaded = {}
 	}
+
+	g_xMax = g_cellData.bounds.xMax
+	g_xMin = g_cellData.bounds.xMin
+	g_yMax = g_cellData.bounds.yMax
+	g_yMin = g_cellData.bounds.yMin
 
 	for cellY = yMin, yMax do
 		g_cellData.uid[cellY] = {}
@@ -277,7 +273,7 @@ function GetAssetsForCell( cellX, cellY, lod )
 	local assets = sm.terrainTile.getAssetsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
 	for _, asset in ipairs( assets ) do
 		local rx, ry = RotateLocal( cellX, cellY, asset.pos.x, asset.pos.y )
-		asset.pos = sm.vec3.new( rx, ry, asset.pos.z )
+		asset.pos = vec3( rx, ry, asset.pos.z )
 		asset.rot = GetRotationQuat( cellX, cellY ) * asset.rot
 	end
 	return assets
@@ -288,7 +284,7 @@ function GetNodesForCell( cellX, cellY )
 	local hasReflectionProbe = false
 	for _, node in ipairs( nodes ) do
 		local rx, ry = RotateLocal( cellX, cellY, node.pos.x, node.pos.y )
-		node.pos = sm.vec3.new( rx, ry, node.pos.z )
+		node.pos = vec3( rx, ry, node.pos.z )
 		node.rot = GetRotationQuat( cellX, cellY ) * node.rot
 
 		hasReflectionProbe = hasReflectionProbe or ValueExists( node.tags, "REFLECTION" )
@@ -296,9 +292,9 @@ function GetNodesForCell( cellX, cellY )
 
 	if not hasReflectionProbe then
 		table_insert(nodes, {
-			pos = sm.vec3.new( 32, 32, 32 ),
+			pos = vec3( 32, 32, 32 ),
 			rot = sm.quat.new( 0.707107, 0, 0, 0.707107 ),
-			scale = sm.vec3.new( 64, 64, 64 ),
+			scale = vec3( 64, 64, 64 ),
 			tags = { "REFLECTION" }
 		})
 	end
@@ -323,7 +319,7 @@ function GetCreationsForCell( cellX, cellY )
 		for i,creation in ipairs( cellCreations ) do
 			local rx, ry = RotateLocal( cellX, cellY, creation.pos.x, creation.pos.y )
 
-			creation.pos = sm.vec3.new( rx, ry, creation.pos.z )
+			creation.pos = vec3( rx, ry, creation.pos.z )
 			creation.rot = GetRotationQuat( cellX, cellY ) * creation.rot
 		end
 
@@ -365,7 +361,7 @@ function GetKinematicsForCell( cellX, cellY, lod )
 	local kinematics = sm.terrainTile.getKinematicsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
 	for _, kinematic in ipairs( kinematics ) do
 		local rx, ry = RotateLocal( cellX, cellY, kinematic.pos.x, kinematic.pos.y )
-		kinematic.pos = sm.vec3.new( rx, ry, kinematic.pos.z )
+		kinematic.pos = vec3( rx, ry, kinematic.pos.z )
 		kinematic.rot = GetRotationQuat( cellX, cellY ) * kinematic.rot
 	end
 	return kinematics
@@ -375,7 +371,7 @@ function GetDecalsForCell( cellX, cellY, lod )
 	local decals = sm.terrainTile.getDecalsForCell( GetTileLoadParamsFromCellPos( cellX, cellY, lod ) )
 	for _, decal in ipairs( decals ) do
 		local rx, ry = RotateLocal( cellX, cellY, decal.pos.x, decal.pos.y )
-		decal.pos = sm.vec3.new( rx, ry, decal.pos.z )
+		decal.pos = vec3( rx, ry, decal.pos.z )
 		decal.rot = GetRotationQuat( cellX, cellY ) * decal.rot
 	end
 	return decals

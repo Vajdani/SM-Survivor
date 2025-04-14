@@ -159,30 +159,23 @@ WeaponTargetFunctions = {
 
         return target
     end,
-    ---Shoot in the diection of the most dense area
+    ---Shoot in the direction of the most dense area
     ---@param enemies Character[]
     ---@param position Vec3
     ---@param owner Character
     ---@return Character
     [2] = function(enemies, position, owner)
-        local lookDir = owner.direction
-        local closest, target
-        for k, v in pairs(enemies) do
-            if sm.exists(v) and v ~= owner then
-                local enemyPos = v.worldPosition
-                local hit, result = sm.physics.raycast(position, enemyPos)
-                if result:getCharacter() == v then
-                    local toEnemy = enemyPos - position
-                    local distance = toEnemy:length2()
-                    if (not target or distance < closest) and lookDir:dot(toEnemy:normalize()) < -0.707107 then
-                        closest = distance
-                        target = v
-                    end
-                end
-            end
+        local targets = {}
+        for i = 0, 7 do
+            local angle = i * 45
+            local contacts = sm.physics.getSphereContacts(position + vec3(math.sin(angle), math.cos(angle), 0) * 10, 9)
+            sm.effect.playEffect("Part - Upgrade", position + vec3(math.sin(angle), math.cos(angle), 0) * 10)
+            targets[i] = contacts.characters
         end
 
-        return target
+        table.sort(targets, function(a, b) return #a > #b end)
+
+        return targets[1]
     end
 }
 
@@ -225,5 +218,6 @@ WeldTool.damage = 100
 WeldTool.renderable = { uuid = blk_plastic, color = sm.color.new(0,0,1) }
 WeldTool.pierceLimit = 100
 WeldTool.bounceLimit = 5
-WeldTool.targetFunctionId = 1
+WeldTool.targetFunctionId = 2
 WeldTool.icon = { "ItemIconsSet0", "ItemIcons", "fdb8b8be-96e7-4de0-85c7-d2f42e4f33ce" }
+WeldTool.sliderColours = { sm.color.new("#4287f5"), sm.color.new("#4f2eb3") }
