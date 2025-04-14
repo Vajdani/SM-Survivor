@@ -358,7 +358,6 @@ function Player:client_onFixedUpdate(dt)
 	local targets = {}
 	--local velocity = target and target.velocity
 	for k, v in pairs(self.weapons) do
-
 		local funcId = v.targetFunctionId
 		if targets[funcId] == nil then
 			targets[funcId] = { WeaponTargetFunctions[funcId](enemies, controlledPos, controlledChar) }

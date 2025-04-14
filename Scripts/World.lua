@@ -32,7 +32,7 @@ function World:server_onCellCreated(x, y)
 end
 
 function World:server_onFixedUpdate()
-    if #sm.unit.getAllUnits() >= 200 then return end
+    if not g_spawnEnemies or #sm.unit.getAllUnits() >= 200 then return end
 
     for k, v in pairs(sm.player.getAllPlayers()) do
         if (sm.game.getCurrentTick() % (spawnDelay + 40 * v.id)) == 0 then

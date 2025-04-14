@@ -201,28 +201,25 @@ WeaponTargetFunctions = {
             end
         end
 
-        for k, v in ipairs(points) do
-            if sm.game.getCurrentTick()%40 == 0 then
-                sm.effect.playEffect("Part - Upgrade", v.averagePosition)
+        local i = 1
+        local last = #points
+        while i < last do
+            local hit, result = sm.physics.raycast(position, points[i].averagePosition, owner)
+            if result.type ~= "character" then
+                table.remove(points, i)
+                last = #points + 1
+            else
+                i = i + 1
             end
-
-            -- local hit, result = sm.physics.raycast(position, v.averagePosition, owner)
-            -- if result.type ~= "character" then
-            --     points[k] = nil
-            -- end
         end
 
-        table.sort(points, function(a, b)
-            return a.count > b.count --and (a.averagePosition - position):length2() < (b.averagePosition - position):length2()
-        end)
+        if #points > 0 then
+            table.sort(points, function(a, b)
+                return a.count > b.count and (a.averagePosition - position):length2() < (b.averagePosition - position):length2()
+            end)
 
-        local point = points[1]
-        if point then
-            if sm.game.getCurrentTick()%40 == 0 then
-                sm.effect.playEffect("Part - Upgrade", point.averagePosition)
-            end
-
-            return { worldPosition = point.averagePosition }
+            -- sm.particle.createParticle("paint_smoke", points[1].averagePosition, QUAT_IDENTITY, colour(0,1,0))
+            return { worldPosition = points[1].averagePosition }
         end
 
         return nil

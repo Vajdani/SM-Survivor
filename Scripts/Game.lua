@@ -5,6 +5,8 @@ dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
 ---@field sv table
 Game = class( nil )
 
+g_spawnEnemies = true
+
 function Game.server_onCreate( self )
 	print("Game.server_onCreate")
     self.sv = {}
@@ -56,6 +58,11 @@ function Game:sv_recreate(data, player)
 	end
 end
 
+function Game:sv_enemies()
+	g_spawnEnemies = not g_spawnEnemies
+end
+
+
 
 function Game:client_onCreate()
     self:initCMD()
@@ -99,6 +106,7 @@ function Game:initCMD()
     sm.game.bindChatCommand("/cam", {}, "cl_cam", "Switch camera mode")
     sm.game.bindChatCommand("/render", {}, "cl_render", "Switch render mode")
     sm.game.bindChatCommand("/recreate", {}, "cl_recreate", "Recreate terrain")
+    sm.game.bindChatCommand("/enemies", {}, "cl_enemies", "Toggle enemy spawning")
 end
 
 function Game:cl_render()
@@ -111,4 +119,8 @@ end
 
 function Game:cl_recreate()
 	self.network:sendToServer("sv_recreate")
+end
+
+function Game:cl_enemies()
+	self.network:sendToServer("sv_enemies")
 end
