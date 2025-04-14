@@ -60,5 +60,165 @@
 				]
 			}			
 		]
+	},
+	"ShapeRenderable0":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable1":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable2":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable3":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable4":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable5":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable6":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable7":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable8":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable9":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable10":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable11":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable12":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable13":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable14":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
+	},
+	"ShapeRenderable15":
+	{
+		"effectList":
+		[
+			{
+				"type": "shapeRenderable",
+				"name": ""
+			}
+		]
 	}
 }

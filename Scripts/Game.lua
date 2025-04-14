@@ -5,7 +5,12 @@ dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
 ---@field sv table
 Game = class( nil )
 
-g_spawnEnemies = true
+
+if g_spawnEnemies == nil then
+	g_spawnEnemies = true
+end
+
+g_enableWaypointEffects = false
 
 function Game.server_onCreate( self )
 	print("Game.server_onCreate")

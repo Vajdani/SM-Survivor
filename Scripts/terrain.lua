@@ -61,8 +61,16 @@ end
 local function AddWaypoint(cellX, cellY, x, y)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
 		pos = vec3(cellX + x, cellY + y, 0),
+		params = {
+			connections = {
+				id = g_wayPointCounter,
+				otherIds = {}
+			}
+		},
 		tags = { "WAYPOINT" },
 	})
+
+	g_wayPointCounter = g_wayPointCounter + 1
 end
 
 local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
@@ -78,12 +86,12 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 		return
 	end
 
-	local final_x, final_y = (cellX * 64 + x) * 0.125, (cellY * 64 + y) * 0.125
-	local rockNoise = abs(perlin(final_x, final_y, seed))
+	local noise_x, noise_y = (cellX * 64 + x) * 0.125, (cellY * 64 + y) * 0.125
+	local rockNoise = abs(perlin(noise_x, noise_y, seed))
 	-- DisplayNoise(cellX, cellY, x, y, rockNoise)
 
 	if rockNoise > 0.15 then
-		AddRock(cellX, cellY, x, y, final_x, final_y, corner, mineralSeed)
+		AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed)
 	else
 		AddWaypoint(cellX, cellY, x, y)
 
@@ -141,6 +149,8 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 	g_yMax = g_cellData.bounds.yMax
 	g_yMin = g_cellData.bounds.yMin
 
+	g_wayPointCounter = 1
+
 	for cellY = yMin, yMax do
 		g_cellData.gridData[cellY] = {}
 		g_cellData.cellLoaded[cellY] = {}
@@ -157,14 +167,89 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		end
 	end
 
+	local waypointPositionToIndex = {}
+	for cellY = yMin, yMax do
+		waypointPositionToIndex[cellY] = {}
+
+		for cellX = xMin, xMax do
+			waypointPositionToIndex[cellY][cellX] = {}
+
+			local nodes = g_cellData.gridData[cellY][cellX].nodes
+			for k, node in pairs(nodes) do
+				if node.tags[1] == "WAYPOINT" then
+					waypointPositionToIndex[cellY][cellX][("%s_%s"):format(node.pos.x, node.pos.y)] = k
+				end
+			end
+		end
+	end
+
+	local directions = {
+		[1] = vec3(1, 0, 0),
+		[2] = vec3(-1, 0, 0),
+		[3] = vec3(0, 1, 0),
+		[4] = vec3(0, -1, 0)
+	}
+
+	for cellY = yMin, yMax do
+		for cellX = xMin, xMax do
+			local nodes = g_cellData.gridData[cellY][cellX].nodes --[[ @as TerrainNode[] ]]
+			for k, node in pairs(nodes) do
+				if node.tags[1] == "WAYPOINT" then
+					local pos = node.pos
+					for i = 1, 4 do
+						local offset = pos + directions[i]
+						local nextNode = waypointPositionToIndex[cellY][cellX][("%s_%s"):format(offset.x, offset.y)]
+						if nextNode then
+							table_insert(node.params.connections.otherIds, nodes[nextNode].params.connections.id)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- if nextNode then
+	-- 	local con_self, con_foreign = node.params.connections, nodes[nextNode].params.connections
+	-- 	if not isAnyOf(con_self.id, con_foreign.otherIds) then
+	-- 	-- 	and not
+	-- 	--    isAnyOf(con_foreign.id, con_self.otherIds) then
+	-- 		table_insert(con_self.otherIds, con_foreign.id)
+	-- 	end
+	-- else
+	-- 	-- local dir = directions[i]
+	-- 	-- local _cellX, _cellY = cellX + dir.x, cellY + dir.y
+	-- 	-- if (cellX < _cellX or cellY < _cellY) and InsideCellBounds( _cellX, _cellY ) then
+	-- 	-- 	local offset_x, offset_y = -1, -1
+	-- 	-- 	if i == 1 then
+	-- 	-- 		offset_x, offset_y = 0, pos.y
+	-- 	-- 	elseif i == 2 then
+	-- 	-- 		offset_x, offset_y = 64, offset.y
+	-- 	-- 	elseif i == 3 then
+	-- 	-- 		offset_x, offset_y = offset.x, 0
+	-- 	-- 	elseif i == 4 then
+	-- 	-- 		offset_x, offset_y = offset.x, 64
+	-- 	-- 	end
+
+	-- 	-- 	nextNode = waypointPositionToIndex[_cellY][_cellX][("%s_%s"):format(offset_x, offset_y)]
+	-- 	-- end
+
+	-- 	-- if nextNode then
+	-- 	-- 	local con_self, con_foreign = node.params.connections, g_cellData.gridData[_cellY][_cellX].nodes[nextNode].params.connections
+	-- 	-- 	if not isAnyOf(con_self.id, con_foreign.otherIds) then
+	-- 	-- 		table_insert(con_self.otherIds, {
+	-- 	-- 			id = con_foreign.id,
+	-- 	-- 			cell = { _cellX, _cellY }
+	-- 	-- 		})
+	-- 	-- 	end
+	-- 	-- end
+	-- end
+
 	sm.terrainData.save( g_cellData )
 end
 
 function Load()
 	-- if sm.terrainData.exists() then
-	-- 	local data = sm.terrainData.load()
-	-- 	g_uuidToPath = data[1]
-	-- 	g_cellData = data[2]
+	-- 	g_cellData = sm.terrainData.load()
 	-- 	return true
 	-- end
 	return false
@@ -284,7 +369,7 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 			uuid = isMineral and mineralId or rockId,
 			pos = v.pos,
 			rot = rot,
-			params = isMineral and ROCKTYPES[rockType] or nil
+			params = ROCKTYPES[rockType]
 		})
 	end
 

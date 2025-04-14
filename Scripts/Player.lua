@@ -407,7 +407,7 @@ function Player:cl_toggleWeapons()
 	if #self.weapons > 0 then
 		self.weapons = {}
 	else
-		self:cl_initWeapons()
+		self:cl_reapplyUpgrades()
 	end
 
 	self:cl_updateWeaponHud()

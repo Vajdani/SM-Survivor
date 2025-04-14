@@ -7,14 +7,15 @@ dofile "$CONTENT_DATA/Scripts/unit/PathingState.lua"
 ---@field target Character?	
 ---@field lastTargetPosition Vec3
 ---@field isPathing boolean
+---@field path NodePathNode[]
 TotebotGreenUnit = class()
 
 local attackUuid = sm.uuid.new( "7315c96b-c3bc-4e28-9294-36cb0082d8e4" )
 local Damage = 5
 
-local targetForgetTime = 4 * 8
-local attackTime = 0.75 * 8
-local stopDistance = 2.5
+local targetForgetTime = 4 * 40 --8
+local attackTime = 0.75 * 40 --8
+local stopDistance = 2 ^ 2
 
 function TotebotGreenUnit:server_onCreate()
 	-- print("totebot create")
@@ -44,101 +45,67 @@ function TotebotGreenUnit:server_onCreate()
 	self.attackTimer:start( attackTime )
 	self.attackTimer:complete()
 
-	self.pathingState = PathingState()
-	self.pathingState:sv_onCreate( self.unit )
-	self.pathingState:sv_setTolerance( 1.0 )
-	self.pathingState:sv_setMovementType( "sprint" )
-	self.pathingState:sv_setWaterAvoidance( false )
-	self.pathingState.debugName = "pathingState"
-	self.pathingState:start()
-
-	self.target = (self.params or {}).target
-	if self.target then
-		self.lastTargetPosition = self.target.worldPosition
+	if self.params then
+		self.target = self.params.target
+	else
+		self.target = GetClosestPlayer(self.unit.character.worldPosition, 1000, self.unit.character:getWorld()).publicData.miner.character
 	end
+
+	self.path = {}
+	self.pathIndex = 1
+
+	self.tickOffset = math.floor(math.random() * 2)
 
 	self.destroyed = false
 end
 
-function TotebotGreenUnit.server_onUnitUpdate( self, dt )
-	if self.shouldForget then
-		self.forgetTimer:tick()
-		if self.forgetTimer:done() then
-			print("totebot forgor", self.target)
-			self.target = nil
-			self.shouldForget = false
-			self.lastTargetPosition = nil
-			self.forgetTimer:reset()
-		end
-	end
-
+function TotebotGreenUnit.server_onFixedUpdate( self, dt )
 	self.attackTimer:tick()
+	if not self.attackTimer:done() then return end
 
-	local player = sm.ai.getClosestVisibleCharacterType( self.unit, unit_miner )
-	if player ~= self.target then
-		if player then
-			print("totebot found target", player)
-			self.target = player
-			self.shouldForget = false
-
-			--self.unit:sendCharacterEvent("alerted")
-
-			self.forgetTimer:reset()
+	local curNode = self.path[self.pathIndex]
+	if curNode then
+		local dist = curNode.toNode:getPosition() - self.unit.character.worldPosition
+		if dist:length2() > 2 then
+			local dir = dist:normalize()
+			self.unit:setMovementDirection(dir)
+			self.unit:setMovementType("sprint")
+			self.unit:setFacingDirection(dir)
 		else
-			if self.target:isDowned() then
-				self.target = nil
-				self.unit:setMovementType("stand")
-			else
-				--self.shouldForget = true
-			end
+			self.pathIndex = min(self.pathIndex + 1, #self.path)
 		end
+	else
+		self.unit:setMovementType("stand")
 	end
 
-	self.pathingState:sv_setConditions({
-		{ variable = sm.pathfinder.conditionProperty.target, value = ( self.lastTargetPosition and 1 or 0 ) }
-	})
-	self.pathingState:sv_setDestination( self.lastTargetPosition )
-	self.pathingState:onUnitUpdate( dt )
+	local ownPos = self.unit.character.worldPosition
+	local toLastTargetPos = self.target.worldPosition - ownPos
+	if (self.target.worldPosition - ownPos):length2() < stopDistance then
+		self.unit:setMovementType("stand")
 
-	if self.target and self.attackTimer:done() then
-		if not self.shouldForget then
-			self.lastTargetPosition = self.target.worldPosition
-		end
+		local dir = toLastTargetPos:normalize()
+		self.unit:setFacingDirection(dir)
 
-		local ownPos = self.unit.character.worldPosition
-		local toLastTargetPos = self.lastTargetPosition - ownPos
-		if (self.target.worldPosition - ownPos):length2() < stopDistance then
-			self.unit:setMovementType("stand")
+		sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 0.5, 10)
+		self.unit:sendCharacterEvent("melee")
 
-			local dir = toLastTargetPos:normalize()
-			self.unit:setFacingDirection(dir)
-
-			sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 0.5, 10)
-
-			self.unit:sendCharacterEvent("melee")
-
-			self.attackTimer:reset()
-			self.isPathing = false
-		elseif (toLastTargetPos):length2() < stopDistance then
-			self.unit:setMovementType("stand")
-			self.isPathing = false
-		else
-			-- local dir = toLastTargetPos:normalize()
-			-- self.unit:setFacingDirection(dir)
-			-- self.unit:setMovementDirection(dir)
-			-- self.unit:setMovementType("sprint")
-			self.isPathing = true
-		end
+		self.attackTimer:reset()
 	end
 end
 
-function TotebotGreenUnit:server_onFixedUpdate(dt)
-	if self.isPathing and self.pathingState.destination then
-		self.pathingState:onFixedUpdate( dt )
-		self.unit:setMovementDirection( self.pathingState:getMovementDirection() )
-		self.unit:setMovementType( self.pathingState:getMovementType() )
-		self.unit:setFacingDirection( self.pathingState:getFacingDirection() )
-		-- print(self.pathingState:getMovementType())
+function TotebotGreenUnit:server_onUnitUpdate()
+	if not self.attackTimer:done() then return end
+
+	local pos = self.target.worldPosition
+	local char = self.unit.character
+	local hit, result = sm.physics.raycast(char.worldPosition, pos, char)
+	if result:getCharacter() == self.target and false then
+		---@diagnostic disable-next-line:missing-fields
+		self.path = { { toNode = { getPosition = function() return pos end } } }
+		self.pathIndex = 1
+	elseif (sm.game.getServerTick() + self.tickOffset) % 2 == 0 then
+		self.path = sm.pathfinder.getPath(char, vec3(pos.x, pos.y, 0), true)
+		self.pathIndex = 1
 	end
 end
 
