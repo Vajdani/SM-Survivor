@@ -25,6 +25,11 @@ function MinerUnit:server_onMelee(position, attacker, damage, power, direction, 
 end
 
 function MinerUnit:server_onFixedUpdate()
+    if not self.unit.publicData then
+        self.unit:destroy()
+        return
+    end
+
     local char = self.unit.character
     if not char or not sm.exists(char) then return end
 
