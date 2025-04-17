@@ -31,7 +31,7 @@ function MineralDrop:client_onUpdate(dt)
     if not self.destination or self.destroyed then return end
 
     local destination = self.destination.worldPosition
-    local newPos = sm.vec3.lerp(self.harvestable.worldPosition, destination, dt * 10)
+    local newPos = sm.vec3.lerp(self.harvestable.worldPosition, destination, dt * 10 * self.destination.movementSpeedFraction)
     self.harvestable:setPosition(newPos)
     if (destination - newPos):length2() < 0.1 then
         if sm.isHost then

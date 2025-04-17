@@ -105,12 +105,19 @@
 			<Property key="Caption" value="1" />
 		</Widget>
 	</Widget>
-	<Widget type="Widget" skin="gui_keybinds_bg" name="abilityPanel" position_real="0 0.9166666666666666 0.041666666666666664 0.037037037037037035">
-		<Widget type="ImageBox" skin="ImageBox" name="icon_magnet" position_real="0.0625 0.125 0.375 0.75" />
-		<Widget type="TextBox" skin="TextBox" name="amount_magnet" position_real="0.4375 0.125 0.5 0.75">
+	<Widget type="Widget" skin="gui_keybinds_bg" name="abilityPanel" position_real="0 0.9166666666666666 0.08854166666666667 0.037037037037037035">
+		<Widget type="ImageBox" skin="ImageBox" name="icon_magnet" position_real="0.029411764705882353 0.125 0.17647058823529413 0.75" />
+		<Widget type="TextBox" skin="TextBox" name="amount_magnet" position_real="0.20588235294117646 0.125 0.23529411764705882 0.75">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Center" />
 			<Property key="Caption" value="1" />
 		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="amount_ability" position_real="0.7352941176470589 0.125 0.23529411764705882 0.75">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="icon_ability" position_real="0.5588235294117647 0.125 0.17647058823529413 0.75" />
+		<Widget type="ImageBox" skin="ImageBox" name="icon_abilityCooldown" position_real="0.7352941176470589 0 0.23529411764705882 1" />
 	</Widget>
 </MyGUI>

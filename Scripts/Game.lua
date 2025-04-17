@@ -37,10 +37,12 @@ end
 
 function Game.server_onPlayerJoined( self, player, isNewPlayer )
     print("Game.server_onPlayerJoined")
-	if not sm.exists( self.sv.saved.world ) then
-		sm.world.loadWorld( self.sv.saved.world )
+	if isNewPlayer then
+		if not sm.exists( self.sv.saved.world ) then
+			sm.world.loadWorld( self.sv.saved.world )
+		end
+		self.sv.saved.world:loadCell( 0, 0, player, "sv_createPlayerCharacter" )
 	end
-	self.sv.saved.world:loadCell( 0, 0, player, "sv_createPlayerCharacter" )
 
 	g_unitManager:sv_onPlayerJoined( player )
 end

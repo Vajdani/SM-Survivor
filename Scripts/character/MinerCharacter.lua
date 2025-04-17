@@ -19,10 +19,25 @@ local classRenderables = {
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Backpack/Outfit_demolition_backpack/char_shared_outfit_demolition_backpack.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Gloves/Outfit_demolition_gloves/char_male_outfit_demolition_gloves.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Hat/Outfit_demolition_hat/char_shared_outfit_demolition_hat.rend",
-			"$SURVIVAL_DATA/Character/Char_Male/Hair/Male/char_male_hair_01/char_male_hair_01.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_demolition_jacket/char_male_outfit_demolition_jacket.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_demolition_pants/char_male_outfit_demolition_pants.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_demolition_shoes/char_male_outfit_demolition_shoes.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Hair/Male/char_male_hair_01/char_male_hair_01.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
+		},
+		tool = {
+			hammerRenderable
+		}
+	},
+	[MINERCLASS.SCOUT] = {
+		character = {
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Backpack/Outfit_delivery_backpack/char_shared_outfit_delivery_backpack.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Gloves/Outfit_delivery_gloves/char_male_outfit_delivery_gloves.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Hat/Outfit_delivery_hat/char_male_outfit_delivery_hat.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_delivery_jacket/char_male_outfit_delivery_jacket.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_delivery_pants/char_male_outfit_delivery_pants.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_delivery_shoes/char_male_outfit_delivery_shoes.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Hair/Male/char_male_hair_01/char_male_hair_01.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
 		},
 		tool = {

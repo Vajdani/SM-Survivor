@@ -12,8 +12,11 @@ function MinerUnit:server_onCreate()
     self.swinging = false
     self.miningEnabled = true
 
-    if self.params then
+    local data = self.params or self.storage:load()
+    if data then
+        self.minerData = data
         self:sv_sendCharInit()
+        self.storage:save(data)
     end
 end
 
@@ -23,7 +26,7 @@ function MinerUnit:sv_sendCharInit()
         return
     end
 
-    sm.event.sendToCharacter(self.unit.character, "sv_init", self.params)
+    sm.event.sendToCharacter(self.unit.character, "sv_init", self.minerData)
 end
 
 function MinerUnit:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
@@ -39,15 +42,10 @@ function MinerUnit:server_onMelee(position, attacker, damage, power, direction, 
 end
 
 function MinerUnit:server_onFixedUpdate()
-    if not self.unit.publicData then
-        self.unit:destroy()
-        return
-    end
-
     local char = self.unit.character
     if not char or not sm.exists(char) then return end
 
-    -- char.movementSpeedFraction = 5
+    char.movementSpeedFraction = self.unit.publicData.owner.publicData.runSpeedMultiplier
 
     local pos = char.worldPosition
     local dir = char.direction
@@ -91,6 +89,8 @@ function MinerUnit:server_onFixedUpdate()
 end
 
 function MinerUnit:sv_collect(trigger, result)
+    if not self.unit then return end
+
     local char = self.unit.character
     for k, v in pairs(result) do
         if MINERALDROPS[v.id] == true then

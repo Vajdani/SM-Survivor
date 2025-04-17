@@ -1,4 +1,4 @@
-<MyGUI type="Layout" version="3.2.0">
+﻿<MyGUI type="Layout" version="3.2.0">
 	<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position="50 50 175 40">
 		<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position="5 5 30 30" />
 		<Widget type="TextBox" skin="TextBox" name="amount_gold" position="35 5 40 30">
@@ -105,12 +105,19 @@
 			<Property key="Caption" value="1" />
 		</Widget>
 	</Widget>
-	<Widget type="Widget" skin="gui_keybinds_bg" name="abilityPanel" position="0 990 80 40">
+	<Widget type="Widget" skin="gui_keybinds_bg" name="abilityPanel" position="0 990 170 40">
 		<Widget type="ImageBox" skin="ImageBox" name="icon_magnet" position="5 5 30 30" />
 		<Widget type="TextBox" skin="TextBox" name="amount_magnet" position="35 5 40 30">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Center" />
 			<Property key="Caption" value="1" />
 		</Widget>
+		<Widget type="TextBox" skin="TextBox" name="amount_ability" position="125 5 40 30">
+			<Property key="FontName" value="SM_ButtonSmallBold" />
+			<Property key="TextAlign" value="Center" />
+			<Property key="Caption" value="1" />
+		</Widget>
+		<Widget type="ImageBox" skin="ImageBox" name="icon_ability" position="95 5 30 30" />
+		<Widget type="ImageBox" skin="ImageBox" name="icon_abilityCooldown" position="125 0 40 40"/>
 	</Widget>
 </MyGUI>

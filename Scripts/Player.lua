@@ -45,16 +45,63 @@ function Player:server_onCreate()
 	self.moveKeys = {}
 	self.controlMethod = 0
 
-	self.level = 0
-	self.collectCharges = 0
+	local saved = self.storage:load()
+	local minerData
+	if saved then
+		self.level = saved.level
+		self.collectCharges = saved.collectCharges
+		self.controlled = saved.controlled
+		self.health = saved.hp
+		self.maxHealth = saved.maxHp
+		self.classId = saved.classId
+		self.minerals = saved.minerals
+		self.selectedUpgrades = saved.selectedUpgrades
 
-	self.health = 100
-	self.maxHealth = 100
-	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
+		minerData = MINERDATA[self.classId]
 
-	self.player.publicData = {}
+		self:sv_loadMiner()
+
+		if #self.selectedUpgrades > 0 then
+			self.network:sendToClient(self.player, "cl_reapplyUpgrades", self.selectedUpgrades)
+		end
+
+		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+	else
+		self.level = 0
+		self.collectCharges = 0
+		self.classId = MINERCLASS.SCOUT
+
+		minerData = MINERDATA[self.classId]
+		self.health = minerData.hp
+		self.maxHealth = minerData.hp
+	end
+
+	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId }, 1)
+
+	self.player.publicData = {
+		runSpeedMultiplier = minerData.runSpeedMultiplier
+	}
 
 	self:sv_initMaterials()
+	self:sv_save()
+end
+
+function Player:sv_save()
+	self.storage:save({
+		level = self.level,
+		collectCharges = self.collectCharges,
+		controlled = self.controlled,
+		hp = self.health,
+		maxHp = self.maxHealth,
+		classId = self.classId,
+		minerals = self.minerals,
+		selectedUpgrades = self.selectedUpgrades
+	})
+end
+
+function Player:sv_saveUpgrades(upgrades)
+	self.selectedUpgrades = upgrades
+	self:sv_save()
 end
 
 function Player:sv_takeDamage(damage)
@@ -71,8 +118,11 @@ function Player:sv_takeDamage(damage)
 	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth }, 1)
 end
 
-function Player:server_onFixedUpdate(dt)
-	-- print(#sm.unit.getAllUnits())
+function Player:server_onFixedUpdate()
+	if self.speedBoostTime and sm.game.getServerTick() > self.speedBoostTime then
+		self.speedBoostTime = nil
+	end
+
 	local char = self.player.character
 	if not char or not sm.exists(char) then return end
 
@@ -93,7 +143,16 @@ function Player:server_onFixedUpdate(dt)
 		self.controlled:setFacingDirection(moveDir)
 	end
 
-	self.controlled:setMovementType(moving and "walk" or "stand")
+	local moveType = "stand"
+	if moving then
+		if self.speedBoostTime then
+			moveType = "sprint"
+		else
+			moveType = "walk"
+		end
+	end
+
+	self.controlled:setMovementType(moveType)
 end
 
 function Player:sv_createMiner(pos)
@@ -106,7 +165,21 @@ function Player:sv_createMiner(pos)
 	self:sv_initMaterials()
 
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
-	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos, 0, { classId = 1, owner = self.player })
+	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos, 0, { classId = self.classId, owner = self.player })
+	self.controlled.publicData = { owner = self.player }
+	self.player.publicData.miner = self.controlled
+	self:sv_seat()
+
+	self:sv_save()
+end
+
+function Player:sv_loadMiner()
+	if not sm.exists(self.player.character) then
+		sm.event.sendToPlayer(self.player, "sv_loadMiner")
+		return
+	end
+
+	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), -VEC3_UP * verticalOffset)
 	self.controlled.publicData = { owner = self.player }
 	self.player.publicData.miner = self.controlled
 	self:sv_seat()
@@ -127,10 +200,13 @@ function Player:sv_onMove(data)
 end
 
 function Player:sv_initMaterials()
-	self.minerals = {}
-	for k, v in pairs(MINERALS) do
-		self.minerals[k] = 0
+	if not self.minerals then
+		self.minerals = {}
+		for k, v in pairs(MINERALS) do
+			self.minerals[k] = 0
+		end
 	end
+
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 end
 
@@ -151,6 +227,8 @@ function Player:sv_collectMineral(data)
 
 	self.minerals[type] = newAmount
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
+
+	self:sv_save()
 
 	if self.level ~= lastLevel then
 		self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, self.level - lastLevel, self.collectCharges })
@@ -195,6 +273,8 @@ function Player:sv_interact()
 				sm.event.sendToHarvestable(v, "sv_onCollect", char)
 			end
 		end
+
+		self:sv_save()
 	end
 end
 
@@ -203,32 +283,13 @@ function Player:sv_setControlMethod(method)
 end
 
 function Player:sv_useAbility()
-	-- local char = self.controlled.character
-	--sm.projectile.projectileAttack(projectile_explosivetape, 0, char.worldPosition + VEC3_UP, (VEC3_UP * 2 + char.direction):normalize() * 10 + char.velocity, self.player)
-	-- sm.event.sendToScriptableObject(
-    --     g_projectileManager, "sv_fireProjectile",
-    --     {
-	-- 		scriptClass = "Dynamite",
-    --         damage = 0,
-    --         damageType = DAMAGETYPES.FIRE,
-    --         bounceLimit = 5,
-    --         pierceLimit = 0,
-    --         gravity = 0.5,
-    --         drag = 0,
-    --         bounceAxes = VEC3_ONE,
-    --         collisionMomentumLoss = 0.25,
-    --         renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) },
-    --         position = char.worldPosition + VEC3_UP,
-    --         projectileVelocity = 10,
-    --         spreadAngle = 5,
-    --         sliceAngle = 0,
-    --         pelletCount = 1,
-    --         aimDir = (VEC3_UP * 2 + char.direction):normalize()
-    --     }
-    -- )
-
-	self.controlled:sendCharacterEvent("throw")
-	sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
+	if self.classId == MINERCLASS.DEMOLITION then
+		self.controlled:sendCharacterEvent("throw")
+		sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
+	elseif self.cl_classId == MINERCLASS.SCOUT then
+		self.speedBoostTime = sm.game.getServerTick() + 5 * 40
+		--self.player.publicData.runSpeedMultiplier = 3
+	end
 end
 
 
@@ -255,7 +316,6 @@ function Player:client_onCreate()
 		end
 	end
 	self.hud:setImage("icon_magnet", "$GAME_DATA/Gui/Editor/ed_icon_transform_origin.png")
-	self.healthSlider = Slider():init(self.hud, "healthBar", 100, 100, { sm.color.new("#ff0000") })
 	self.hud:open()
 
 	self:cl_cam()
@@ -282,7 +342,11 @@ function Player:client_onCreate()
 		self.upgradesGui:setButtonCallback("card"..i, "cl_upgradeSelected")
 	end
 
-	self.selectedUpgrades = {}
+	self.cl_selectedUpgrades = {}
+
+	self.abilityRecharge = 0
+	self.abilityUses = 0
+	self.abilityMaxUses = 0
 
 	self:cl_updateLevelCount({ 0, 0, 0 })
 end
@@ -294,8 +358,25 @@ function Player:client_onClientDataUpdate(data, channel)
 		local health = data.health
 		local maxHealth = data.maxHealth
 		self.hud:setText("healthText", ("%sHP %s/%s       "):format(("   "):rep(#tostring(maxHealth) - #tostring(health)), math.max(health, 0), maxHealth))
-		self.healthSlider:update(math.max(health, 0))
+		if not self.healthSlider then
+			self.healthSlider = Slider():init(self.hud, "healthBar", maxHealth, maxHealth, { sm.color.new("#ff0000") })
+		end
+		self.healthSlider:update_shooting(math.max(health, 0))
+
 		self.isDead = health <= 0
+
+		if data.classId then
+			self.cl_classId = data.classId
+
+			local ability = MINERDATA[self.cl_classId].ability
+			self.abilityCooldown = ability.cooldown
+			self.abilityRecharge = ability.recharge
+			self.abilityUses = ability.uses
+			self.abilityMaxUses = ability.uses
+
+			SetGuiIcon(self.hud, "icon_ability", ability.icon)
+			self:cl_updateAbilityHud()
+		end
 	else
 		self.cl_controlled = data.controlled
 		self.enemyTrigger = sm.areaTrigger.createBox(sm.vec3.new(20, 20, 1), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.character)
@@ -303,10 +384,18 @@ function Player:client_onClientDataUpdate(data, channel)
 end
 
 function Player:client_onReload()
-	-- for k, v in pairs(self.weapons) do
-	-- 	v.clip = 0
-	-- end
+	if self.abilityRechargeTimer or self.abilityCooldownTimer then return true end
+
 	self.network:sendToServer("sv_useAbility")
+
+	self.abilityUses = self.abilityUses - 1
+	if self.abilityUses <= 0 then
+		self.abilityRechargeTimer = self.abilityRecharge
+	else
+		self.abilityCooldownTimer = self.abilityCooldown
+	end
+
+	self:cl_updateAbilityHud()
 
 	return true
 end
@@ -336,6 +425,18 @@ function Player:cl_updateWeaponHud()
 			SetGuiIcon(self.hud, widget.."_icon", icon)
 			self.hud:setText(widget.."_level", tostring(weapon.level))
 		end
+	end
+end
+
+function Player:cl_updateAbilityHud()
+	self.hud:setText("amount_ability", tostring(self.abilityUses))
+
+	if self.abilityRechargeTimer then
+		SetGuiIcon(self.hud, "icon_abilityCooldown", { "Rotation", "remove", tostring(math.floor((1 - self.abilityRechargeTimer/self.abilityRecharge) * 360)) })
+	elseif self.abilityCooldownTimer then
+		SetGuiIcon(self.hud, "icon_abilityCooldown", { "Rotation", "remove", tostring(math.floor((1 - self.abilityCooldownTimer/self.abilityCooldown) * 360)) })
+	else
+		SetGuiIcon(self.hud, "icon_abilityCooldown", { "Rotation", "remove", "360" })
 	end
 end
 
@@ -370,6 +471,23 @@ end
 function Player:client_onFixedUpdate(dt)
 	if not self.isLocal or self.isDead then return end
 
+	if self.abilityCooldownTimer then
+		self.abilityCooldownTimer = max(self.abilityCooldownTimer - dt, 0)
+		if self.abilityCooldownTimer <= 0 then
+			self.abilityCooldownTimer = nil
+		end
+	end
+
+	if self.abilityRechargeTimer then
+		self.abilityRechargeTimer = max(self.abilityRechargeTimer - dt, 0)
+		if self.abilityRechargeTimer <= 0 then
+			self.abilityRechargeTimer = nil
+			self.abilityUses = self.abilityMaxUses
+		end
+	end
+
+	self:cl_updateAbilityHud()
+
 	local controlledChar = self.cl_controlled
 	if not controlledChar or not sm.exists(controlledChar) then return end
 
@@ -380,6 +498,7 @@ function Player:client_onFixedUpdate(dt)
 	if #enemies == 1 then --Only self
 		for k, v in pairs(self.weapons) do
 			v:update(dt)
+			-- v:update(dt, controlledPos, k == 4 and controlledChar.direction or nil)
 		end
 
 		return
@@ -443,10 +562,14 @@ function Player:cl_toggleWeapons()
 	self:cl_updateWeaponHud()
 end
 
-function Player:cl_reapplyUpgrades()
+function Player:cl_reapplyUpgrades(upgrades)
 	self:cl_initWeapons()
 
-	for k, data in ipairs(self.selectedUpgrades) do
+	if upgrades then
+		self.cl_selectedUpgrades = upgrades
+	end
+
+	for k, data in ipairs(self.cl_selectedUpgrades) do
 		local upgradeId = data[1]
 		local upgrade = UPGRADES[upgradeId]
 		if upgrade.weaponUpgrade then
@@ -565,7 +688,7 @@ end
 
 function Player:cl_upgradeSelected(button)
 	local data = self.rolledUpgrades[button]
-	table_insert(self.selectedUpgrades, data)
+	table_insert(self.cl_selectedUpgrades, data)
 
 	local upgradeId = data[1]
 	local upgrade = UPGRADES[upgradeId]
@@ -591,6 +714,8 @@ function Player:cl_upgradeSelected(button)
 
 		self.upgradesGui:close()
 		self.hud:open()
+
+		self.network:sendToServer("sv_saveUpgrades", self.cl_selectedUpgrades)
 	else
 		self:cl_processUpgradeQueue()
 	end

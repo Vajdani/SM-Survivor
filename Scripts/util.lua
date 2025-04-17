@@ -265,7 +265,30 @@ UPGRADES = {
 }
 
 MINERCLASS = {
-    DEMOLITION = 1
+    DEMOLITION = 1,
+    SCOUT      = 2,
+}
+
+MINERDATA = {
+    [MINERCLASS.DEMOLITION] = {
+        hp = 100,
+        runSpeedMultiplier = 1,
+        ability = {
+            recharge = 10,
+            cooldown = 2,
+            uses = 2,
+            icon = { "ItemIconsSet0", "ItemIcons", "8d3b98de-c981-4f05-abfe-d22ee4781d33" }
+        }
+    },
+    [MINERCLASS.SCOUT] = {
+        hp = 50,
+        runSpeedMultiplier = 1.5,
+        ability = {
+            recharge = 30,
+            uses = 1,
+            icon = "$CONTENT_DATA/Gui/MineralIcons/gold.png"
+        }
+    }
 }
 
 
