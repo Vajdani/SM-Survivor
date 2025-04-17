@@ -10,6 +10,11 @@ local plasticId = uuid( "628b2d61-5ceb-43e9-8334-a4135566df7a" )
 
 local rockRot = angleAxis(RAD90, VEC3_X)
 
+local function GetGridKey(x, y)
+	-- return tonumber(("%s%s"):format(x, y))
+	return ("%s_%s"):format(x, y)
+end
+
 local function GetRockType(val)
     if val > 0.3 and val < 0.31 then
         return ROCKTYPE.GOLD
@@ -48,10 +53,10 @@ local function DisplayNoise(cellX, cellY, x, y, noise)
 	})
 end
 
-local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed)
+local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed, rockType)
 	local rock = {
-		rockType = GetRockType(abs(perlin(noise_x, noise_y, mineralSeed))),
-		pos = corner + vec3(x, y, 0.75),
+		rockType = rockType or GetRockType(abs(perlin(noise_x, noise_y, mineralSeed))),
+		pos = { corner.x + x, corner.y + y },
 		rot = random(0, 3),
 	}
 
@@ -60,7 +65,7 @@ end
 
 local function AddWaypoint(cellX, cellY, x, y)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
-		pos = vec3(cellX + x, cellY + y, 0),
+		pos = { cellX + x, cellY + y },
 		params = {
 			connections = {
 				id = g_wayPointCounter,
@@ -75,14 +80,7 @@ end
 
 local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 	if IsBorder(cellX, cellY, x, y) then
-		local rock = {
-			rockType = ROCKTYPE.BORDER,
-			pos = corner + vec3(x, y, 0.75),
-			rot = random(0, 3),
-		}
-
-		table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
-
+		AddRock(cellX, cellY, x, y, nil, nil, corner, nil, 1)
 		return
 	end
 
@@ -95,16 +93,16 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 	else
 		AddWaypoint(cellX, cellY, x, y)
 
-		if rockNoise > 0.14 then
-			-- g_cellData.gridData[cellY][cellX].water[x.."_"..y] = true
-			-- table_insert(g_cellData.gridData[cellY][cellX].nodes, {
-			-- 	pos = vec3(cellX + x, cellY + y, 0.5),
-			-- 	params = {
-			-- 		guaranteed = true
-			-- 	},
-			-- 	tags = { "TOTEBOT_GREEN" },
-			-- })
-		end
+		-- if rockNoise > 0.14 then
+		-- 	g_cellData.gridData[cellY][cellX].water[x.."_"..y] = true
+		-- 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
+		-- 		pos = vec3(cellX + x, cellY + y, 0.5),
+		-- 		params = {
+		-- 			guaranteed = true
+		-- 		},
+		-- 		tags = { "TOTEBOT_GREEN" },
+		-- 	})
+		-- end
 	end
 end
 
@@ -140,9 +138,10 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		seed = seed,
 
 		mineralSeed = seed + math.random() * 500,
-		gridData = {},
-		cellLoaded = {}
+		gridData = {}
 	}
+
+	g_cellLoaded = {}
 
 	g_xMax = g_cellData.bounds.xMax
 	g_xMin = g_cellData.bounds.xMin
@@ -153,41 +152,46 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 
 	for cellY = yMin, yMax do
 		g_cellData.gridData[cellY] = {}
-		g_cellData.cellLoaded[cellY] = {}
+		g_cellLoaded[cellY] = {}
 
 		for cellX = xMin, xMax do
 			g_cellData.gridData[cellY][cellX] = {
 				rocks = {},
-				water = {},
 				nodes = {}
 			}
-			g_cellData.cellLoaded[cellY][cellX] = false
+			g_cellLoaded[cellY][cellX] = false
 
 		    AssembleGrid(cellX, cellY, g_cellData.seed, g_cellData.mineralSeed)
 		end
 	end
 
 	local waypointPositionToIndex = {}
+	local rockPositionToIndex = {}
 	for cellY = yMin, yMax do
 		waypointPositionToIndex[cellY] = {}
+		rockPositionToIndex[cellY] = {}
 
 		for cellX = xMin, xMax do
 			waypointPositionToIndex[cellY][cellX] = {}
+			rockPositionToIndex[cellY][cellX] = {}
 
-			local nodes = g_cellData.gridData[cellY][cellX].nodes
-			for k, node in pairs(nodes) do
+			for k, node in pairs(g_cellData.gridData[cellY][cellX].nodes) do
 				if node.tags[1] == "WAYPOINT" then
-					waypointPositionToIndex[cellY][cellX][("%s_%s"):format(node.pos.x, node.pos.y)] = k
+					waypointPositionToIndex[cellY][cellX][GetGridKey(node.pos[1], node.pos[2])] = k
 				end
+			end
+
+			for k, node in pairs(g_cellData.gridData[cellY][cellX].rocks) do
+				rockPositionToIndex[cellY][cellX][GetGridKey(node.pos[1], node.pos[2])] = k
 			end
 		end
 	end
 
 	local directions = {
-		[1] = vec3(1, 0, 0),
-		[2] = vec3(-1, 0, 0),
-		[3] = vec3(0, 1, 0),
-		[4] = vec3(0, -1, 0)
+		[1] = { 1,  0 },
+		[2] = { -1, 0 },
+		[3] = { 0,  1 },
+		[4] = { 0, -1 }
 	}
 
 	for cellY = yMin, yMax do
@@ -197,10 +201,40 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 				if node.tags[1] == "WAYPOINT" then
 					local pos = node.pos
 					for i = 1, 4 do
-						local offset = pos + directions[i]
-						local nextNode = waypointPositionToIndex[cellY][cellX][("%s_%s"):format(offset.x, offset.y)]
+						local dir = directions[i]
+						local offset = { pos[1] + dir[1], pos[2] + dir[2] }
+						local nextNode = waypointPositionToIndex[cellY][cellX][GetGridKey(offset[1], offset[2])]
 						if nextNode then
 							table_insert(node.params.connections.otherIds, nodes[nextNode].params.connections.id)
+						elseif
+							rockPositionToIndex[cellY][cellX][GetGridKey(offset[1], offset[2])] == nil and
+							(pos[1] == rockMin or pos[1] == rockMax - 1 or pos[2] == rockMin or pos[2] == rockMax - 1) then
+							-- and not (offset[1] == rockMin or offset[1] >= rockMax or offset[1] == rockMin or offset[1] >= rockMax) then
+							local _cellX, _cellY = cellX + dir[1], cellY + dir[2]
+							if InsideCellBounds( _cellX, _cellY ) then
+								local pos_x, pos_y = -1, -1
+								if i == 1 then
+									pos_x, pos_y = rockMin, pos[2]
+								elseif i == 2 then
+									pos_x, pos_y = rockMax - 1, pos[2]
+								elseif i == 3 then
+									pos_x, pos_y = pos[1], rockMin
+								elseif i == 4 then
+									pos_x, pos_y = pos[1], rockMax - 1
+								end
+
+								nextNode = waypointPositionToIndex[_cellY][_cellX][GetGridKey(pos_x, pos_y)]
+								if nextNode then
+									local foreign = g_cellData.gridData[_cellY][_cellX].nodes[nextNode].params.connections
+									table_insert(node.params.connections.otherIds, {
+										id = foreign.id,
+										cell = { dir[1], dir[2] },
+										dir = dir
+									})
+
+									g_cellData.gridData[_cellY][_cellX].nodes[nextNode].params.connections.ccount = (foreign.ccount or 0) + 1
+								end
+							end
 						end
 					end
 				end
@@ -208,43 +242,10 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 		end
 	end
 
-	-- if nextNode then
-	-- 	local con_self, con_foreign = node.params.connections, nodes[nextNode].params.connections
-	-- 	if not isAnyOf(con_self.id, con_foreign.otherIds) then
-	-- 	-- 	and not
-	-- 	--    isAnyOf(con_foreign.id, con_self.otherIds) then
-	-- 		table_insert(con_self.otherIds, con_foreign.id)
-	-- 	end
-	-- else
-	-- 	-- local dir = directions[i]
-	-- 	-- local _cellX, _cellY = cellX + dir.x, cellY + dir.y
-	-- 	-- if (cellX < _cellX or cellY < _cellY) and InsideCellBounds( _cellX, _cellY ) then
-	-- 	-- 	local offset_x, offset_y = -1, -1
-	-- 	-- 	if i == 1 then
-	-- 	-- 		offset_x, offset_y = 0, pos.y
-	-- 	-- 	elseif i == 2 then
-	-- 	-- 		offset_x, offset_y = 64, offset.y
-	-- 	-- 	elseif i == 3 then
-	-- 	-- 		offset_x, offset_y = offset.x, 0
-	-- 	-- 	elseif i == 4 then
-	-- 	-- 		offset_x, offset_y = offset.x, 64
-	-- 	-- 	end
+	waypointPositionToIndex = nil
+	rockPositionToIndex = nil
 
-	-- 	-- 	nextNode = waypointPositionToIndex[_cellY][_cellX][("%s_%s"):format(offset_x, offset_y)]
-	-- 	-- end
-
-	-- 	-- if nextNode then
-	-- 	-- 	local con_self, con_foreign = node.params.connections, g_cellData.gridData[_cellY][_cellX].nodes[nextNode].params.connections
-	-- 	-- 	if not isAnyOf(con_self.id, con_foreign.otherIds) then
-	-- 	-- 		table_insert(con_self.otherIds, {
-	-- 	-- 			id = con_foreign.id,
-	-- 	-- 			cell = { _cellX, _cellY }
-	-- 	-- 		})
-	-- 	-- 	end
-	-- 	-- end
-	-- end
-
-	sm.terrainData.save( g_cellData )
+	-- sm.terrainData.save( g_cellData )
 end
 
 function Load()
@@ -260,34 +261,15 @@ function GetTilePath( uid )
 end
 
 function GetHeightAt( x, y, lod )
-	local height = 0
-
-	-- local cellX, cellY = GetCell( x, y )
-	-- if InsideCellBounds( cellX, cellY ) then
-	-- 	local water = g_cellData.gridData[cellY][cellX].water
-	-- 	if water[x.."_"..y] == true then
-	-- 		height = -1
-	-- 	end
-	-- end
-
-	return height --sm.terrainTile.getHeightAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
+	return 0
 end
 
 function GetColorAt( x, y, lod )
-	local r, g , b = 0.242, 0.423, 0.512
-	-- local cellX, cellY = GetCell( x, y )
-	-- if InsideCellBounds( cellX, cellY ) then
-	-- 	local water = g_cellData.gridData[cellY][cellX].water
-	-- 	if water[x.."_"..y] == true then
-	-- 		r, g, b = 0, 0, 1
-	-- 	end
-	-- end
-
-	return r, g, b --sm.terrainTile.getColorAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
+	return 0.242, 0.423, 0.512
 end
 
 function GetMaterialAt( x, y, lod )
-	return 1, 0, 0, 0, 0, 0, 0, 0 --sm.terrainTile.getMaterialAt( GetTileLoadParamsFromWorldPos( x, y, lod ) )
+	return 1, 0, 0, 0, 0, 0, 0, 0
 end
 
 function GetClutterIdxAt( x, y )
@@ -335,7 +317,7 @@ function GetNodesForCell( cellX, cellY )
 	local nodes = defaultNodes
 	for k, v in pairs(g_cellData.gridData[cellY][cellX].nodes) do
 		table_insert(nodes, {
-			pos = v.pos,
+			pos = vec3(v.pos[1], v.pos[2], 0),
 			rot = v.rot or QUAT_IDENTITY,
 			scale = v.scale or VEC3_ONE,
 			params = v.params,
@@ -351,7 +333,7 @@ function GetCreationsForCell( cellX, cellY )
 end
 
 function GetHarvestablesForCell( cellX, cellY, lod )
-	if g_cellData.cellLoaded[cellY][cellX] == true then
+	if g_cellLoaded[cellY][cellX] == true then
 		return {}
 	end
 
@@ -367,13 +349,13 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 
 		table_insert(rocks, {
 			uuid = isMineral and mineralId or rockId,
-			pos = v.pos,
+			pos = vec3(v.pos[1], v.pos[2], 0.75),
 			rot = rot,
 			params = ROCKTYPES[rockType]
 		})
 	end
 
-	g_cellData.cellLoaded[cellY][cellX] = true
+	g_cellLoaded[cellY][cellX] = true
 
 	return rocks
 end

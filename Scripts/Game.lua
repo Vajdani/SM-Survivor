@@ -5,7 +5,6 @@ dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
 ---@field sv table
 Game = class( nil )
 
-
 if g_spawnEnemies == nil then
 	g_spawnEnemies = true
 end
@@ -49,6 +48,10 @@ function Game:sv_createPlayerCharacter( world, x, y, player, params )
 	sm.event.sendToPlayer(player, "sv_createMiner", pos)
 end
 
+function Game:sv_onRockHit(rock)
+	self.network:sendToClients("cl_onRockHit", rock)
+end
+
 function Game:sv_recreate(data, player)
 	self.sv.saved.world:destroy()
 	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
@@ -81,10 +84,28 @@ function Game:client_onCreate()
 
 	g_effectManager = EffectManager()
 	g_effectManager:cl_onCreate()
+
+	self.cl_rockAnims = {}
+end
+
+function Game:client_onFixedUpdate(dt)
+	local speed = dt * 5
+	for k, v in pairs(self.cl_rockAnims) do
+		if sm.exists(v.rock) and v.time > 0 then
+			v.time = v.time - speed
+			v.rock:setPoseWeight(0, v.time)
+		else
+			self.cl_rockAnims[k] = nil
+		end
+	end
 end
 
 function Game.client_onLoadingScreenLifted( self )
 	g_effectManager:cl_onLoadingScreenLifted()
+end
+
+function Game:cl_onRockHit(rock)
+	table_insert(self.cl_rockAnims, { rock = rock, time = math.random(50, 100) * 0.01 })
 end
 
 function Game:setLighting(time)

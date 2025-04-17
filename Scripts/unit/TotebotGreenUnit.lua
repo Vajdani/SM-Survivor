@@ -54,7 +54,7 @@ function TotebotGreenUnit:server_onCreate()
 	self.path = {}
 	self.pathIndex = 1
 
-	self.tickOffset = math.floor(math.random() * 2)
+	self.tickOffset = math.floor(math.random() * 8)
 
 	self.destroyed = false
 end
@@ -103,7 +103,7 @@ function TotebotGreenUnit:server_onUnitUpdate()
 		---@diagnostic disable-next-line:missing-fields
 		self.path = { { toNode = { getPosition = function() return pos end } } }
 		self.pathIndex = 1
-	elseif (sm.game.getServerTick() + self.tickOffset) % 2 == 0 then
+	elseif (sm.game.getServerTick() + self.tickOffset) % 8 == 0 then
 		self.path = sm.pathfinder.getPath(char, vec3(pos.x, pos.y, 0), true)
 		self.pathIndex = 1
 	end

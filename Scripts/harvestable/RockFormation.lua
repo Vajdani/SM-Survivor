@@ -28,25 +28,8 @@ function RockFormation:sv_onHit()
         self.harvestable:destroy()
     else
         self.storage:save(self.sv)
-        self.network:sendToClients("cl_onHit")
+        sm.event.sendToGame("sv_onRockHit", self.harvestable)
     end
-end
-
-
-
-function RockFormation:client_onCreate()
-    self.animProgress = 0
-end
-
-function RockFormation:client_onFixedUpdate(dt)
-    if self.animProgress <= 0 then return end
-
-    self.animProgress = math.max(self.animProgress - dt * 5, 0)
-    self.harvestable:setPoseWeight(0, self.animProgress)
-end
-
-function RockFormation:cl_onHit()
-    self.animProgress = math.random(50, 100) * 0.01
 end
 
 
@@ -68,7 +51,6 @@ function MineralFormation:server_onCreate()
     self.network:sendToClients("cl_colour", self.sv.type)
 end
 
---local mineralDrop = sm.uuid.new("f6cc2b7a-fa4c-42e5-b272-604549028149")
 function MineralFormation:sv_onHit()
     if not sm.exists(self.harvestable) then return end
 
@@ -81,19 +63,13 @@ function MineralFormation:sv_onHit()
             { size = self.harvestable:getMass() / AUDIO_MASS_DIVIDE_RATIO }
         )
 
-        -- sm.projectile.harvestableCustomProjectileAttack(
-        --     { type = self.sv.type, amount = math.random(1, 4) },
-        --     mineralDrop, 0, worldPos, sm.noise.gunSpread(VEC3_UP * 2.5, 5),
-        --     self.harvestable, 0
-        -- )
-
         local drop = sm.harvestable.create(hvs_mineralDrop, vec3(worldPos.x, worldPos.y, 0.1), angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
         drop:setParams({ type = self.sv.type, amount = math.random(1, 4) })
 
         self.harvestable:destroy()
     else
         self.storage:save(self.sv)
-        self.network:sendToClients("cl_onHit")
+        sm.event.sendToGame("sv_onRockHit", self.harvestable)
     end
 end
 

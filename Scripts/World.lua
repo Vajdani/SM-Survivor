@@ -13,10 +13,14 @@ dofile( "$GAME_DATA/Scripts/game/managers/CreativePathNodeManager.lua")
 World = class()
 World.terrainScript = "$CONTENT_DATA/Scripts/terrain.lua"
 World.groundMaterialSet = "$GAME_DATA/Terrain/Materials/gnd_flat_materialset.json"
-World.cellMinX = -1
-World.cellMaxX = 0
-World.cellMinY = -1
-World.cellMaxY = 0
+
+local size = 1
+World.cellMinX = -size
+World.cellMaxX = size - 1
+World.cellMinY = -size
+World.cellMaxY = size - 1
+
+-- World.isStatic = false
 World.worldBorder = true
 -- World.renderMode = "warehouse"
 
@@ -39,7 +43,7 @@ function World:server_onCellCreated(x, y)
 end
 
 function World:server_onFixedUpdate()
-    if not g_spawnEnemies or #sm.unit.getAllUnits() >= 200 then return end
+    if not g_spawnEnemies or #sm.unit.getAllUnits() >= 100 then return end
 
     for k, v in pairs(sm.player.getAllPlayers()) do
         if (sm.game.getCurrentTick() % (spawnDelay + 40 * v.id)) == 0 then
@@ -76,6 +80,14 @@ function World:client_onCellLoaded( x, y )
         list[v.params.connections.id] = k
     end
 
+    local directions = {
+		["1_0"] = colour(1,0,0),
+		["-1_0"] = colour(0,1,0),
+		["0_1"] = colour(0,0,1),
+		["0_-1"] = colour(1,1,1)
+	}
+
+    local heightOffset = 1
     for k, v in pairs(nodes) do
         local effectId = "ShapeRenderable"..math.floor(#self.effects/4096)
 
@@ -89,6 +101,29 @@ function World:client_onCellLoaded( x, y )
 
         for _k, _v in pairs(v.params.connections.otherIds) do
             local node = nodes[list[_v]]
+            local foreign = false
+            if not node then
+                for __k, __v in pairs(sm.cell.getNodesByTag(x + _v.cell[1], y + _v.cell[2], "WAYPOINT")) do
+                    if __v.params.connections.id == _v.id then
+                        node = __v
+                        foreign = true
+
+                        effectId = "ShapeRenderable"..math.floor(#self.effects/4096)
+                        local __effect = sm.effect.createEffect(effectId)
+                        __effect:setParameter("uuid", blk_plastic)
+                        __effect:setParameter("color", colour(1,1,0))
+                        local scale = vec3(0.6,0.6,10) * 0.25
+                        __effect:setScale(scale)
+                        __effect:setPosition(v.position + vec3(0,0, scale.z * 0.5 + heightOffset))
+                        __effect:start()
+
+                        table_insert(self.effects, __effect)
+
+                        break
+                    end
+                end
+            end
+
             if node then
                 local pos = node.position
 
@@ -96,15 +131,17 @@ function World:client_onCellLoaded( x, y )
                 local _effect = sm.effect.createEffect(effectId)
                 _effect:setParameter("uuid", blk_plastic)
 
+                if foreign then
+                    _effect:setParameter("color", directions[("%s_%s"):format(_v.dir[1], _v.dir[2])])
+                end
+
                 local dir = pos - v.position
-                _effect:setPosition(v.position + dir * 0.5)
+                _effect:setPosition(v.position + dir * 0.5 + (foreign and VEC3_UP * heightOffset or VEC3_ZERO))
                 _effect:setRotation(sm.vec3.getRotation(VEC3_UP, dir:safeNormalize(VEC3_UP)))
                 _effect:setScale(vec3(0.15, 0.15, dir:length()))
                 _effect:start()
 
                 table_insert(self.effects, _effect)
-            else
-                -- sm.log.warning("sus node")
             end
         end
     end
