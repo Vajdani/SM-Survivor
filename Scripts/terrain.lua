@@ -65,7 +65,7 @@ end
 
 local function AddWaypoint(cellX, cellY, x, y)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
-		pos = { cellX + x, cellY + y },
+		pos = { x, y },
 		params = {
 			connections = {
 				id = g_wayPointCounter,
@@ -207,7 +207,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 							table_insert(node.params.connections.otherIds, nodes[nextNode].params.connections.id)
 						elseif
 							rockPositionToIndex[cellY][cellX][GetGridKey(offset[1], offset[2])] == nil and
-							(pos[1] == rockMin or pos[1] == rockMax - 1 or pos[2] == rockMin or pos[2] == rockMax - 1) then
+							(pos[1] == rockMin or pos[1] == rockMax or pos[2] == rockMin or pos[2] == rockMax) then
 							-- and not (offset[1] == rockMin or offset[1] >= rockMax or offset[1] == rockMin or offset[1] >= rockMax) then
 							local _cellX, _cellY = cellX + dir[1], cellY + dir[2]
 							if InsideCellBounds( _cellX, _cellY ) then
@@ -215,11 +215,11 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 								if i == 1 then
 									pos_x, pos_y = rockMin, pos[2]
 								elseif i == 2 then
-									pos_x, pos_y = rockMax - 1, pos[2]
+									pos_x, pos_y = rockMax, pos[2]
 								elseif i == 3 then
 									pos_x, pos_y = pos[1], rockMin
 								elseif i == 4 then
-									pos_x, pos_y = pos[1], rockMax - 1
+									pos_x, pos_y = pos[1], rockMax
 								end
 
 								nextNode = waypointPositionToIndex[_cellY][_cellX][GetGridKey(pos_x, pos_y)]

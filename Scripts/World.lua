@@ -61,6 +61,17 @@ end
 
 
 
+function World:client_onDestroy()
+    if self.effects then
+        for k, v in pairs(self.effects) do
+            v:stopImmediate()
+            v:destroy()
+        end
+
+        self.effects = nil
+    end
+end
+
 function World:client_onUpdate( dt )
 	g_effectManager:cl_onWorldUpdate( self )
 end
