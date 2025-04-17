@@ -21,6 +21,10 @@ function Game.server_onCreate( self )
 		self.storage:save( self.sv.saved )
 	end
 
+	if not sm.exists( self.sv.saved.world ) then
+		sm.world.loadWorld( self.sv.saved.world )
+	end
+
 	sm.scriptableObject.createScriptableObject(sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0"), nil, self.sv.saved.world)
 
 	g_unitManager = UnitManager()

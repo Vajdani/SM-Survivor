@@ -106,7 +106,7 @@ function Player:sv_createMiner(pos)
 	self:sv_initMaterials()
 
 	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
-	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos)
+	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos, 0, { classId = 1, owner = self.player })
 	self.controlled.publicData = { owner = self.player }
 	self.player.publicData.miner = self.controlled
 	self:sv_seat()
@@ -203,8 +203,32 @@ function Player:sv_setControlMethod(method)
 end
 
 function Player:sv_useAbility()
-	local char = self.controlled.character
-	sm.projectile.projectileAttack(projectile_explosivetape, 0, char.worldPosition + VEC3_UP, (VEC3_UP * 2 + char.direction):normalize() * 10 + char.velocity, self.player)
+	-- local char = self.controlled.character
+	--sm.projectile.projectileAttack(projectile_explosivetape, 0, char.worldPosition + VEC3_UP, (VEC3_UP * 2 + char.direction):normalize() * 10 + char.velocity, self.player)
+	-- sm.event.sendToScriptableObject(
+    --     g_projectileManager, "sv_fireProjectile",
+    --     {
+	-- 		scriptClass = "Dynamite",
+    --         damage = 0,
+    --         damageType = DAMAGETYPES.FIRE,
+    --         bounceLimit = 5,
+    --         pierceLimit = 0,
+    --         gravity = 0.5,
+    --         drag = 0,
+    --         bounceAxes = VEC3_ONE,
+    --         collisionMomentumLoss = 0.25,
+    --         renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) },
+    --         position = char.worldPosition + VEC3_UP,
+    --         projectileVelocity = 10,
+    --         spreadAngle = 5,
+    --         sliceAngle = 0,
+    --         pelletCount = 1,
+    --         aimDir = (VEC3_UP * 2 + char.direction):normalize()
+    --     }
+    -- )
+
+	self.controlled:sendCharacterEvent("throw")
+	sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
 end
 
 

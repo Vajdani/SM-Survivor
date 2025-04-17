@@ -10,6 +10,20 @@ function MinerUnit:server_onCreate()
 
     self.timer = mineTimer
     self.swinging = false
+    self.miningEnabled = true
+
+    if self.params then
+        self:sv_sendCharInit()
+    end
+end
+
+function MinerUnit:sv_sendCharInit()
+    if not sm.exists(self.unit.character) then
+        sm.event.sendToUnit(self.unit, "sv_sendCharInit")
+        return
+    end
+
+    sm.event.sendToCharacter(self.unit.character, "sv_init", self.params)
 end
 
 function MinerUnit:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
@@ -46,7 +60,7 @@ function MinerUnit:server_onFixedUpdate()
 
     pos = pos + VEC3_UP * char:getHeight() * 0.25
     local _, colResult = sm.physics.spherecast(pos, pos + dir * 1.5, 0.1, char)
-    if colResult.type == "harvestable" then
+    if self.miningEnabled and colResult.type == "harvestable" then
         self.swinging = true
         self.timer = self.timer - 1
         if self.timer <= 0 then
@@ -83,4 +97,12 @@ function MinerUnit:sv_collect(trigger, result)
             sm.event.sendToHarvestable(v, "sv_onCollect", char)
         end
     end
+end
+
+function MinerUnit:sv_onDynamiteThrow()
+    self:sv_setMiningEnabled(true)
+end
+
+function MinerUnit:sv_setMiningEnabled(state)
+    self.miningEnabled = state
 end

@@ -5,6 +5,7 @@ dofile "weaponUtil.lua"
 ---@field color? Color The desired colour
 
 ---@class ProjectileParams
+---@field scriptClass string The name of the projectile's script class
 ---@field damage number The damage that the projectile deals to enemies
 ---@field damageType number The damage type that the projectile has
 ---@field bounceLimit number How many times the can projectile bounce before dying
@@ -31,6 +32,11 @@ function ProjectileManager:sv_fireProjectile(data)
     self.network:sendToClients("cl_addProjectile", data)
 end
 
+function ProjectileManager:sv_projectileNetwork(args)
+    local projectile = self.projectiles[args.id]
+    projectile[args.callback](projectile, args.params)
+end
+
 function ProjectileManager:sv_onHit(data)
     local char = data.char
     if not sm.exists(char) then return end
@@ -41,6 +47,8 @@ function ProjectileManager:sv_onHit(data)
     sm.event.sendToUnit(unit, "sv_onHit", data.stats)
 end
 
+
+
 function ProjectileManager:client_onCreate()
     self.projectiles = {}
 end
@@ -49,18 +57,46 @@ function ProjectileManager:client_onUpdate(dt)
     for k, projectile in pairs(self.projectiles) do
         local delete = projectile:update(self, dt)
         if delete then
-            self.projectiles[k] = nil
+            self:cl_destroyProjectile(k)
         end
     end
+end
+
+function ProjectileManager:cl_destroyProjectile(id)
+    self.projectiles[id].effect:destroy()
+    self.projectiles[id] = nil
 end
 
 ---@param data ProjectileParams
 function ProjectileManager:cl_addProjectile(data)
     local dir, sliceAngle, spreadAngle, pellets = data.aimDir, data.sliceAngle, data.spreadAngle, data.pelletCount
     local angleSlice, halfAngle = sliceAngle / pellets, sliceAngle * 0.5
+    local scriptClass = data.scriptClass and _G[data.scriptClass] or Projectile
     for i = 1, pellets do
         data.direction = dir:rotate(math.rad(angleSlice * i - halfAngle + math.random(-spreadAngle, spreadAngle)), VEC3_UP)
-        self.projectiles[#self.projectiles+1] = Projectile():init(data)
+
+        local id = #self.projectiles + 1
+        local projectile = scriptClass():init(data)
+        projectile.id = id
+        function projectile.sendToServer(pSelf, callback, args)
+            self.network:sendToServer("sv_projectileNetwork", { callback = callback, params = args, id = pSelf.id })
+        end
+
+        function projectile.sendToClients(pSelf, callback, args)
+            self.network:sendToClients("cl_projectileNetwork", { callback = callback, params = args, id = pSelf.id })
+        end
+
+        function projectile.sendToClient(pSelf, client, callback, args)
+            self.network:sendToClient(client, "cl_projectileNetwork", { callback = callback, params = args, id = pSelf.id })
+        end
+
+        function projectile.destroy(pSelf)
+            if not sm.isServerMode() then return end
+
+            self.network:sendToClients("cl_destroyProjectile", pSelf.id)
+        end
+
+        self.projectiles[id] = projectile
     end
 
 end
@@ -69,11 +105,21 @@ function ProjectileManager:cl_fireProjectile(data)
     self.network:sendToServer("sv_fireProjectile", data)
 end
 
+function ProjectileManager:cl_projectileNetwork(args)
+    local projectile = self.projectiles[args.id]
+    projectile[args.callback](projectile, args.params)
+end
+
+
 
 ---@class Projectile : ProjectileParams
 ---@field lifeTime number The projectile's lifetime 
 ---@field effect Effect The projectile's effect
 ---@field direction Vec3
+---@field sendToServer fun(self:Projectile, callback: string, args: any)
+---@field sendToClients fun(self:Projectile, callback: string, args: any)
+---@field sendToClient fun(self:Projectile, client: Player, callback: string, args: any)
+---@field destroy fun()
 Projectile = class()
 Projectile.lifeTime = 10
 
@@ -205,4 +251,52 @@ function Projectile:onHit(manager, hitTerrain, result)
             }
         )
     end
+end
+
+
+
+---@class Dynamite : Projectile
+Dynamite = class(Projectile)
+
+function Dynamite:init(data)
+    Projectile.init(self, data)
+
+    self.attached = false
+    self.detonateTime = 2
+    self.detonated = false
+
+    return self
+end
+
+function Dynamite:update(manager, dt)
+    if self.attached then
+        self.detonateTime = self.detonateTime - dt
+        if self.detonateTime <= 0 and not self.detonated then
+            if sm.isHost then
+                self:sendToServer("sv_detonate")
+            end
+
+            self.detonated = true
+        end
+
+        return false
+    end
+
+    return Projectile.update(self, manager, dt)
+end
+
+---@param manager ProjectileManager
+---@param hitTerrain boolean
+---@param result RaycastResult
+function Dynamite:onHit(manager, hitTerrain, result)
+    Projectile.onHit(self, manager, hitTerrain, result)
+
+    if not result:getCharacter() then
+        self.attached = true
+    end
+end
+
+function Dynamite:sv_detonate()
+    sm.physics.explode( self.position, 7, 4, 12, 40, "PropaneTank - ExplosionBig" )
+    self:destroy()
 end

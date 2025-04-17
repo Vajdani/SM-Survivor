@@ -56,8 +56,10 @@
 			{ "name" : "ko_fromrun", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Ko/ani_char_male_lom_ko_fromrun.dae"},
 			{ "name" : "ko_idle", 				"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Ko/ani_char_male_lom_ko_idle.dae", "looping": true },
 
-			{ "name" : "sledgehammer_attack1", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack1.dae" },
-			{ "name" : "sledgehammer_attack2", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack2.dae" }
+			{ "name" : "sledgehammer_attack1", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack1.dae" },
+			{ "name" : "sledgehammer_attack2", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack2.dae" },
+
+			{ "name" : "throw", 				"file" : "$SURVIVAL_DATA/Character/Char_Male/Animations/Thirdperson/Glowstick/ani_char_male_glowstick_use.dae" }
 		],
 		"maxViewDistance": 1000.0
 	}]
