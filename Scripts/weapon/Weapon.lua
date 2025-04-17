@@ -84,7 +84,7 @@ function Weapon:update(dt, pos, dir)
     self.slider:update_shooting(self.clip)
 
     local spawnPos = pos + dir * 0.15
-    sm.event.sendToTool(
+    sm.event.sendToScriptableObject(
         g_projectileManager, "cl_fireProjectile",
         {
             damage = self.damage,

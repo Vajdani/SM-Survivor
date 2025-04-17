@@ -21,6 +21,8 @@ function Game.server_onCreate( self )
 		self.storage:save( self.sv.saved )
 	end
 
+	sm.scriptableObject.createScriptableObject(sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0"), nil, self.sv.saved.world)
+
 	g_unitManager = UnitManager()
 	g_unitManager:sv_onCreate( self.sv.saved.overworld )
 end
@@ -53,6 +55,8 @@ end
 function Game:sv_recreate(data, player)
 	self.sv.saved.world:destroy()
 	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
+	sm.scriptableObject.createScriptableObject(sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0"), nil, self.sv.saved.world)
+
 	self.storage:save( self.sv.saved )
 
 	if not sm.exists( self.sv.saved.world ) then

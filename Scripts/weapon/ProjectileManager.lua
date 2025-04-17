@@ -19,11 +19,11 @@ dofile "weaponUtil.lua"
 ---@field sliceAngle number The angle of the slice
 ---@field spreadAngle number The angle of the spread
 
----@class ProjectileManager : ToolClass
+---@class ProjectileManager : ScriptableObjectClass
 ProjectileManager = class()
 
 function ProjectileManager:server_onCreate()
-    g_projectileManager = self.tool
+    g_projectileManager = self.scriptableObject
 end
 
 ---@param data ProjectileParams
