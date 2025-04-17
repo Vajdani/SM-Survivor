@@ -317,7 +317,7 @@ end
 
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
-	local char = self.player.character
+	local char = self.cl_controlled
 	if not self.isLocal or not char then return end
 
 	if self.isDead then
@@ -327,7 +327,7 @@ function Player:client_onUpdate(dt)
 	end
 
 	if self.cam ~= 3 then return end
-	local charPos = char.worldPosition + VEC3_UP * verticalOffset
+	local charPos = char.worldPosition
 	local newPos = charPos + camOffset * self.zoom
 	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
 	sm.camera.setDirection(charPos - newPos)
