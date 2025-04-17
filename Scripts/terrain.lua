@@ -2,7 +2,7 @@ dofile( "$SURVIVAL_DATA/Scripts/terrain/terrain_util2.lua" )
 dofile "util.lua"
 
 local rockMin = 0
-local rockMax = 64
+local rockMax = 63
 
 local rockId = uuid("0c01f246-0090-43e4-8453-c1390322a7e4")
 local mineralId = uuid("e731dede-34df-467f-8beb-315985179860")
@@ -53,10 +53,10 @@ local function DisplayNoise(cellX, cellY, x, y, noise)
 	})
 end
 
-local function AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed, rockType)
+local function AddRock(cellX, cellY, x, y, noise_x, noise_y, mineralSeed, rockType)
 	local rock = {
 		rockType = rockType or GetRockType(abs(perlin(noise_x, noise_y, mineralSeed))),
-		pos = { corner.x + x, corner.y + y },
+		pos = { x, y },
 		rot = random(0, 3),
 	}
 
@@ -78,9 +78,9 @@ local function AddWaypoint(cellX, cellY, x, y)
 	g_wayPointCounter = g_wayPointCounter + 1
 end
 
-local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
+local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed)
 	if IsBorder(cellX, cellY, x, y) then
-		AddRock(cellX, cellY, x, y, nil, nil, corner, nil, 1)
+		AddRock(cellX, cellY, x, y, nil, nil, nil, 1)
 		return
 	end
 
@@ -89,7 +89,7 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 	-- DisplayNoise(cellX, cellY, x, y, rockNoise)
 
 	if rockNoise > 0.15 then
-		AddRock(cellX, cellY, x, y, noise_x, noise_y, corner, mineralSeed)
+		AddRock(cellX, cellY, x, y, noise_x, noise_y, mineralSeed)
 	else
 		AddWaypoint(cellX, cellY, x, y)
 
@@ -107,18 +107,17 @@ local function AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
 end
 
 local function AssembleGrid(cellX, cellY, seed, mineralSeed)
-	local corner = vec3(cellX, cellY, 0)
 	for x = rockMin, rockMax do
 		for y = rockMin, rockMax do
 			-- local rock = {
 			-- 	rockType = ROCKTYPE.ROCK,
-			-- 	pos = corner + vec3(x, y, 0.75),
+			-- 	pos = vec3(x, y, 0.75),
 			-- 	rot = random(0, 3),
 			-- }
 
 			-- table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
 
-			AddGridItems(cellX, cellY, x, y, seed, mineralSeed, corner)
+			AddGridItems(cellX, cellY, x, y, seed, mineralSeed)
 		end
 	end
 end
@@ -245,7 +244,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 	waypointPositionToIndex = nil
 	rockPositionToIndex = nil
 
-	-- sm.terrainData.save( g_cellData )
+	sm.terrainData.save( g_cellData )
 end
 
 function Load()
@@ -354,6 +353,33 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 			params = ROCKTYPES[rockType]
 		})
 	end
+
+	-- local seed, mineralSeed = g_cellData.seed, g_cellData.mineralSeed
+	-- for x = rockMin, rockMax do
+	-- 	for y = rockMin, rockMax do
+	-- 		if IsBorder(cellX, cellY, x, y) then
+	-- 			table_insert(rocks, {
+	-- 				uuid = rockId,
+	-- 				pos = vec3(x, y, 0.75),
+	-- 				rot = rockRot * angleAxis(RAD90 * math.random(0, 3), VEC3_Y),
+	-- 				params = ROCKTYPES[1]
+	-- 			})
+	-- 		else
+	-- 			local noise_x, noise_y = (cellX * 64 + x) * 0.125, (cellY * 64 + y) * 0.125
+	-- 			local rockNoise = abs(perlin(noise_x, noise_y, seed))
+	-- 			if rockNoise > 0.15 then
+	-- 				local rockType = GetRockType(abs(perlin(noise_x, noise_y, mineralSeed)))
+
+	-- 				table_insert(rocks, {
+	-- 					uuid = MINERALS[rockType] ~= nil and mineralId or rockId,
+	-- 					pos = vec3(x, y, 0.75),
+	-- 					rot = rockRot * angleAxis(RAD90 * math.random(0, 3), VEC3_Y),
+	-- 					params = ROCKTYPES[rockType]
+	-- 				})
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 
 	g_cellLoaded[cellY][cellX] = true
 
