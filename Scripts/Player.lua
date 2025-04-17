@@ -202,6 +202,11 @@ function Player:sv_setControlMethod(method)
 	self.controlMethod = method
 end
 
+function Player:sv_useAbility()
+	local char = self.controlled.character
+	sm.projectile.projectileAttack(projectile_explosivetape, 0, char.worldPosition + VEC3_UP, (VEC3_UP * 2 + char.direction):normalize() * 10 + char.velocity, self.player)
+end
+
 
 
 function Player:client_onCreate()
@@ -274,9 +279,10 @@ function Player:client_onClientDataUpdate(data, channel)
 end
 
 function Player:client_onReload()
-	for k, v in pairs(self.weapons) do
-		v.clip = 0
-	end
+	-- for k, v in pairs(self.weapons) do
+	-- 	v.clip = 0
+	-- end
+	self.network:sendToServer("sv_useAbility")
 
 	return true
 end

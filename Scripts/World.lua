@@ -57,6 +57,10 @@ function World:server_onProjectile(position, airTime, velocity, projectileName, 
         local drop = sm.harvestable.create(hvs_mineralDrop, position, angleAxis(math.rad(math.random(1, 360)), VEC3_UP))
         drop:setParams(customData)
     end
+
+    if uuid == projectile_explosivetape then
+		sm.physics.explode( position, 7, 2.0, 6.0, 25.0, "RedTapeBot - ExplosivesHit" )
+	end
 end
 
 

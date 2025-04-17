@@ -4,7 +4,7 @@ dofile "$CONTENT_DATA/Scripts/unit/PathingState.lua"
 ---@class TotebotGreenUnit : UnitClass
 ---@field forgetTimer Timer
 ---@field attackTimer Timer
----@field target Character?	
+---@field target? Character
 ---@field lastTargetPosition Vec3
 ---@field isPathing boolean
 ---@field path NodePathNode[]
