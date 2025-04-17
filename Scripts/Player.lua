@@ -318,7 +318,7 @@ end
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
 	local char = self.cl_controlled
-	if not self.isLocal or not char then return end
+	if not self.isLocal or not char or not sm.exists(char) then return end
 
 	if self.isDead then
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Revive", "")
