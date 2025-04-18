@@ -43,7 +43,6 @@ local classRenderables = {
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_delivery_jacket/char_male_outfit_delivery_jacket.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_delivery_pants/char_male_outfit_delivery_pants.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_delivery_shoes/char_male_outfit_delivery_shoes.rend",
-			"$SURVIVAL_DATA/Character/Char_Male/Hair/Male/char_male_hair_01/char_male_hair_01.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
 		},
 		tool = {
