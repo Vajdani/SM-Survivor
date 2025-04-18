@@ -162,6 +162,7 @@ end
 
 function Game:cl_freecam()
 	g_cl_freecam = not g_cl_freecam
+	g_cl_freecamModifier = false
 	if g_cl_freecam then
 		g_cl_camPosition = sm.camera.getPosition()
 		g_cl_freecamKeys = {}

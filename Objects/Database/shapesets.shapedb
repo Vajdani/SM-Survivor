@@ -1,5 +1,6 @@
 {
    "shapeSetList" : [
+      "$GAME_DATA/Objects/Database/ShapeSets/blocks.json",
       "$SURVIVAL_DATA/Objects/Database/ShapeSets/blocks.json",
 
       "$CONTENT_DATA/Objects/Database/ShapeSets/parts.shapeset"

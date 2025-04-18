@@ -322,6 +322,9 @@ angleAxis = sm.quat.angleAxis
 vec3 = sm.vec3.new
 uuid = sm.uuid.new
 colour = sm.color.new
+getRotation = sm.vec3.getRotation
+bezier2 = sm.vec3.bezier2
+vec3_lerp = sm.vec3.lerp
 
 function GetYawPitch( direction )
     return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
@@ -329,7 +332,7 @@ end
 
 function CalculateRightVector(vector)
     local yaw = math.atan2(vector.y, vector.x) - math.pi / 2
-    return sm.vec3.new(math.cos(yaw), math.sin(yaw), 0)
+    return vec3(math.cos(yaw), math.sin(yaw), 0)
 end
 
 ---@param position Vec3
@@ -349,5 +352,91 @@ function SetGuiIcon(gui, widget, icon)
         gui:setIconImage(widget, icon)
     else
         gui:setImage(widget, icon)
+    end
+end
+
+
+
+Line = class()
+function Line:init( thickness, colour )
+    self.effect = sm.effect.createEffect("ShapeRenderable")
+	self.effect:setParameter("uuid", blk_plastic)
+    self.effect:setParameter("color", colour)
+    self.effect:setScale( VEC3_ONE * thickness )
+
+    self.thickness = thickness
+	self.spinTime = 0
+
+    return self
+end
+
+function Line:update( startPos, endPos, dt, spinSpeed )
+	local delta = endPos - startPos
+    local length = delta:length()
+
+    if length < 0.0001 then
+        sm.log.warning("Line:update() | Length of 'endPos - startPos' must be longer than 0.")
+        return
+	end
+
+	local rot = getRotation(VEC3_UP, delta)
+	local speed = spinSpeed or 1
+	self.spinTime = self.spinTime + dt * speed
+	rot = rot * angleAxis( math.rad(self.spinTime), VEC3_UP )
+
+	local distance = vec3(self.thickness, self.thickness, length)
+
+	self.effect:setPosition(startPos + delta * 0.5)
+	self.effect:setScale(distance)
+	self.effect:setRotation(rot)
+
+    if not self.effect:isPlaying() then
+        self.effect:start()
+    end
+end
+
+function Line:stop()
+    if self.effect:isPlaying() then
+	    self.effect:stop()
+    end
+end
+
+
+CurvedLine = class()
+function CurvedLine:init( thickness, colours, steps, bendStart, soundEffect )
+	self.effects = {}
+	for i = 1, steps do
+		self.effects[#self.effects+1] = Line():init( thickness, type(colours) == "table" and colours[i] or colours )
+	end
+
+	self.thickness = thickness
+	self.colours = colours
+	self.steps = steps
+	self.bendStart = bendStart or 1
+	self.activeTime = 0
+
+	if soundEffect then
+		self.sound = sm.effect.createEffect( soundEffect )
+	end
+
+    return self
+end
+
+
+function CurvedLine:update(startPos, endPos, points)
+    for k, v in ipairs(self.effects) do
+        if k <= self.steps then
+            self.effects[k]:update(k == 1 and startPos or points[k - 1], k == self.steps and endPos or points[k], 0, 0)
+        else
+            self.effects[k]:stop()
+        end
+    end
+end
+
+function CurvedLine:stop()
+    if not self.effects[1].effect:isPlaying() then return end
+
+    for k, v in ipairs(self.effects) do
+        self.effects[k]:stop()
     end
 end

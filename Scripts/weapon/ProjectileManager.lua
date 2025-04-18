@@ -11,7 +11,7 @@ dofile "weaponUtil.lua"
 ---@field bounceLimit number How many times the can projectile bounce before dying
 ---@field pierceLimit number How many times the projectiles can pierce through enemies
 ---@field gravity number The amount of gravity the projectile recieves
----@field renderable ProjectileRenderable|string Describes how the projectile will look
+---@field renderable ProjectileRenderable|string|EffectName Describes how the projectile will look
 ---@field position Vec3 The projectile's position
 ---@field velocity Vec3 The projectile's velocity(m/s)
 ---@field aimDir Vec3 The projectile's starting direction
@@ -19,6 +19,10 @@ dofile "weaponUtil.lua"
 ---@field pelletCount number The amount of pellets fired
 ---@field sliceAngle number The angle of the slice
 ---@field spreadAngle number The angle of the spread
+---@field drag number
+---@field bounceAxes Vec3
+---@field collisionMomentumLoss number
+---@field projectileVelocity number
 
 ---@class ProjectileManager : ScriptableObjectClass
 ProjectileManager = class()
@@ -120,13 +124,13 @@ end
 ---@field sendToClients fun(self:Projectile, callback: string, args: any)
 ---@field sendToClient fun(self:Projectile, client: Player, callback: string, args: any)
 ---@field destroy fun()
+---@field init fun(self:Projectile, data:ProjectileParams, headless:boolean) : Projectile
 Projectile = class()
 Projectile.lifeTime = 10
 
 
 ---Sets up the projectile
----@param data table The projectile data
-function Projectile:init(data)
+function Projectile:init(data, headless)
     self.damage = data.damage
     self.damageType = data.damageType
     self.bounceLimit = data.bounceLimit
@@ -138,20 +142,30 @@ function Projectile:init(data)
     self.projectileVelocity = data.projectileVelocity
     self.direction = data.direction
 
-    local effect
-    if type(data.renderable) == "string" then
-        effect = sm.effect.createEffect(data.renderable)
+    if headless then
+        ---@diagnostic disable-next-line:missing-fields
+        self.effect = {
+            setPosition = function() end,
+            setRotation = function() end,
+            stop = function() end,
+            destroy = function() end,
+        }
     else
-        effect = sm.effect.createEffect("ShapeRenderable")
-        effect:setParameter("uuid", data.renderable.uuid)
-        effect:setParameter("color", data.renderable.color or sm.color.new(1,1,1))
-        effect:setScale(sm.vec3.one() * 0.25)
-    end
+        local effect
+        if type(data.renderable) == "string" then
+            effect = sm.effect.createEffect(data.renderable --[[@as string]])
+        else
+            effect = sm.effect.createEffect("ShapeRenderable")
+            effect:setParameter("uuid", data.renderable.uuid)
+            effect:setParameter("color", data.renderable.color or sm.color.new(1,1,1))
+            effect:setScale(sm.vec3.one() * 0.25)
+        end
 
-    effect:setPosition(data.position)
-    effect:setRotation(sm.vec3.getRotation(sm.vec3.new(0,0,1), self.direction))
-    effect:start()
-    self.effect = effect
+        effect:setPosition(data.position)
+        effect:setRotation(sm.vec3.getRotation(sm.vec3.new(0,0,1), self.direction))
+        effect:start()
+        self.effect = effect
+    end
 
     self.position = data.position
 
@@ -195,7 +209,7 @@ function Projectile:update(manager, dt)
     if hit then
         self:onHit(manager, hitTerrain, result)
 
-        if self.pierceLimit < 0 or hitTerrain and self.bounceLimit < 0 then
+        if result.type == "limiter" or self.pierceLimit < 0 or hitTerrain and self.bounceLimit < 0 then
             self.effect:stop()
             return true
         end
@@ -203,8 +217,7 @@ function Projectile:update(manager, dt)
 
     self.position = hitTerrain and result.pointWorld + result.normalWorld * 0.1 or newPos
     self.effect:setPosition(newPos)
-
-    self.effect:setRotation(sm.vec3.getRotation(VEC3_UP, self.direction))
+    self.effect:setRotation(getRotation(VEC3_UP, self.direction))
 
     return false
 end
@@ -258,8 +271,8 @@ end
 ---@class Dynamite : Projectile
 Dynamite = class(Projectile)
 
-function Dynamite:init(data)
-    Projectile.init(self, data)
+function Dynamite:init(data, headless)
+    Projectile.init(self, data, headless)
 
     self.attached = false
     self.detonateTime = 2

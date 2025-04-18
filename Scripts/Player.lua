@@ -459,6 +459,11 @@ function Player:client_onUpdate(dt)
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
 	end
 
+	-- if self.cl_classId == MINERCLASS.DEMOLITION and false then
+	if self.cl_classId == MINERCLASS.DEMOLITION then
+		self:cl_drawDynamiteTrajectory(dt)
+	end
+
 	if g_cl_freecam then
 		local moveSpeed = dt * (g_cl_freecamKeys[16] == true and 50 or 10)
         local fwd = 0
@@ -556,6 +561,65 @@ function Player:client_onFixedUpdate(dt)
 			v:update(dt)
 		end
 	end
+end
+
+local fakeManager = { network = { sendToServer = function() end } }
+function Player:cl_drawDynamiteTrajectory(dt)
+	if not self.trajectory then
+		self.trajectory = CurvedLine():init(0.05, colour(1,1,1), 50, 0)
+		self.trajectorySim = Dynamite():init({
+			damage = 0,
+			damageType = DAMAGETYPES.FIRE,
+			bounceLimit = 0,
+			pierceLimit = 0,
+			gravity = 0.5,
+			drag = 0,
+			projectileVelocity = 10,
+		}, true)
+	end
+
+	-- if self.abilityRechargeTimer then
+	-- 	self.trajectory:stop()
+	-- 	return
+	-- end
+
+	local startPos = self.cl_controlled.worldPosition + VEC3_UP
+	self.trajectorySim.position = startPos
+	self.trajectorySim.direction = (VEC3_UP * 2 + self.cl_controlled:getSmoothViewDirection()):normalize()
+	self.trajectorySim.lifeTime = 10
+	self.trajectorySim.detonateTime = 2
+	self.trajectorySim.attached = false
+
+	local points = {}
+	while(true) do
+		local quit = self.trajectorySim:update(fakeManager, dt)
+		table_insert(points, self.trajectorySim.position)
+
+		if quit or self.trajectorySim.attached then
+			break
+		end
+	end
+
+	local sum = 0
+	for i = 1, #points do
+		sum = sum + (points[i] - (i == 1 and startPos or points[i - 1])):length2()
+	end
+
+	local spacing = sum / 30
+	local sampled = {}
+	local sum2 = 0
+	for i = 1, #points do
+		local prev = i == 1 and startPos or points[i - 1]
+		local distance = (points[i] - prev):length2()
+		sum2 = sum2 + distance
+		if sum2 >= spacing then
+			table_insert(sampled, vec3_lerp(prev, points[i], (spacing - distance) / distance))
+			sum2 = 0
+		end
+	end
+
+	self.trajectory.steps = #sampled - 1
+	self.trajectory:update(startPos, points[#points], sampled)
 end
 
 function Player:cl_cam()

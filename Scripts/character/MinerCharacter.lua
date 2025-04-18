@@ -73,7 +73,7 @@ function MinerCharacter:sv_throwDynamite()
             renderable = { uuid = blk_plastic, color = sm.color.new(1,0,0) },
             position = self.character.worldPosition + VEC3_UP,
             projectileVelocity = 10,
-            spreadAngle = 5,
+            spreadAngle = 0,
             sliceAngle = 0,
             pelletCount = 1,
             aimDir = (VEC3_UP * 2 + self.character.direction):normalize()
