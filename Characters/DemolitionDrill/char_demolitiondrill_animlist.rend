@@ -1,0 +1,11 @@
+{
+	"lodList": [{
+		"mesh": "$CONTENT_DATA/Characters/DemolitionDrill/ani_char_demolitiondrill_position.dae",
+		"includes" : ["POSITION", "UV0", "NORMAL", "TANGENTS", "BLEND_INDICES", "BLEND_WEIGHTS"],
+		"animationList" : [
+			{ "name" : "drill_rotate", "file" : "$CONTENT_DATA/Characters/DemolitionDrill/Animations/Drill_Rot_New.dae", "looping" : true }
+		],
+
+		"maxViewDistance": 1000.0
+	}]
+}

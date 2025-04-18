@@ -1,0 +1,35 @@
+{
+	"lodList": [{
+		"mesh": "$GAME_DATA/Character/Char_Male/Animations/Animationrefs/aniref_char_male_tpose.dae",
+		"includes" : ["POSITION", "UV0", "NORMAL", "TANGENTS", "BLEND_INDICES", "BLEND_WEIGHTS"],
+		"animationList" : [
+			{ "name" : "idle", 					"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_idle.dae", "looping" : true },
+			// { "name" : "drill_rotate", 					"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_idle.dae", "looping" : true },
+	
+			{ "name" : "jump", 					"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump.dae" },
+			{ "name" : "jump_up", 				"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump_up.dae", "looping" : true },
+			{ "name" : "jump_down", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump_down.dae", "looping" : true },
+			{ "name" : "jump_land", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump_land.dae" },
+			{ "name" : "jump_land_fwd", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump_land_fwd.dae" },
+			{ "name" : "jump_land_bwd", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Jump/ani_char_male_lom_jump_land_bwd.dae" },
+
+			{ "name" : "run", 					"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_run.dae", "looping" : true },
+			
+			{ "name" : "run_left", 				"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Run/ani_char_male_lom_run_left.dae", "looping" : true },
+			{ "name" : "run_right", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Run/ani_char_male_lom_run_right.dae", "looping" : true },
+
+			{ "name" : "run_bwd", 				"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_run_bwd.dae", "looping" : true },
+			
+			{ "name" : "run_bwd_left", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Run/ani_char_male_lom_run_bwdleft.dae", "looping" : true },
+			{ "name" : "run_bwd_right", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Run/ani_char_male_lom_run_bwdright.dae", "looping" : true },
+
+			{ "name" : "shuffle_left", 			"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Shuffle/ani_char_male_lom_shuffle_left.dae", "looping" : true },
+			{ "name" : "shuffle_right", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Shuffle/ani_char_male_lom_shuffle_right.dae", "looping" : true },
+
+			{ "name" : "sprint", 				"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_sprint.dae", "looping": true },
+			{ "name" : "sprint_left_45", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Sprint/ani_char_male_lom_sprint_fwd_left45.dae", "looping": true },
+			{ "name" : "sprint_right_45", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Locomotion/Sprint/ani_char_male_lom_sprint_fwd_right45.dae", "looping": true }
+		],
+		"maxViewDistance": 1000.0
+	}]
+}

@@ -8,7 +8,6 @@ function MinerUnit:server_onCreate()
     self.collectArea = sm.areaTrigger.createSphere(2, sm.vec3.zero(), nil, sm.areaTrigger.filter.harvestable)
     self.collectArea:bindOnEnter("sv_collect")
 
-    self.timer = mineTimer
     self.swinging = false
     self.miningEnabled = true
 
@@ -45,7 +44,12 @@ function MinerUnit:server_onFixedUpdate()
     local char = self.unit.character
     if not char or not sm.exists(char) then return end
 
-    char.movementSpeedFraction = self.unit.publicData.owner.publicData.runSpeedMultiplier
+    local minerData = self.unit.publicData.owner.publicData
+    char.movementSpeedFraction = minerData.runSpeedMultiplier
+
+    if not self.timer then
+        self.timer = mineTimer * minerData.mineSpeedMultiplier
+    end
 
     local pos = char.worldPosition
     local dir = char.direction
@@ -57,7 +61,7 @@ function MinerUnit:server_onFixedUpdate()
     local contents = self.mineBox:getContents()
 
     pos = pos + VEC3_UP * char:getHeight() * 0.25
-    local _, colResult = sm.physics.spherecast(pos, pos + dir * 1.5, 0.1, char)
+    local _, colResult = sm.physics.spherecast(pos, pos + dir * 2, 0.1, char)
     if self.miningEnabled and colResult.type == "harvestable" then
         self.swinging = true
         self.timer = self.timer - 1
@@ -72,14 +76,14 @@ function MinerUnit:server_onFixedUpdate()
                         )
                     end
 
-                    sm.event.sendToHarvestable(rock, "sv_onHit")
+                    sm.event.sendToHarvestable(rock, "sv_onHit", minerData.mineDamage)
                 end
             end
 
-            self.timer = mineTimer
+            self.timer = mineTimer * minerData.mineSpeedMultiplier
         end
     elseif self.swinging then
-        self.timer = mineTimer
+        self.timer = 0--mineTimer * minerData.mineSpeedMultiplier
         self.swinging = false
     end
 

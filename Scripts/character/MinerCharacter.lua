@@ -11,7 +11,12 @@ dofile "../util.lua"
 ---@field blendSpeed number
 MinerCharacter = class()
 
-local hammerRenderable = "$GAME_DATA/Character/Char_Tools/Char_sledgehammer/char_sledgehammer.rend"
+local defaultAnims = "$CONTENT_DATA/Characters/char_miner_hammerAnims.rend"
+local drillRenderables = {
+	"$CONTENT_DATA/Characters/DemolitionDrill/char_demolitiondrill_animlist.rend",
+	"$CONTENT_DATA/Characters/DemolitionDrill/char_demolitiondrill_base.rend",
+	"$CONTENT_DATA/Characters/DemolitionDrill/char_demolitiondrill_anim.rend",
+}
 local glowstickRenderable = "$SURVIVAL_DATA/Character/Char_Glowstick/char_glowstick.rend"
 local classRenderables = {
 	[MINERCLASS.DEMOLITION] = {
@@ -26,7 +31,8 @@ local classRenderables = {
 			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
 		},
 		tool = {
-			hammerRenderable
+			"$CONTENT_DATA/Characters/char_miner_demolitiondrillAnims.rend",
+			unpack(drillRenderables)
 		}
 	},
 	[MINERCLASS.SCOUT] = {
@@ -41,7 +47,8 @@ local classRenderables = {
 			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
 		},
 		tool = {
-			hammerRenderable
+			defaultAnims,
+			"$GAME_DATA/Character/Char_Tools/Char_sledgehammer/char_sledgehammer.rend"
 		}
 	}
 }
@@ -99,6 +106,18 @@ function MinerCharacter.client_onGraphicsLoaded( self )
 		weight = 0,
 		speed = 1
 	}
+	self.animations.spudgun_shoot1 = {
+		info = self.character:getAnimationInfo( "spudgun_shoot1" ),
+		time = 0,
+		weight = 0,
+		speed = 1
+	}
+	self.animations.spudgun_shoot2 = {
+		info = self.character:getAnimationInfo( "spudgun_shoot2" ),
+		time = 0,
+		weight = 0,
+		speed = 1
+	}
 	self.animations.throw = {
 		info = self.character:getAnimationInfo( "throw" ),
 		time = 0,
@@ -124,6 +143,16 @@ function MinerCharacter.client_onGraphicsLoaded( self )
 
 	self.graphicsLoaded = true
 	self.animationsLoaded = true
+end
+
+function MinerCharacter:cl_fixDrill()
+	if self.drillFixDelay > 0 then
+		self.drillFixDelay = self.drillFixDelay - 1
+		sm.event.sendToCharacter(self.character, "cl_fixDrill")
+		return
+	end
+
+	self.character:updateAnimation( "drill_rotate", 0, 1 )
 end
 
 function MinerCharacter:cl_initGlow()
@@ -179,8 +208,8 @@ function MinerCharacter.client_onUpdate( self, deltaTime )
 						self:initSwing()
 					else
 						if self.currentAnimation == "throw" then
-							self.character:removeRenderable(glowstickRenderable)
-							self.character:addRenderable(hammerRenderable)
+							self:cl_removeRenderables({ glowstickRenderable, defaultAnims })
+							self:cl_applyRenderables(self.toolRenderables)
 						end
 
 						self.currentAnimation = ""
@@ -196,13 +225,11 @@ function MinerCharacter.client_onUpdate( self, deltaTime )
 end
 
 function MinerCharacter.client_onEvent( self, event )
-	if not self.animationsLoaded then
+	if not self.animationsLoaded or self.currentAnimation == "throw" and event:match("swing_") then
 		return
 	end
 
 	if event == "swing_start" then
-		self.character:addRenderable(hammerRenderable)
-
 		self.swinging = true
 
 		if swingAnims[self.currentAnimation] == nil then
@@ -214,37 +241,49 @@ function MinerCharacter.client_onEvent( self, event )
 		self.currentAnimation = "throw"
 		self.animations.throw.time = 0
 
-		self.animations.sledgehammer_attack1.weight = 0
-		self.animations.sledgehammer_attack1.time = 0
-		self.animations.sledgehammer_attack2.weight = 0
-		self.animations.sledgehammer_attack2.time = 0
+		for k, v in pairs({
+			"sledgehammer_attack1",
+			"sledgehammer_attack2",
+			"spudgun_shoot1",
+			"spudgun_shoot2"
+		}) do
+			self.animations[v].weight = 0
+			self.animations[v].time = 0
+		end
 
 		self.swinging = false
 		self.swing = 1
 
-		self.character:removeRenderable(hammerRenderable)
-		self.character:addRenderable(glowstickRenderable)
+		self:cl_removeRenderables(self.toolRenderables)
+		self:cl_applyRenderables({ glowstickRenderable, defaultAnims })
 	end
 end
 
 function MinerCharacter:initSwing()
 	if self.swing % 2 == 0 then
-		self.currentAnimation = "sledgehammer_attack2"
-		self.animations.sledgehammer_attack2.time = 0
+		self.currentAnimation = self.classId == MINERCLASS.DEMOLITION and "spudgun_shoot2" or "sledgehammer_attack2"
 	else
-		self.currentAnimation = "sledgehammer_attack1"
-		self.animations.sledgehammer_attack1.time = 0
+		self.currentAnimation = self.classId == MINERCLASS.DEMOLITION and "spudgun_shoot1" or "sledgehammer_attack1"
 	end
 
+	self.animations[self.currentAnimation].time = 0
 	self.swing = self.swing + 1
 end
 
 
 
 function MinerCharacter:cl_init(args)
-	local renderables = classRenderables[args.classId]
+	self.classId = args.classId
+	if self.classId == MINERCLASS.DEMOLITION then
+		self.drillFixDelay = 5
+		sm.event.sendToCharacter(self.character, "cl_fixDrill")
+	end
+
+	local renderables = classRenderables[self.classId]
 	self:cl_applyRenderables(renderables.character)
-	self:cl_applyRenderables(renderables.tool)
+
+	self.toolRenderables = renderables.tool
+	self:cl_applyRenderables(self.toolRenderables)
 end
 
 function MinerCharacter:cl_applyRenderables(renderables)

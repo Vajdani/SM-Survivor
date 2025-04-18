@@ -86,7 +86,7 @@ function TotebotGreenUnit.server_onFixedUpdate( self, dt )
 		local dir = toLastTargetPos:normalize()
 		self.unit:setFacingDirection(dir)
 
-		sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 10, 10)
+		sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 5, 10)
 		self.unit:sendCharacterEvent("melee")
 
 		self.attackTimer:reset()

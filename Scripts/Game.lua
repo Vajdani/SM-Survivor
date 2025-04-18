@@ -6,7 +6,7 @@ dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
 Game = class( nil )
 
 if g_spawnEnemies == nil then
-	g_spawnEnemies = true
+	g_spawnEnemies = false
 end
 
 g_enableWaypointEffects = false
@@ -141,6 +141,7 @@ function Game:initCMD()
     sm.game.bindChatCommand("/render", {}, "cl_render", "Switch render mode")
     sm.game.bindChatCommand("/recreate", {}, "cl_recreate", "Recreate terrain")
     sm.game.bindChatCommand("/enemies", {}, "cl_enemies", "Toggle enemy spawning")
+    sm.game.bindChatCommand("/freecam", {}, "cl_freecam", "Toggle free camera")
 end
 
 function Game:cl_render()
@@ -157,4 +158,16 @@ end
 
 function Game:cl_enemies()
 	self.network:sendToServer("sv_enemies")
+end
+
+function Game:cl_freecam()
+	g_cl_freecam = not g_cl_freecam
+	if g_cl_freecam then
+		g_cl_camPosition = sm.camera.getPosition()
+		g_cl_freecamKeys = {}
+
+		sm.localPlayer.setLockedControls(true)
+		sm.localPlayer.setDirection(sm.camera.getDirection())
+		sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setLockedControls", false)
+	end
 end

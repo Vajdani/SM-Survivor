@@ -273,6 +273,8 @@ MINERDATA = {
     [MINERCLASS.DEMOLITION] = {
         hp = 100,
         runSpeedMultiplier = 1,
+        mineSpeedMultiplier = 1,
+        mineDamage = 3,
         ability = {
             recharge = 10,
             cooldown = 2,
@@ -283,6 +285,8 @@ MINERDATA = {
     [MINERCLASS.SCOUT] = {
         hp = 50,
         runSpeedMultiplier = 1.5,
+        mineSpeedMultiplier = 1,
+        mineDamage = 1,
         ability = {
             recharge = 30,
             uses = 1,
@@ -308,6 +312,7 @@ unit_miner = sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b")
 
 hvs_mineralDrop = sm.uuid.new("a09539ba-95d3-4f65-989d-83d1e9c32d0f")
 hvs_xpDrop = sm.uuid.new("24b899a3-a663-4da5-b1bf-670ea4bf16a2")
+hvs_input = sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952")
 
 table_insert = table.insert
 perlin = sm.noise.perlinNoise2d
@@ -320,6 +325,11 @@ colour = sm.color.new
 
 function GetYawPitch( direction )
     return math.atan2(direction.y, direction.x) - math.pi/2, math.asin(direction.z)
+end
+
+function CalculateRightVector(vector)
+    local yaw = math.atan2(vector.y, vector.x) - math.pi / 2
+    return sm.vec3.new(math.cos(yaw), math.sin(yaw), 0)
 end
 
 ---@param position Vec3

@@ -69,7 +69,7 @@ function Player:server_onCreate()
 	else
 		self.level = 0
 		self.collectCharges = 0
-		self.classId = MINERCLASS.SCOUT
+		self.classId = MINERCLASS.DEMOLITION
 
 		minerData = MINERDATA[self.classId]
 		self.health = minerData.hp
@@ -79,7 +79,9 @@ function Player:server_onCreate()
 	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId }, 1)
 
 	self.player.publicData = {
-		runSpeedMultiplier = minerData.runSpeedMultiplier
+		runSpeedMultiplier = minerData.runSpeedMultiplier,
+		mineSpeedMultiplier = minerData.mineSpeedMultiplier,
+		mineDamage = minerData.mineDamage
 	}
 
 	self:sv_initMaterials()
@@ -164,8 +166,8 @@ function Player:sv_createMiner(pos)
 
 	self:sv_initMaterials()
 
-	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), pos)
-	self.controlled = sm.unit.createUnit(sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b"), pos, 0, { classId = self.classId, owner = self.player })
+	self.input = sm.harvestable.create(hvs_input, pos)
+	self.controlled = sm.unit.createUnit(unit_miner, pos, 0, { classId = self.classId, owner = self.player })
 	self.controlled.publicData = { owner = self.player }
 	self.player.publicData.miner = self.controlled
 	self:sv_seat()
@@ -179,7 +181,7 @@ function Player:sv_loadMiner()
 		return
 	end
 
-	self.input = sm.harvestable.create(sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952"), -VEC3_UP * verticalOffset)
+	self.input = sm.harvestable.create(hvs_input, -VEC3_UP * verticalOffset)
 	self.controlled.publicData = { owner = self.player }
 	self.player.publicData.miner = self.controlled
 	self:sv_seat()
@@ -457,15 +459,39 @@ function Player:client_onUpdate(dt)
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Attract XP orbs", "")
 	end
 
-	if self.cam ~= 3 then return end
-	local charPos = char.worldPosition
-	local newPos = charPos + camOffset * self.zoom
-	sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
-	sm.camera.setDirection(charPos - newPos)
-	-- sm.camera.setFov(sm.camera.getDefaultFov())
+	if g_cl_freecam then
+		local moveSpeed = dt * (g_cl_freecamKeys[16] == true and 50 or 10)
+        local fwd = 0
+        if g_cl_freecamKeys[3] then fwd = fwd + moveSpeed end
+        if g_cl_freecamKeys[4] then fwd = fwd - moveSpeed end
 
-	-- sm.camera.setPosition(char.worldPosition + VEC3_UP * (verticalOffset + char:getHeight() * 1.5))
-	-- sm.camera.setDirection(char.direction)
+        local right = 0
+        if g_cl_freecamKeys[2] then right = right + moveSpeed end
+        if g_cl_freecamKeys[1] then right = right - moveSpeed end
+
+        local up = 0
+        if g_cl_freecamKeys[21] then up = up + moveSpeed end
+        if g_cl_freecamKeys[20] then up = up - moveSpeed end
+
+        local playerDir = self.player.character.direction
+        g_cl_camPosition = g_cl_camPosition + playerDir * fwd + CalculateRightVector(playerDir) * right + VEC3_UP * up
+
+        local lerp = dt * 10
+        local lerpedPos = sm.vec3.lerp(sm.camera.getPosition(), g_cl_camPosition, lerp)
+
+        sm.camera.setPosition(lerpedPos)
+        sm.camera.setDirection(sm.vec3.lerp(sm.camera.getDirection(), playerDir, lerp))
+	else
+		if self.cam ~= 3 then return end
+		local charPos = char.worldPosition
+		local newPos = charPos + camOffset * self.zoom
+		sm.camera.setPosition(sm.vec3.lerp(sm.camera.getPosition(), newPos, dt * 15))
+		sm.camera.setDirection(charPos - newPos)
+		-- sm.camera.setFov(sm.camera.getDefaultFov())
+
+		-- sm.camera.setPosition(char.worldPosition + VEC3_UP * (verticalOffset + char:getHeight() * 1.5))
+		-- sm.camera.setDirection(char.direction)
+	end
 end
 
 function Player:client_onFixedUpdate(dt)
@@ -533,6 +559,8 @@ function Player:client_onFixedUpdate(dt)
 end
 
 function Player:cl_cam()
+	g_cl_freecam = false
+
 	self.zoom = 1
 	self.cam = self.cam == 3 and 0 or 3
 	sm.camera.setCameraState(self.cam)
@@ -725,6 +753,10 @@ function Player:cl_upgradeClosed()
 	if not self.hud:isActive() then
 		self.hud:open()
 	end
+end
+
+function Player:cl_setLockedControls(state)
+	sm.localPlayer.setLockedControls(state)
 end
 
 

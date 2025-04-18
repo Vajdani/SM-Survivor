@@ -1,0 +1,16 @@
+{
+	"lodList": [{
+		"mesh": "$GAME_DATA/Character/Char_Male/Animations/Animationrefs/aniref_char_male_tpose.dae",
+		"includes" : ["POSITION", "UV0", "NORMAL", "TANGENTS", "BLEND_INDICES", "BLEND_WEIGHTS"],
+		"animationList" : [
+			{ "name" : "sledgehammer_attack1", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack1.dae" },
+			{ "name" : "sledgehammer_attack2", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack2.dae" },
+
+			{ "name": "spudgun_shoot1", 					"file": "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_shoot.dae" },
+			{ "name": "spudgun_shoot2", 					"file": "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_shoot.dae" },
+
+			{ "name" : "throw", 				"file" : "$SURVIVAL_DATA/Character/Char_Male/Animations/Thirdperson/Glowstick/ani_char_male_glowstick_use.dae" }
+		],
+		"maxViewDistance": 1000.0
+	}]
+}

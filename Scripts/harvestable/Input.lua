@@ -8,7 +8,26 @@ local movementKeys = {
     [4] = true,
 }
 
+local freecamKeys = {
+    [1] = true,
+    [2] = true,
+    [3] = true,
+    [4] = true,
+    [16] = true,
+    [20] = true,
+    [21] = true,
+}
+
 function Input:client_onAction(action, state)
+    if action == 5 and state then
+        g_cl_freecamModifier = not g_cl_freecamModifier
+    end
+
+    if g_cl_freecam and freecamKeys[action] == true and not g_cl_freecamModifier then
+        g_cl_freecamKeys[action] = state
+        return false
+    end
+
     if movementKeys[action] == true then
         self.network:sendToServer("sv_onMove", { key = action, state = state })
         return false

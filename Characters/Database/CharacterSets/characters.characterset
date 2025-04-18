@@ -42,7 +42,7 @@
 			},
 			"ragdoll": "$SURVIVAL_DATA/Character/Char_Male/char_male_ragdoll.json",
 			"renderables": [
-				"$CONTENT_DATA/Characters/char_male_tp.rend",
+				"$CONTENT_DATA/Characters/char_miner_baseAnims.rend",
 				"$GAME_DATA/Character/Char_Male/Animations/char_male_tp_swim.rend"
 			],
 			"tumble": {
