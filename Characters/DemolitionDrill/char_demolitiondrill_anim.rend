@@ -14,7 +14,7 @@
 				},
 				{
 					"textureList": [
-						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensionsport_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_interactive_suspensionsport_dif.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_asg.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_nor.tga"
 					],
@@ -23,7 +23,7 @@
 				},
 				{
 					"textureList": [
-						"$SURVIVAL_DATA/Objects/Textures/powertools/obj_powertools_drill_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_powertools_drill_dif.tga",
 						"$SURVIVAL_DATA/Objects/Textures/powertools/obj_powertools_drill_asg.tga",
 						"$SURVIVAL_DATA/Objects/Textures/powertools/obj_powertools_drill_nor.tga"
 					],
@@ -32,7 +32,7 @@
 				},
 				{
 					"textureList": [
-						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensionsport_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_interactive_suspensionsport_dif.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_asg.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_nor.tga"
 					],

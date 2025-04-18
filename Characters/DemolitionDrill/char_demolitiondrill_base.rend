@@ -13,7 +13,7 @@
 			"subMeshList": [
 				{
 					"textureList": [
-						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_mountablespudgun_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_interactive_mountablespudgun_dif.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_mountablespudgun_asg.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_mountablespudgun_nor.tga"
 					],
@@ -49,7 +49,7 @@
 				},
 				{
 					"textureList": [
-						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensionsport_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_interactive_suspensionsport_dif.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_asg.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_suspensions_nor.tga"
 					],
@@ -58,7 +58,7 @@
 				},
 				{
 					"textureList": [
-						"$SURVIVAL_DATA/Objects/Textures/resource/obj_resource_cuircuitboard_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_resource_cuircuitboard_dif.tga",
 						"$SURVIVAL_DATA/Objects/Textures/resource/obj_resource_cuircuitboard_asg.tga",
 						"$SURVIVAL_DATA/Objects/Textures/resource/obj_resource_cuircuitboard_nor.tga"
 					],
@@ -67,7 +67,7 @@
 				},
 				{
 					"textureList": [
-						"$SURVIVAL_DATA/Objects/Textures/consumable/obj_consumable_battery_dif.tga",
+						"$CONTENT_DATA/Characters/DemolitionDrill/obj_consumable_battery_dif.tga",
 						"$SURVIVAL_DATA/Objects/Textures/consumable/obj_consumable_battery_asg.tga",
 						"$SURVIVAL_DATA/Objects/Textures/consumable/obj_consumable_battery_nor.tga"
 					],
