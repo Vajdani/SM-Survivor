@@ -6,7 +6,7 @@ dofile( "$SURVIVAL_DATA/Scripts/game/managers/EffectManager.lua" )
 Game = class( nil )
 
 if g_spawnEnemies == nil then
-	g_spawnEnemies = false
+	g_spawnEnemies = true
 end
 
 g_enableWaypointEffects = false
