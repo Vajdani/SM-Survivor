@@ -10,6 +10,17 @@ dofile "gui/Slider.lua"
 ---@field xpBar Slider
 Player = class( nil )
 
+local dropCollectionRadius = 100
+local speedBoostTime = 5 * 40
+local jumpDirectionMultiplier = sm.vec3.new(2,2,2)
+local jumpForceMultiplier = 10
+local jumpDelayTicks = 5
+local jumpImpactRadius = 3.5
+local freeCamFast = 50
+local freeCamSlow = 10
+local maxXP = 100
+local maxZoom = 15
+
 local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 local verticalOffset = 10
 local moveDirs = {
@@ -141,19 +152,23 @@ function Player:server_onFixedUpdate()
 
 	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
 
-	if self.isJumping and sm.game.getServerTick() - self.jumpTick >= 5 and cChar.velocity.z < 0 then
+	if self.isJumping and sm.game.getServerTick() - self.jumpTick >= jumpDelayTicks and cChar.velocity.z < 0 then
 		local hit, result = sm.physics.spherecast(pos, pos - VEC3_UP, 0.5, cChar)
 		if hit and result.type ~= "limiter" then
-			local contacts = sm.physics.getSphereContacts(pos, 3.5)
+			local contacts = sm.physics.getSphereContacts(pos, jumpImpactRadius)
 			for k, v in pairs(contacts.harvestables) do
 				if not MINERALDROPS[v.id] then
-					sm.event.sendToHarvestable(v, "sv_onHit", 100)
+					sm.event.sendToHarvestable(v, "sv_onHit", 1000)
 				end
 			end
 
 			for k, v in pairs(contacts.characters) do
 				if not v:isPlayer() and v ~= cChar then
-					sm.event.sendToUnit(v:getUnit(), "sv_onHit", { damage = 1000, impact = (v.worldPosition - pos):normalize() * 10, hitPos = v.worldPosition })
+					sm.event.sendToUnit(v:getUnit(), "sv_onHit", {
+						damage = 1000,
+						impact = (v.worldPosition - pos):normalize() * 10,
+						hitPos = v.worldPosition
+					})
 				end
 			end
 
@@ -246,9 +261,9 @@ function Player:sv_collectMineral(data)
 	local type = data.type
 	local newAmount = self.minerals[type] + data.amount
 	local lastLevel = self.level
-	if type == ROCKTYPE.XP and newAmount >= 100 then
-		for i = 1, math.floor(newAmount / 100) do
-			newAmount = newAmount - 100
+	if type == ROCKTYPE.XP and newAmount >= maxXP then
+		for i = 1, math.floor(newAmount / maxXP) do
+			newAmount = newAmount - maxXP
 
 			self.level = self.level + 1
 			if self.level % 5 == 0 then
@@ -283,11 +298,11 @@ function Player:sv_interact()
 	if self.collectCharges > 0 then
 		local pos = char.worldPosition
 		local xp = 0
-		local contacts = sm.physics.getSphereContacts(pos, 100)
+		local contacts = sm.physics.getSphereContacts(pos, dropCollectionRadius)
 		for k, v in pairs(contacts.harvestables) do
 			if MINERALDROPS[v.id] == true then
 				xp = xp + v.publicData.amount
-				v:destroy()
+				sm.event.sendToGame("sv_onDropCollect", { drop = v, target = char, collect = false })
 			end
 		end
 
@@ -299,13 +314,6 @@ function Player:sv_interact()
 				self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
 			end
 		end
-
-		-- local contacts = sm.physics.getSphereContacts(pos, 100)
-		-- for k, v in pairs(contacts.harvestables) do
-		-- 	if MINERALDROPS[v.id] == true then
-		-- 		sm.event.sendToHarvestable(v, "sv_onCollect", char)
-		-- 	end
-		-- end
 
 		self:sv_save()
 	end
@@ -343,7 +351,7 @@ function Player:sv_useAbility()
 		self.controlled:sendCharacterEvent("throw")
 		sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
 	elseif self.cl_classId == MINERCLASS.SCOUT then
-		self.speedBoostTime = sm.game.getServerTick() + 500 * 40
+		self.speedBoostTime = sm.game.getServerTick() + speedBoostTime
 		--self.player.publicData.runSpeedMultiplier = 3
 	elseif self.cl_classId == MINERCLASS.STUNTMAN then
 		local char = self.controlled.character
@@ -352,7 +360,7 @@ function Player:sv_useAbility()
 		-- 	jumpDir = char.direction
 		-- end
 
-		sm.physics.applyImpulse(char, (VEC3_UP * 2 + jumpDir * 2) * char.mass * 10)
+		sm.physics.applyImpulse(char, (VEC3_UP + jumpDir) * jumpDirectionMultiplier * char.mass * jumpForceMultiplier)
 		self.isJumping = true
 		self.jumpTick = sm.game.getServerTick()
 
@@ -552,7 +560,7 @@ function Player:client_onUpdate(dt)
 	end
 
 	if g_cl_freecam then
-		local moveSpeed = dt * (g_cl_freecamKeys[16] == true and 50 or 10)
+		local moveSpeed = dt * (g_cl_freecamKeys[16] == true and freeCamFast or freeCamSlow)
         local fwd = 0
         if g_cl_freecamKeys[3] then fwd = fwd + moveSpeed end
         if g_cl_freecamKeys[4] then fwd = fwd - moveSpeed end
@@ -724,7 +732,7 @@ function Player:cl_increaseZoom()
 end
 
 function Player:cl_decreaseZoom()
-	self.zoom = self.zoom < 100 and self.zoom + 1 or 100
+	self.zoom = self.zoom < maxZoom and self.zoom + 1 or maxZoom
 end
 
 function Player:cl_setControlMethod(method)
@@ -780,7 +788,7 @@ function Player:cl_updateMineralCount(data)
 	for k, v in pairs(data) do
 		if k == ROCKTYPE.XP then
 			if not self.xpBar then
-				self.xpBar = Slider():init(self.hud, "icon_xp", 100, 100, { MINERALCOLOURS[ROCKTYPE.XP] })
+				self.xpBar = Slider():init(self.hud, "icon_xp", maxXP, maxXP, { MINERALCOLOURS[ROCKTYPE.XP] })
 			end
 
 			self.xpBar:update(v)

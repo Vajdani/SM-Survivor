@@ -4,8 +4,8 @@ MinerUnit = class()
 local mineTimer = 25
 
 function MinerUnit:server_onCreate()
-    self.mineBox =  sm.areaTrigger.createBox(vec3(2,2,1) * 0.5, sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
-    self.collectArea = sm.areaTrigger.createSphere(2, sm.vec3.zero(), nil, sm.areaTrigger.filter.harvestable)
+    self.mineBox =  sm.areaTrigger.createBox(vec3(2,2,1) * 0.5, VEC3_ZERO, QUAT_IDENTITY, sm.areaTrigger.filter.harvestable)
+    self.collectArea = sm.areaTrigger.createSphere(2, VEC3_ZERO, nil, sm.areaTrigger.filter.harvestable)
     self.collectArea:bindOnEnter("sv_collect")
 
     self.swinging = false
@@ -98,7 +98,7 @@ function MinerUnit:sv_collect(trigger, result)
     local char = self.unit.character
     for k, v in pairs(result) do
         if MINERALDROPS[v.id] == true then
-            sm.event.sendToHarvestable(v, "sv_onCollect", char)
+            sm.event.sendToGame("sv_onDropCollect", { drop = v, target = char, collect = true })
         end
     end
 end

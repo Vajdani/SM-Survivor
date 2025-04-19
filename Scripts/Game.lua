@@ -58,6 +58,20 @@ function Game:sv_onRockHit(rock)
 	self.network:sendToClients("cl_onRockHit", rock)
 end
 
+function Game:sv_onDropCollect(args)
+	self.network:sendToClients("cl_onDropCollect", args)
+end
+
+function Game:sv_destoryDrop(args)
+	if not sm.exists(args.drop) then return end
+
+	if args.collect then
+		sm.event.sendToPlayer(args.target:getUnit().publicData.owner, "sv_collectMineral", args.drop.publicData)
+	end
+
+	args.drop:destroy()
+end
+
 function Game:sv_recreate(data, player)
 	self.sv.saved.world:destroy()
 	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
@@ -94,6 +108,7 @@ function Game:client_onCreate()
 	g_effectManager:cl_onCreate()
 
 	self.cl_rockAnims = {}
+	self.cl_collectedDrops = {}
 end
 
 function Game:client_onFixedUpdate(dt)
@@ -106,6 +121,23 @@ function Game:client_onFixedUpdate(dt)
 			self.cl_rockAnims[k] = nil
 		end
 	end
+
+	for k, v in pairs(self.cl_collectedDrops) do
+		if not sm.exists(v.drop) or v.destroyed then
+			self.cl_collectedDrops[k] = nil
+		else
+			local destination = v.target.worldPosition
+			local newPos = sm.vec3.lerp(v.drop.worldPosition, destination, dt * 10 * v.target.movementSpeedFraction)
+			v.drop:setPosition(newPos)
+			if (destination - newPos):length2() < 0.1 then
+				if sm.isHost then
+					self.network:sendToServer("sv_destoryDrop", v)
+				end
+
+				v.destroyed = true
+			end
+		end
+	end
 end
 
 function Game.client_onLoadingScreenLifted( self )
@@ -114,6 +146,10 @@ end
 
 function Game:cl_onRockHit(rock)
 	table_insert(self.cl_rockAnims, { rock = rock, time = math.random(50, 100) * 0.01 })
+end
+
+function Game:cl_onDropCollect(args)
+	table_insert(self.cl_collectedDrops, args)
 end
 
 function Game:setLighting(time)
