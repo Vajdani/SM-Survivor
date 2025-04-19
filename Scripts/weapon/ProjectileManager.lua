@@ -252,7 +252,7 @@ function Projectile:onHit(manager, hitTerrain, result)
     local char = result:getCharacter()
     table_insert(self.hitObjs, char)
 
-    if sm.isHost then
+    if sm.isHost and manager then
         manager.network:sendToServer("sv_onHit",
             {
                 char = char,

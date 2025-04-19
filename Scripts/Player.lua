@@ -10,19 +10,20 @@ dofile "gui/Slider.lua"
 ---@field xpBar Slider
 Player = class( nil )
 
+local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 local verticalOffset = 10
 local moveDirs = {
 	[0] = {
-		[1] = function() return -VEC3_X end,
-		[2] = function() return  VEC3_X end,
-		[3] = function() return  VEC3_Y end,
-		[4] = function() return -VEC3_Y end,
+		[1] = -VEC3_X,
+		[2] =  VEC3_X,
+		[3] =  VEC3_Y,
+		[4] = -VEC3_Y,
 	},
 	[1] = {
-		[1] = function() return -VEC3_X:rotate(-RAD30, VEC3_UP) end,
-		[2] = function() return  VEC3_X:rotate(-RAD30, VEC3_UP) end,
-		[3] = function() return  VEC3_Y:rotate(-RAD30, VEC3_UP) end,
-		[4] = function() return -VEC3_Y:rotate(-RAD30, VEC3_UP) end,
+		[1] =  VEC3_X:rotate(math.atan2(camOffset.y, camOffset.x) - math.pi * 0.5, VEC3_UP),
+		[2] = -VEC3_X:rotate(math.atan2(camOffset.y, camOffset.x) - math.pi * 0.5, VEC3_UP),
+		[3] = -VEC3_Y:rotate(math.atan2(camOffset.y, camOffset.x) - math.pi * 0.5, VEC3_UP),
+		[4] =  VEC3_Y:rotate(math.atan2(camOffset.y, camOffset.x) - math.pi * 0.5, VEC3_UP),
 	},
 	[2] = {
 		[1] = function(char)
@@ -284,6 +285,25 @@ function Player:sv_setControlMethod(method)
 	self.controlMethod = method
 end
 
+function Player:sv_refreshClass()
+	local minerData = MINERDATA[self.classId]
+	self.health = minerData.hp
+	self.maxHealth = minerData.hp
+	self.player.publicData = {
+		runSpeedMultiplier = minerData.runSpeedMultiplier,
+		mineSpeedMultiplier = minerData.mineSpeedMultiplier,
+		mineDamage = minerData.mineDamage
+	}
+end
+
+function Player:sv_newClass()
+	self.classId = (self.classId % #MINERDATA) + 1
+	self:sv_refreshClass()
+	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId }, 1)
+    sm.event.sendToCharacter(self.controlled.character, "sv_init", { classId = self.classId, owner = self.player })
+end
+
+
 function Player:sv_useAbility()
 	if self.classId == MINERCLASS.DEMOLITION then
 		self.controlled:sendCharacterEvent("throw")
@@ -363,6 +383,7 @@ function Player:client_onClientDataUpdate(data, channel)
 		if not self.healthSlider then
 			self.healthSlider = Slider():init(self.hud, "healthBar", maxHealth, maxHealth, { sm.color.new("#ff0000") })
 		end
+		self.healthSlider.steps, self.healthSlider.steps_reloading = maxHealth, maxHealth
 		self.healthSlider:update_shooting(math.max(health, 0))
 
 		self.isDead = health <= 0
@@ -448,10 +469,18 @@ function Player:client_onInteract(char, state)
 	return true
 end
 
-local camOffset = sm.vec3.new(-0.75,-1.25,1.75) * 10
 function Player:client_onUpdate(dt)
 	local char = self.cl_controlled
-	if not self.isLocal or not char or not sm.exists(char) then return end
+	if not self.isLocal then return end
+
+	if not char or not sm.exists(char) then
+		if self.trajectory then
+			self.trajectory:destroy()
+			self.trajectory = nil
+		end
+
+		return
+	end
 
 	if self.isDead then
 		sm.gui.setInteractionText(sm.gui.getKeyBinding("Use", true), "Revive", "")
@@ -462,6 +491,9 @@ function Player:client_onUpdate(dt)
 	-- if self.cl_classId == MINERCLASS.DEMOLITION and false then
 	if self.cl_classId == MINERCLASS.DEMOLITION then
 		self:cl_drawDynamiteTrajectory(dt)
+	elseif self.trajectory then
+		self.trajectory:destroy()
+		self.trajectory = nil
 	end
 
 	if g_cl_freecam then
@@ -563,7 +595,6 @@ function Player:client_onFixedUpdate(dt)
 	end
 end
 
-local fakeManager = { network = { sendToServer = function() end } }
 function Player:cl_drawDynamiteTrajectory(dt)
 	if not self.trajectory then
 		self.trajectory = CurvedLine():init(0.05, colour(1,1,1), 50, 0)
@@ -592,7 +623,7 @@ function Player:cl_drawDynamiteTrajectory(dt)
 
 	local points = {}
 	while(true) do
-		local quit = self.trajectorySim:update(fakeManager, dt)
+		local quit = self.trajectorySim:update(nil, dt)
 		table_insert(points, self.trajectorySim.position)
 
 		if quit or self.trajectorySim.attached then
@@ -672,6 +703,14 @@ function Player:cl_reapplyUpgrades(upgrades)
 	end
 
 	self:cl_updateWeaponHud()
+end
+
+function Player:cl_refreshClass()
+	self.network:sendToServer("sv_refreshClass")
+end
+
+function Player:cl_newClass()
+	self.network:sendToServer("sv_newClass")
 end
 
 function Player:cl_updateMineralCount(data)
@@ -831,7 +870,8 @@ function Player:GetMoveDir()
 	local moveDirSet = moveDirs[self.controlMethod]
 	for k, v in pairs(self.moveKeys) do
 		if v then
-			moveDir = moveDir + moveDirSet[k](char)
+			local dir = moveDirSet[k]
+			moveDir = moveDir + (type(dir) == "function" and dir(char) or dir)
 		end
 	end
 

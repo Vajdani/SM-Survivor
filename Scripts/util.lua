@@ -267,6 +267,7 @@ UPGRADES = {
 MINERCLASS = {
     DEMOLITION = 1,
     SCOUT      = 2,
+    STUNTMAN   = 3,
 }
 
 MINERDATA = {
@@ -279,7 +280,8 @@ MINERDATA = {
             recharge = 10,
             cooldown = 2,
             uses = 2,
-            icon = { "ItemIconsSet0", "ItemIcons", "8d3b98de-c981-4f05-abfe-d22ee4781d33" }
+            icon = "$CONTENT_DATA/Gui/obj_interactive_propanetank_small.png"
+            --{ "ItemIconsSet0", "ItemIcons", "8d3b98de-c981-4f05-abfe-d22ee4781d33" }
         }
     },
     [MINERCLASS.SCOUT] = {
@@ -290,7 +292,19 @@ MINERDATA = {
         ability = {
             recharge = 30,
             uses = 1,
-            icon = "$CONTENT_DATA/Gui/MineralIcons/gold.png"
+            icon = "$CONTENT_DATA/Gui/gui_icon_speed.png"
+        }
+    },
+    [MINERCLASS.STUNTMAN] = {
+        hp = 25,
+        runSpeedMultiplier = 1,
+        mineSpeedMultiplier = 1,
+        mineDamage = 1,
+        ability = {
+            recharge = 60,
+            cooldown = 15,
+            uses = 2,
+            icon = "gui_icon_upgrade.png"
         }
     }
 }
@@ -439,4 +453,11 @@ function CurvedLine:stop()
     for k, v in ipairs(self.effects) do
         self.effects[k]:stop()
     end
+end
+
+function CurvedLine:destroy()
+    for k, v in ipairs(self.effects) do
+        self.effects[k].effect:destroy()
+    end
+    self.effects = {}
 end

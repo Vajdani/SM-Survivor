@@ -49,6 +49,20 @@ local classRenderables = {
 			defaultAnims,
 			"$GAME_DATA/Character/Char_Tools/Char_sledgehammer/char_sledgehammer.rend"
 		}
+	},
+	[MINERCLASS.STUNTMAN] = {
+		character = {
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Backpack/Outfit_stuntman_backpack/char_shared_outfit_stuntman_backpack.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Gloves/Outfit_stuntman_gloves/char_male_outfit_stuntman_gloves.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Hat/Outfit_stuntman_hat/char_male_outfit_stuntman_hat.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_stuntman_jacket/char_male_outfit_stuntman_jacket.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_stuntman_pants/char_male_outfit_stuntman_pants.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_stuntman_shoes/char_male_outfit_stuntman_shoes.rend",
+		},
+		tool = {
+			defaultAnims,
+			"$GAME_DATA/Character/Char_Tools/Char_sledgehammer/char_sledgehammer.rend"
+		}
 	}
 }
 
@@ -272,6 +286,23 @@ end
 
 
 function MinerCharacter:cl_init(args)
+	if self.classId then
+		local added = {}
+		for rendType, renderables in pairs(classRenderables[args.classId]) do
+			for k, renderable in pairs(renderables) do
+				added[renderable] = true
+			end
+		end
+
+		for rendType, renderables in pairs(classRenderables[self.classId]) do
+			for k, renderable in pairs(renderables) do
+				if not added[renderable] then
+					self.character:removeRenderable(renderable)
+				end
+			end
+		end
+	end
+
 	self.classId = args.classId
 	if self.classId == MINERCLASS.DEMOLITION then
 		self.drillFixDelay = 5

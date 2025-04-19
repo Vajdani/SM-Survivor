@@ -19,7 +19,7 @@ local freecamKeys = {
 }
 
 function Input:client_onAction(action, state)
-    if action == 5 and state then
+    if g_cl_freecam and action == 5 and state then
         g_cl_freecamModifier = not g_cl_freecamModifier
     end
 
@@ -50,6 +50,10 @@ function Input:client_onAction(action, state)
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_toggleWeapons")
     elseif action == 9 then --Reapply upgrades
         sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_reapplyUpgrades")
+    elseif action == 10 then --Refresh class
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_refreshClass")
+    elseif action == 11 then --New class
+        sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_newClass")
     end
 
     return false
