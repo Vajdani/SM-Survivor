@@ -59,7 +59,7 @@ function TotebotGreenUnit:server_onCreate()
 	self.destroyed = false
 end
 
-function TotebotGreenUnit.server_onFixedUpdate( self, dt )
+function TotebotGreenUnit:server_onFixedUpdate()
 	self.attackTimer:tick()
 	if not self.attackTimer:done() then return end
 
@@ -78,28 +78,37 @@ function TotebotGreenUnit.server_onFixedUpdate( self, dt )
 		self.unit:setMovementType("stand")
 	end
 
-	local ownPos = self.unit.character.worldPosition
-	local toLastTargetPos = self.target.worldPosition - ownPos
-	if (self.target.worldPosition - ownPos):length2() < stopDistance then
-		self.unit:setMovementType("stand")
+	if not self.target:isDowned() then
+		local ownPos = self.unit.character.worldPosition
+		local toLastTargetPos = self.target.worldPosition - ownPos
+		if (self.target.worldPosition - ownPos):length2() < stopDistance then
+			self.unit:setMovementType("stand")
 
-		local dir = toLastTargetPos:normalize()
-		self.unit:setFacingDirection(dir)
+			local dir = toLastTargetPos:normalize()
+			self.unit:setFacingDirection(dir)
 
-		sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 5, 10)
-		self.unit:sendCharacterEvent("melee")
+			sm.melee.meleeAttack(attackUuid, Damage, ownPos, dir * 2, self.unit, 5, 10)
+			self.unit:sendCharacterEvent("melee")
 
-		self.attackTimer:reset()
+			self.attackTimer:reset()
+		end
 	end
 end
 
+local filter = sm.physics.filter.default - sm.physics.filter.character
 function TotebotGreenUnit:server_onUnitUpdate()
 	if not self.attackTimer:done() then return end
 
 	local pos = self.target.worldPosition
 	local char = self.unit.character
-	local hit, result = sm.physics.raycast(char.worldPosition, pos, char)
-	if result:getCharacter() == self.target then
+	if self.target:isDowned() then
+		self.path = {}
+		self.pathIndex = 1
+		return
+	end
+
+	local hit, result = sm.physics.raycast(char.worldPosition, pos, nil, filter)
+	if not hit then
 		---@diagnostic disable-next-line:missing-fields
 		self.path = { { toNode = { getPosition = function() return pos end } } }
 		self.pathIndex = 1
@@ -114,7 +123,7 @@ end
 
 
 
-function TotebotGreenUnit.server_onProjectile( self, hitPos, hitTime, hitVelocity, _, attacker, damage, userData, hitNormal, projectileUuid )
+function TotebotGreenUnit:server_onProjectile(hitPos, hitTime, hitVelocity, _, attacker, damage, userData, hitNormal, projectileUuid)
 	if not sm.exists( self.unit ) or not sm.exists( attacker ) then
 		return
 	end
@@ -123,7 +132,7 @@ function TotebotGreenUnit.server_onProjectile( self, hitPos, hitTime, hitVelocit
 	self:sv_takeDamage( damage, impact, hitPos )
 end
 
-function TotebotGreenUnit.server_onMelee( self, hitPos, attacker, damage, power, hitDirection )
+function TotebotGreenUnit:server_onMelee(hitPos, attacker, damage, power, hitDirection)
 	if not sm.exists( self.unit ) or not sm.exists( attacker ) then
 		return
 	end
@@ -132,39 +141,40 @@ function TotebotGreenUnit.server_onMelee( self, hitPos, attacker, damage, power,
 	self:sv_takeDamage( damage, impact, hitPos )
 end
 
-function TotebotGreenUnit.server_onExplosion( self, center, destructionLevel )
+function TotebotGreenUnit:server_onExplosion(center, destructionLevel)
 	if not sm.exists( self.unit ) then
 		return
 	end
+
 	local impact = ( self.unit:getCharacter().worldPosition - center ):normalize() * 6
 	self:sv_takeDamage( self.saved.stats.maxhp * ( destructionLevel / 10 ), impact, self.unit:getCharacter().worldPosition )
 end
 
 function TotebotGreenUnit:sv_onHit(data)
-	self:sv_takeDamage(data.damage, sm.vec3.zero(), data.hitPos)
+	self:sv_takeDamage(data.damage, data.impact or VEC3_ZERO, data.hitPos)
 end
 
-function TotebotGreenUnit.sv_takeDamage( self, damage, impact, hitPos )
+function TotebotGreenUnit:sv_takeDamage(damage, impact, hitPos)
 	if self.saved.stats.hp > 0 then
 		self.saved.stats.hp = self.saved.stats.hp - damage
 		self.saved.stats.hp = math.max( self.saved.stats.hp, 0 )
 		-- print( "'TotebotGreenUnit' received:", damage, "damage.", self.saved.stats.hp, "/", self.saved.stats.maxhp, "HP" )
 
-		local effectRotation = sm.quat.identity()
+		local effectRotation = QUAT_IDENTITY
 		if hitPos and impact and impact:length() >= FLT_EPSILON then
-			effectRotation = sm.vec3.getRotation( sm.vec3.new( 0, 0, 1 ), impact:normalize() * -1 )
+			effectRotation = getRotation( VEC3_UP, impact:normalize() * -1 )
 		end
 		sm.effect.playEffect( "ToteBot - Hit", hitPos, nil, effectRotation )
 
 		if self.saved.stats.hp <= 0 then
-			self:sv_onDeath( impact )
+			self:sv_onDeath()
 		else
 			self.storage:save( self.saved )
 		end
 	end
 end
 
-function TotebotGreenUnit.sv_onDeath( self, impact )
+function TotebotGreenUnit:sv_onDeath()
 	local character = self.unit:getCharacter()
 	if not self.destroyed then
 		self.unit:sendCharacterEvent( "death" )

@@ -64,6 +64,10 @@ end
 function Weapon:update(dt, pos, dir)
     self.fireCooldownTimer = math.max(self.fireCooldownTimer - dt, 0)
 
+    if not ProjectileManager.CanFireProjectile(self.pelletCount) then
+        return
+    end
+
     if self.clip == 0 then
         self.reloadTimer = self.reloadTimer - dt
         self.slider:update_reloading(self.reloadTimer)

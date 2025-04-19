@@ -43,12 +43,19 @@ function World:server_onCellCreated(x, y)
 end
 
 function World:server_onFixedUpdate()
-    if not g_spawnEnemies or #sm.unit.getAllUnits() >= 100 then return end
+    if not g_spawnEnemies or #sm.unit.getAllUnits() >= 200 then return end
 
     for k, v in pairs(sm.player.getAllPlayers()) do
         if (sm.game.getCurrentTick() % (spawnDelay + 40 * v.id)) == 0 then
             self:sv_spawnEnemies(v.publicData.miner)
         end
+        -- local miner = v.publicData.miner
+        -- if sm.game.getServerTick() % 20 == 0 and miner then
+        --     local char = miner.character
+        --     if char and sm.exists(char) and not char:isDowned() then
+        --         sm.event.sendToWorld(self.world, "sv_spawnEnemy", { delay = math.random(5 * 40, 10 * 40), miner = char })
+        --     end
+        -- end
     end
 end
 
@@ -190,4 +197,23 @@ function World:sv_spawnEnemies(miner)
             sm.unit.createUnit(unit_totebot_green, spawnPos, yaw, { target = char })
         end
 	end
+end
+
+function World:sv_spawnEnemy(args)
+    if args.delay > 0 then
+        args.delay = args.delay - 1
+        sm.event.sendToWorld(self.world, "sv_spawnEnemy", args)
+        return
+    end
+
+    local miner = args.miner
+    if not miner or not sm.exists(miner) or miner:isDowned() then return end
+
+    local dir = VEC3_Y:rotate(math.rad(math.random(359)), VEC3_UP)
+    local spawnPos = args.miner.worldPosition + dir * math.random(25, 75)
+    local yaw = GetYawPitch(-dir)
+    local hit, result = sm.physics.spherecast(spawnPos + VEC3_UP * 2.5, -VEC3_UP, 1)
+    if result.type == "terrainSurface" then
+        sm.unit.createUnit(unit_totebot_green, result.pointWorld, yaw, { target = miner })
+    end
 end

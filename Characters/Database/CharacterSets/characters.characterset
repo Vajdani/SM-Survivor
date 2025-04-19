@@ -107,14 +107,14 @@
 				"facingRotationSpeed": 9.4245,
 				"canSwim": true
 			},
-			"sound": {
-				"movementSoundFrames": [
-					1
-				],
-				"crouchedMovementSoundFrames": [
-					1
-				]
-			},
+			// "sound": {
+			// 	"movementSoundFrames": [
+			// 		1
+			// 	],
+			// 	"crouchedMovementSoundFrames": [
+			// 		1
+			// 	]
+			// },
 			"capsule": {
 				"radius": 0.35,
 				"height": 1.25

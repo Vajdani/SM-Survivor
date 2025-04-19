@@ -54,15 +54,22 @@ UPGRADETIERDATA = {
 
 ---@enum UPGRADETYPE
 UPGRADETYPE = {
+    -- DAMAGE   = 1,
+    -- RELOAD   = 2,
+    -- PIERCE   = 3,
+    -- RANGE    = 4,
+    -- LEVEL    = 5,
+    -- FIRERATE = 6,
+    -- CLIPSIZE = 7,
+    -- BOUNCE   = 8,
+    -- PELLETS  = 9,
     DAMAGE   = 1,
     RELOAD   = 2,
     PIERCE   = 3,
-    RANGE    = 4,
-    LEVEL    = 5,
-    FIRERATE = 6,
-    CLIPSIZE = 7,
-    BOUNCE   = 8,
-    PELLETS  = 9,
+    FIRERATE = 4,
+    CLIPSIZE = 5,
+    BOUNCE   = 6,
+    PELLETS  = 7,
 }
 
 ---@enum UPGRADES
@@ -133,47 +140,47 @@ UPGRADES = {
             weapon.pierceLimit = weapon.pierceLimit  + self.rarities[rarity][2]
         end
     },
-    [UPGRADETYPE.RANGE] = {
-        cardTitle = "Range",
-        icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
-        rarities = {
-            [UPGRADETIER.COMMON]    = { 0.75, 0.10 },
-            [UPGRADETIER.UNCOMMON]  = { 0.50, 0.15 },
-            [UPGRADETIER.RARE]      = { 0.25, 0.25 },
-            [UPGRADETIER.EPIC]      = { 0.15, 0.35 },
-            [UPGRADETIER.LEGENDARY] = { 0.00, 0.50 },
-        },
-        bonusTitle = function(amount)
-            return ("+%s%% #149dffRANGE"):format(amount * 100)
-        end,
-        bonusDescription = "Increase Weapon Level by 1",
-        restriction = -1,
-        weaponUpgrade = true,
-        upgradeWeapon = function(self, weapon, rarity)
-            weapon.level = weapon.level + 1
-            -- weapon.damage = weapon.damage * (1 + self.rarities[rarity][2])
-        end
-    },
-    [UPGRADETYPE.LEVEL] = {
-        cardTitle = "Level",
-        icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
-        rarities = {
-            [UPGRADETIER.COMMON]    = { 0.75, 1 },
-            [UPGRADETIER.UNCOMMON]  = { 0.50, 2 },
-            [UPGRADETIER.RARE]      = { 0.25, 3 },
-            [UPGRADETIER.EPIC]      = { 0.15, 4 },
-            [UPGRADETIER.LEGENDARY] = { 0.00, 5 },
-        },
-        bonusTitle = function(amount)
-            return ("+%s #149dffWEAPON LEVELS"):format(amount)
-        end,
-        bonusDescription = "Lets you imagine your weapon is now a lot prettier",
-        restriction = -1,
-        weaponUpgrade = true,
-        upgradeWeapon = function(self, weapon, rarity)
-            weapon.level = weapon.level + self.rarities[rarity][2]
-        end
-    },
+    -- [UPGRADETYPE.RANGE] = {
+    --     cardTitle = "Range",
+    --     icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
+    --     rarities = {
+    --         [UPGRADETIER.COMMON]    = { 0.75, 0.10 },
+    --         [UPGRADETIER.UNCOMMON]  = { 0.50, 0.15 },
+    --         [UPGRADETIER.RARE]      = { 0.25, 0.25 },
+    --         [UPGRADETIER.EPIC]      = { 0.15, 0.35 },
+    --         [UPGRADETIER.LEGENDARY] = { 0.00, 0.50 },
+    --     },
+    --     bonusTitle = function(amount)
+    --         return ("+%s%% #149dffRANGE"):format(amount * 100)
+    --     end,
+    --     bonusDescription = "Increase Weapon Level by 1",
+    --     restriction = -1,
+    --     weaponUpgrade = true,
+    --     upgradeWeapon = function(self, weapon, rarity)
+    --         weapon.level = weapon.level + 1
+    --         -- weapon.damage = weapon.damage * (1 + self.rarities[rarity][2])
+    --     end
+    -- },
+    -- [UPGRADETYPE.LEVEL] = {
+    --     cardTitle = "Level",
+    --     icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
+    --     rarities = {
+    --         [UPGRADETIER.COMMON]    = { 0.75, 1 },
+    --         [UPGRADETIER.UNCOMMON]  = { 0.50, 2 },
+    --         [UPGRADETIER.RARE]      = { 0.25, 3 },
+    --         [UPGRADETIER.EPIC]      = { 0.15, 4 },
+    --         [UPGRADETIER.LEGENDARY] = { 0.00, 5 },
+    --     },
+    --     bonusTitle = function(amount)
+    --         return ("+%s #149dffWEAPON LEVELS"):format(amount)
+    --     end,
+    --     bonusDescription = "Lets you imagine your weapon is now a lot prettier",
+    --     restriction = -1,
+    --     weaponUpgrade = true,
+    --     upgradeWeapon = function(self, weapon, rarity)
+    --         weapon.level = weapon.level + self.rarities[rarity][2]
+    --     end
+    -- },
     [UPGRADETYPE.FIRERATE] = {
         cardTitle = "Fire rate",
         icon = "$CONTENT_DATA/Gui/WeaponIcons/spudgun.png",
@@ -297,7 +304,7 @@ MINERDATA = {
     },
     [MINERCLASS.STUNTMAN] = {
         hp = 25,
-        runSpeedMultiplier = 1,
+        runSpeedMultiplier = 1.25,
         mineSpeedMultiplier = 1,
         mineDamage = 1,
         ability = {
@@ -310,6 +317,9 @@ MINERDATA = {
 }
 
 
+
+MAXPROJECTILECOUNT = 1000
+PROJECTILERANGELIMIT = 50^2
 
 VEC3_X = sm.vec3.new(1,0,0)
 VEC3_Y = sm.vec3.new(0,1,0)

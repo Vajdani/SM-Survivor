@@ -144,9 +144,16 @@ function Player:server_onFixedUpdate()
 	if self.isJumping and sm.game.getServerTick() - self.jumpTick >= 5 and cChar.velocity.z < 0 then
 		local hit, result = sm.physics.spherecast(pos, pos - VEC3_UP, 0.5, cChar)
 		if hit and result.type ~= "limiter" then
-			for k, v in pairs(sm.physics.getSphereContacts(pos, 3.5).harvestables) do
+			local contacts = sm.physics.getSphereContacts(pos, 3.5)
+			for k, v in pairs(contacts.harvestables) do
 				if not MINERALDROPS[v.id] then
 					sm.event.sendToHarvestable(v, "sv_onHit", 100)
+				end
+			end
+
+			for k, v in pairs(contacts.characters) do
+				if not v:isPlayer() and v ~= cChar then
+					sm.event.sendToUnit(v:getUnit(), "sv_onHit", { damage = 1000, impact = (v.worldPosition - pos):normalize() * 10, hitPos = v.worldPosition })
 				end
 			end
 
@@ -275,29 +282,30 @@ function Player:sv_interact()
 
 	if self.collectCharges > 0 then
 		local pos = char.worldPosition
-		sm.effect.playEffect("Part - Upgrade", pos)
-
-		self.collectCharges = self.collectCharges - 1
-
-		-- local xp = 0
-		-- local contacts = sm.physics.getSphereContacts(pos, 100)
-		-- for k, v in pairs(contacts.harvestables) do
-		-- 	if MINERALDROPS[v.id] == true then
-		-- 		xp = xp + v.publicData.amount
-		-- 		v:destroy()
-		-- 	end
-		-- end
-
-		-- if not self:sv_collectMineral({ type = ROCKTYPE.XP, amount = xp }) then
-		-- 	self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
-		-- end
-
+		local xp = 0
 		local contacts = sm.physics.getSphereContacts(pos, 100)
 		for k, v in pairs(contacts.harvestables) do
 			if MINERALDROPS[v.id] == true then
-				sm.event.sendToHarvestable(v, "sv_onCollect", char)
+				xp = xp + v.publicData.amount
+				v:destroy()
 			end
 		end
+
+		if xp > 0 then
+			sm.effect.playEffect("Part - Upgrade", pos)
+
+			self.collectCharges = self.collectCharges - 1
+			if not self:sv_collectMineral({ type = ROCKTYPE.XP, amount = xp }) then
+				self.network:sendToClient(self.player, "cl_updateLevelCount", { self.level, 0, self.collectCharges })
+			end
+		end
+
+		-- local contacts = sm.physics.getSphereContacts(pos, 100)
+		-- for k, v in pairs(contacts.harvestables) do
+		-- 	if MINERALDROPS[v.id] == true then
+		-- 		sm.event.sendToHarvestable(v, "sv_onCollect", char)
+		-- 	end
+		-- end
 
 		self:sv_save()
 	end
@@ -329,20 +337,22 @@ end
 
 
 function Player:sv_useAbility()
+	if self.controlled.character:isDowned() then return end
+
 	if self.classId == MINERCLASS.DEMOLITION then
 		self.controlled:sendCharacterEvent("throw")
 		sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
 	elseif self.cl_classId == MINERCLASS.SCOUT then
-		self.speedBoostTime = sm.game.getServerTick() + 5 * 40
+		self.speedBoostTime = sm.game.getServerTick() + 500 * 40
 		--self.player.publicData.runSpeedMultiplier = 3
 	elseif self.cl_classId == MINERCLASS.STUNTMAN then
 		local char = self.controlled.character
 		local jumpDir = self:GetMoveDir()
-		if jumpDir == VEC3_ZERO then
-			jumpDir = char.direction
-		end
+		-- if jumpDir == VEC3_ZERO then
+		-- 	jumpDir = char.direction
+		-- end
 
-		sm.physics.applyImpulse(char, (VEC3_UP * 2 + jumpDir * 3):normalize() * char.mass * 25)
+		sm.physics.applyImpulse(char, (VEC3_UP * 2 + jumpDir * 2) * char.mass * 10)
 		self.isJumping = true
 		self.jumpTick = sm.game.getServerTick()
 
@@ -431,7 +441,9 @@ function Player:client_onClientDataUpdate(data, channel)
 
 			local ability = MINERDATA[self.cl_classId].ability
 			self.abilityCooldown = ability.cooldown
+			self.abilityCooldownTimer = nil
 			self.abilityRecharge = ability.recharge
+			self.abilityRechargeTimer = nil
 			self.abilityUses = ability.uses
 			self.abilityMaxUses = ability.uses
 
@@ -440,14 +452,17 @@ function Player:client_onClientDataUpdate(data, channel)
 		end
 	else
 		self.cl_controlled = data.controlled
-		self.enemyTrigger = sm.areaTrigger.createBox(sm.vec3.new(20, 20, 1), sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.character)
+		self.enemyTrigger = sm.areaTrigger.createBox(vec3(20, 20, 1), VEC3_ZERO, QUAT_IDENTITY, sm.areaTrigger.filter.character)
 	end
 end
 
 function Player:client_onReload()
-	if self.abilityRechargeTimer or self.abilityCooldownTimer or
-	   self.cl_classId == MINERCLASS.STUNTMAN and not self.cl_controlled:isOnGround()
-	then return true end
+	if self.cl_controlled:isDowned() or
+	   self.abilityRechargeTimer or
+	   self.abilityCooldownTimer or
+	   self.cl_classId == MINERCLASS.STUNTMAN and not self.cl_controlled:isOnGround() then
+		return true
+	end
 
 	self.network:sendToServer("sv_useAbility")
 
@@ -601,6 +616,7 @@ function Player:client_onFixedUpdate(dt)
 	if #enemies == 1 then --Only self
 		for k, v in pairs(self.weapons) do
 			v:update(dt)
+			-- v:update(dt, controlledPos, controlledChar.direction)
 			-- v:update(dt, controlledPos, k == 4 and controlledChar.direction or nil)
 		end
 
@@ -656,6 +672,7 @@ function Player:cl_drawDynamiteTrajectory(dt)
 
 	local startPos = self.cl_controlled.worldPosition + VEC3_UP
 	self.trajectorySim.position = startPos
+	self.trajectorySim.startPosition = startPos
 	self.trajectorySim.direction = (VEC3_UP * 2 + self.cl_controlled:getSmoothViewDirection()):normalize()
 	self.trajectorySim.lifeTime = 10
 	self.trajectorySim.detonateTime = 2
@@ -871,16 +888,16 @@ function Player:cl_upgradeSelected(button)
 	local upgrade = UPGRADES[upgradeId]
 	if upgrade.weaponUpgrade then
 		local weaponId = data[3]
-		local lastLevel = self.weapons[weaponId].level
 		upgrade:upgradeWeapon(self.weapons[weaponId], data[2])
 
-		if math.floor(lastLevel / 6) ~= math.floor(self.weapons[weaponId].level / 6) then
-			print("overclock")
-			-- for i = 1, math.floor(self.weapons[weaponId].level / 6) do
-			-- 	self.weapons[weaponId].level = self.weapons[weaponId].level - 6
-			-- 	print("overclock")
-			-- end
-		end
+		-- local lastLevel = self.weapons[weaponId].level
+		-- if math.floor(lastLevel / 6) ~= math.floor(self.weapons[weaponId].level / 6) then
+		-- 	print("overclock")
+		-- 	for i = 1, math.floor(self.weapons[weaponId].level / 6) do
+		-- 		self.weapons[weaponId].level = self.weapons[weaponId].level - 6
+		-- 		print("overclock")
+		-- 	end
+		-- end
 	else
 
 	end

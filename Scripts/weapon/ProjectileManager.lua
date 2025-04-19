@@ -58,10 +58,13 @@ function ProjectileManager:client_onCreate()
 end
 
 function ProjectileManager:client_onUpdate(dt)
+    g_projectileCount = 0
     for k, projectile in pairs(self.projectiles) do
         local delete = projectile:update(self, dt)
         if delete then
             self:cl_destroyProjectile(k)
+        else
+            g_projectileCount = g_projectileCount + 1
         end
     end
 end
@@ -112,6 +115,12 @@ end
 function ProjectileManager:cl_projectileNetwork(args)
     local projectile = self.projectiles[args.id]
     projectile[args.callback](projectile, args.params)
+end
+
+
+
+function ProjectileManager.CanFireProjectile(pellets)
+    return g_projectileCount + pellets <= MAXPROJECTILECOUNT
 end
 
 
@@ -167,6 +176,7 @@ function Projectile:init(data, headless)
         self.effect = effect
     end
 
+    self.startPosition = data.position
     self.position = data.position
 
     self.hitObjs = {}
@@ -182,7 +192,7 @@ local terrainTypes = {
 
 function Projectile:update(manager, dt)
     self.lifeTime = self.lifeTime - dt
-    if self.lifeTime <= 0 or self.position.z < 0 then
+    if self.lifeTime <= 0 or self.position.z < 0 or (self.position - self.startPosition):length2() >= PROJECTILERANGELIMIT then
         self.effect:stop()
         return true
     end
