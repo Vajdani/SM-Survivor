@@ -99,7 +99,7 @@ function TotebotGreenUnit:server_onUnitUpdate()
 	local pos = self.target.worldPosition
 	local char = self.unit.character
 	local hit, result = sm.physics.raycast(char.worldPosition, pos, char)
-	if result:getCharacter() == self.target and false then
+	if result:getCharacter() == self.target then
 		---@diagnostic disable-next-line:missing-fields
 		self.path = { { toNode = { getPosition = function() return pos end } } }
 		self.pathIndex = 1

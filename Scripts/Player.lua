@@ -126,20 +126,42 @@ function Player:server_onFixedUpdate()
 		self.speedBoostTime = nil
 	end
 
-	local char = self.player.character
-	if not char or not sm.exists(char) then return end
-
+	local pChar = self.player.character
+	if not pChar or not sm.exists(pChar) then return end
 	if not self.input or not sm.exists(self.input) then return end
 
-	local pos = self.controlled.character.worldPosition
+	local cChar = self.controlled.character
+	if not cChar or not sm.exists(cChar) then return end
+
+	local pos = cChar.worldPosition
+	if pos.z < -5 then
+		pos = vec3(pos.x, pos.y, 0.5)
+		cChar:setWorldPosition(pos)
+	end
+
 	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
+
+	if self.isJumping and sm.game.getServerTick() - self.jumpTick >= 5 and cChar.velocity.z < 0 then
+		local hit, result = sm.physics.spherecast(pos, pos - VEC3_UP, 0.5, cChar)
+		if hit and result.type ~= "limiter" then
+			for k, v in pairs(sm.physics.getSphereContacts(pos, 3.5).harvestables) do
+				if not MINERALDROPS[v.id] then
+					sm.event.sendToHarvestable(v, "sv_onHit", 100)
+				end
+			end
+
+			self.isJumping = false
+			self.controlled:sendCharacterEvent("land")
+			sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", true)
+		end
+	end
 
 	local moveDir = self:GetMoveDir()
 	self.controlled:setMovementDirection(moveDir)
 
 	local moving = moveDir:length2() > 0
 	if self.controlMethod == 2 then
-		local dir = char.direction
+		local dir = pChar.direction
 		dir.z = 0
 		self.controlled:setFacingDirection(dir:normalize())
 	elseif moving then
@@ -292,8 +314,10 @@ function Player:sv_refreshClass()
 	self.player.publicData = {
 		runSpeedMultiplier = minerData.runSpeedMultiplier,
 		mineSpeedMultiplier = minerData.mineSpeedMultiplier,
-		mineDamage = minerData.mineDamage
+		mineDamage = minerData.mineDamage,
+		miner = self.controlled
 	}
+	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId, hipleaserefresh = math.random() }, 1)
 end
 
 function Player:sv_newClass()
@@ -311,6 +335,20 @@ function Player:sv_useAbility()
 	elseif self.cl_classId == MINERCLASS.SCOUT then
 		self.speedBoostTime = sm.game.getServerTick() + 5 * 40
 		--self.player.publicData.runSpeedMultiplier = 3
+	elseif self.cl_classId == MINERCLASS.STUNTMAN then
+		local char = self.controlled.character
+		local jumpDir = self:GetMoveDir()
+		if jumpDir == VEC3_ZERO then
+			jumpDir = char.direction
+		end
+
+		sm.physics.applyImpulse(char, (VEC3_UP * 2 + jumpDir * 3):normalize() * char.mass * 25)
+		self.isJumping = true
+		self.jumpTick = sm.game.getServerTick()
+
+		sm.effect.playEffect("Stuntman - Jump", char.worldPosition)
+		self.controlled:sendCharacterEvent("jump")
+		sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", false)
 	end
 end
 
@@ -407,7 +445,9 @@ function Player:client_onClientDataUpdate(data, channel)
 end
 
 function Player:client_onReload()
-	if self.abilityRechargeTimer or self.abilityCooldownTimer then return true end
+	if self.abilityRechargeTimer or self.abilityCooldownTimer or
+	   self.cl_classId == MINERCLASS.STUNTMAN and not self.cl_controlled:isOnGround()
+	then return true end
 
 	self.network:sendToServer("sv_useAbility")
 
@@ -672,6 +712,12 @@ end
 
 function Player:cl_setControlMethod(method)
 	self.cl_controlMethod = method
+	-- if method == 3 then
+	-- 	sm.localPlayer.setLockedControls(true)
+	-- 	sm.localPlayer.setDirection(self.cl_controlled.direction)
+	-- 	sm.event.sendToPlayer(sm.localPlayer.getPlayer(), "cl_setLockedControls", false)
+	-- end
+
 	self.network:sendToServer("sv_setControlMethod", method)
 end
 
@@ -866,7 +912,7 @@ end
 
 function Player:GetMoveDir()
 	local char = self.controlled.character
-	local moveDir = sm.vec3.zero()
+	local moveDir = VEC3_ZERO
 	local moveDirSet = moveDirs[self.controlMethod]
 	for k, v in pairs(self.moveKeys) do
 		if v then

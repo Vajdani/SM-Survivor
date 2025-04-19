@@ -109,13 +109,11 @@ end
 local function AssembleGrid(cellX, cellY, seed, mineralSeed)
 	for x = rockMin, rockMax do
 		for y = rockMin, rockMax do
-			-- local rock = {
+			-- table_insert(g_cellData.gridData[cellY][cellX].rocks, {
 			-- 	rockType = ROCKTYPE.ROCK,
-			-- 	pos = vec3(x, y, 0.75),
+			-- 	pos = { x, y },
 			-- 	rot = random(0, 3),
-			-- }
-
-			-- table_insert(g_cellData.gridData[cellY][cellX].rocks, rock)
+			-- })
 
 			AddGridItems(cellX, cellY, x, y, seed, mineralSeed)
 		end

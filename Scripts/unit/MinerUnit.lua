@@ -4,7 +4,7 @@ MinerUnit = class()
 local mineTimer = 25
 
 function MinerUnit:server_onCreate()
-    self.mineBox =  sm.areaTrigger.createBox(vec3(2,1.5,1) * 0.5, sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
+    self.mineBox =  sm.areaTrigger.createBox(vec3(2,2,1) * 0.5, sm.vec3.zero(), sm.quat.identity(), sm.areaTrigger.filter.harvestable)
     self.collectArea = sm.areaTrigger.createSphere(2, sm.vec3.zero(), nil, sm.areaTrigger.filter.harvestable)
     self.collectArea:bindOnEnter("sv_collect")
 
@@ -61,7 +61,7 @@ function MinerUnit:server_onFixedUpdate()
     local contents = self.mineBox:getContents()
 
     pos = pos + VEC3_UP * char:getHeight() * 0.25
-    local _, colResult = sm.physics.spherecast(pos, pos + dir * 2, 0.1, char)
+    local _, colResult = sm.physics.spherecast(pos, pos + dir * 1.9, 0.1, char)
     if self.miningEnabled and colResult.type == "harvestable" then
         self.swinging = true
         self.timer = self.timer - 1

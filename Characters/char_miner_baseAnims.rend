@@ -5,6 +5,7 @@
 		"animationList" : [
 			{ "name" : "sledgehammer_attack1", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack1.dae" },
 			{ "name" : "sledgehammer_attack2", 	"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_attack2.dae" },
+			{ "name" : "sledgehammer_guard_idle", 		"file" : "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Sledgehammer/ani_char_male_sledgehammer_guard_idle.dae", "looping" : true },
 
 			{ "name": "spudgun_shoot1", 					"file": "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_shoot.dae" },
 			{ "name": "spudgun_shoot2", 					"file": "$GAME_DATA/Character/Char_Male/Animations/Thirdperson/Spudgun/ani_char_male_spudgun_shoot.dae" },

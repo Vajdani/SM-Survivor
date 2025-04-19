@@ -219,7 +219,10 @@ WeaponTargetFunctions = {
             end)
 
             -- sm.particle.createParticle("paint_smoke", points[1].averagePosition, QUAT_IDENTITY, colour(0,1,0))
-            return { worldPosition = points[1].averagePosition }
+            local hit, result = sm.physics.raycast(position, points[1].averagePosition, owner)
+            if result.type ~= "harvestable" then
+                return { worldPosition = points[1].averagePosition }
+            end
         end
 
         return nil

@@ -119,6 +119,12 @@ function MinerCharacter.client_onGraphicsLoaded( self )
 		weight = 0,
 		speed = 1
 	}
+	self.animations.sledgehammer_guard_idle = {
+		info = self.character:getAnimationInfo( "sledgehammer_guard_idle" ),
+		time = 0,
+		weight = 0,
+		speed = 1
+	}
 	self.animations.spudgun_shoot1 = {
 		info = self.character:getAnimationInfo( "spudgun_shoot1" ),
 		time = 0,
@@ -237,8 +243,13 @@ function MinerCharacter.client_onUpdate( self, deltaTime )
 	end
 end
 
+local blockSwings = {
+	throw = true,
+	jump = true,
+	land = true
+}
 function MinerCharacter.client_onEvent( self, event )
-	if not self.animationsLoaded or self.currentAnimation == "throw" and event:match("swing_") then
+	if not self.animationsLoaded or blockSwings[self.currentAnimation] and event:match("swing_") then
 		return
 	end
 
@@ -269,6 +280,12 @@ function MinerCharacter.client_onEvent( self, event )
 
 		self:cl_removeRenderables(self.toolRenderables)
 		self:cl_applyRenderables({ glowstickRenderable, defaultAnims })
+	elseif event == "jump" then
+		self.currentAnimation = "sledgehammer_guard_idle"
+		self.animations.sledgehammer_guard_idle.time = 0
+	elseif event == "land" then
+		self.currentAnimation = "sledgehammer_attack1"
+		self.animations.sledgehammer_attack1.time = 0
 	end
 end
 
