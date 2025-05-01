@@ -58,6 +58,7 @@ local classRenderables = {
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Jacket/Outfit_stuntman_jacket/char_male_outfit_stuntman_jacket.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Pants/Outfit_stuntman_pants/char_male_outfit_stuntman_pants.rend",
 			"$SURVIVAL_DATA/Character/Char_Male/Outfit/Shoes/Outfit_stuntman_shoes/char_male_outfit_stuntman_shoes.rend",
+			"$SURVIVAL_DATA/Character/Char_Male/Head/Male/char_male_head01/char_male_head01.rend"
 		},
 		tool = {
 			defaultAnims,
