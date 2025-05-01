@@ -272,6 +272,11 @@ function Player:sv_collectMineral(data)
 		end
 	end
 
+	EventManager.Invoke("CollectItem", {
+		type = type,
+		amount = data.amount
+	})
+
 	self.minerals[type] = newAmount
 	self.network:sendToClient(self.player, "cl_updateMineralCount", self.minerals)
 
@@ -333,6 +338,7 @@ function Player:sv_refreshClass()
 		mineDamage = minerData.mineDamage,
 		miner = self.controlled
 	}
+	self:sv_save()
 	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId, hipleaserefresh = math.random() }, 1)
 end
 
@@ -340,7 +346,7 @@ function Player:sv_newClass()
 	self.classId = (self.classId % #MINERDATA) + 1
 	self:sv_refreshClass()
 	self.network:setClientData({ health = self.health, maxHealth = self.maxHealth, classId = self.classId }, 1)
-    sm.event.sendToCharacter(self.controlled.character, "sv_init", { classId = self.classId, owner = self.player })
+    sm.event.sendToUnit(self.controlled, "sv_sendCharInit", { classId = self.classId, owner = self.player })
 end
 
 
@@ -596,6 +602,15 @@ end
 
 function Player:client_onFixedUpdate(dt)
 	if not self.isLocal or self.isDead then return end
+
+	local active = g_sideMission ~= nil and g_sideMission.clientPublicData ~= nil
+	self.hud:setVisible("objectivePanel", active)
+	if active then
+		local data = g_sideMission.clientPublicData
+		self.hud:setText("objective_title", data.title)
+		self.hud:setText("objective_progress", data.progress)
+		SetGuiIcon(self.hud, "objective_icon", data.icon)
+	end
 
 	if self.abilityCooldownTimer then
 		self.abilityCooldownTimer = max(self.abilityCooldownTimer - dt, 0)

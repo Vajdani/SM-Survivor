@@ -1,4 +1,4 @@
-dofile( "$SURVIVAL_DATA/Scripts/terrain/terrain_util2.lua" )
+dofile("$SURVIVAL_DATA/Scripts/terrain/terrain_util2.lua")
 dofile "util.lua"
 
 local rockMin = 0
@@ -6,7 +6,8 @@ local rockMax = 63
 
 local rockId = uuid("0c01f246-0090-43e4-8453-c1390322a7e4")
 local mineralId = uuid("e731dede-34df-467f-8beb-315985179860")
-local plasticId = uuid( "628b2d61-5ceb-43e9-8334-a4135566df7a" )
+local morkiteId = uuid("853b3592-296d-4393-8125-0fc60e01cccd")
+local plasticId = uuid("628b2d61-5ceb-43e9-8334-a4135566df7a")
 
 local rockRot = angleAxis(RAD90, VEC3_X)
 
@@ -16,13 +17,17 @@ local function GetGridKey(x, y)
 end
 
 local function GetRockType(val)
-    if val > 0.3 and val < 0.31 then
-        return ROCKTYPE.GOLD
-    elseif val > 0.33 and val < 0.35 then
-        return ROCKTYPE.NITRA
-    end
+	if g_hasMorkite and val > 0.36 then
+		return ROCKTYPE.MORKITE
+	end
 
-    return ROCKTYPE.ROCK
+	if val > 0.3 and val < 0.31 then
+		return ROCKTYPE.GOLD
+	elseif val > 0.33 and val < 0.35 then
+		return ROCKTYPE.NITRA
+	end
+
+	return ROCKTYPE.ROCK
 end
 
 local function IsBorder(cellX, cellY, x, y)
@@ -123,11 +128,13 @@ end
 
 
 function Init()
-	print( "Init terrain" )
+	print("Init terrain")
 end
 
-function Create( xMin, xMax, yMin, yMax, seed, data )
-	math.randomseed( seed )
+function Create(xMin, xMax, yMin, yMax, seed, data)
+	math.randomseed(seed)
+
+	g_hasMorkite = data.sideMissionId == SIDEMISSION.COLLECTMORKITE
 
 	g_uuidToPath = {}
 	g_cellData = {
@@ -158,7 +165,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 			}
 			g_cellLoaded[cellY][cellX] = false
 
-		    AssembleGrid(cellX, cellY, g_cellData.seed, g_cellData.mineralSeed)
+			AssembleGrid(cellX, cellY, g_cellData.seed, g_cellData.mineralSeed)
 		end
 	end
 
@@ -208,7 +215,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 							(pos[1] == rockMin or pos[1] == rockMax or pos[2] == rockMin or pos[2] == rockMax) then
 							-- and not (offset[1] == rockMin or offset[1] >= rockMax or offset[1] == rockMin or offset[1] >= rockMax) then
 							local _cellX, _cellY = cellX + dir[1], cellY + dir[2]
-							if InsideCellBounds( _cellX, _cellY ) then
+							if InsideCellBounds(_cellX, _cellY) then
 								local pos_x, pos_y = -1, -1
 								if i == 1 then
 									pos_x, pos_y = rockMin, pos[2]
@@ -242,7 +249,7 @@ function Create( xMin, xMax, yMin, yMax, seed, data )
 	waypointPositionToIndex = nil
 	rockPositionToIndex = nil
 
-	sm.terrainData.save( g_cellData )
+	sm.terrainData.save(g_cellData)
 end
 
 function Load()
@@ -253,37 +260,35 @@ function Load()
 	return false
 end
 
-function GetTilePath( uid )
+function GetTilePath(uid)
 	return ""
 end
 
-function GetHeightAt( x, y, lod )
+function GetHeightAt(x, y, lod)
 	return 0
 end
 
-function GetColorAt( x, y, lod )
+function GetColorAt(x, y, lod)
 	return 0.242, 0.423, 0.512
 end
 
-function GetMaterialAt( x, y, lod )
+function GetMaterialAt(x, y, lod)
 	return 1, 0, 0, 0, 0, 0, 0, 0
 end
 
-function GetClutterIdxAt( x, y )
+function GetClutterIdxAt(x, y)
 	return -1
 end
 
-function GetAssetsForCell( cellX, cellY, lod )
+function GetAssetsForCell(cellX, cellY, lod)
 	return {}
 end
 
-
-
 local defaultNodes = {
 	{
-		pos = vec3( 32, 32, 32 ),
-		rot = sm.quat.new( 0.707107, 0, 0, 0.707107 ),
-		scale = vec3( 64, 64, 64 ),
+		pos = vec3(32, 32, 32),
+		rot = sm.quat.new(0.707107, 0, 0, 0.707107),
+		scale = vec3(64, 64, 64),
 		tags = { "REFLECTION" }
 	}
 }
@@ -306,7 +311,7 @@ for i = 1, amount do
 	end
 end
 
-function GetNodesForCell( cellX, cellY )
+function GetNodesForCell(cellX, cellY)
 	if not InsideCellBounds(cellX, cellY) then
 		return {}
 	end
@@ -325,11 +330,18 @@ function GetNodesForCell( cellX, cellY )
 	return nodes
 end
 
-function GetCreationsForCell( cellX, cellY )
+function GetCreationsForCell(cellX, cellY)
 	return {}
 end
 
-function GetHarvestablesForCell( cellX, cellY, lod )
+local rockTypeToUUID = {
+	[ROCKTYPE.ROCK]    = rockId,
+	[ROCKTYPE.BORDER]  = rockId,
+	[ROCKTYPE.GOLD]    = mineralId,
+	[ROCKTYPE.NITRA]   = mineralId,
+	[ROCKTYPE.MORKITE] = morkiteId,
+}
+function GetHarvestablesForCell(cellX, cellY, lod)
 	if g_cellLoaded[cellY][cellX] == true then
 		return {}
 	end
@@ -337,15 +349,13 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 	local rocks = {}
 	for k, v in pairs(g_cellData.gridData[cellY][cellX].rocks) do
 		local rockType = v.rockType
-		local isMineral = MINERALS[rockType] ~= nil
-
 		local rot = rockRot
 		if v.rot ~= 0 then
 			rot = rot * angleAxis(RAD90 * v.rot, VEC3_Y)
 		end
 
 		table_insert(rocks, {
-			uuid = isMineral and mineralId or rockId,
+			uuid = rockTypeToUUID[rockType],
 			pos = vec3(v.pos[1], v.pos[2], 0.75),
 			rot = rot,
 			params = ROCKTYPES[rockType]
@@ -384,10 +394,10 @@ function GetHarvestablesForCell( cellX, cellY, lod )
 	return rocks
 end
 
-function GetKinematicsForCell( cellX, cellY, lod )
+function GetKinematicsForCell(cellX, cellY, lod)
 	return {}
 end
 
-function GetDecalsForCell( cellX, cellY, lod )
+function GetDecalsForCell(cellX, cellY, lod)
 	return {}
 end

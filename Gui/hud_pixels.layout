@@ -1,4 +1,4 @@
-﻿<MyGUI type="Layout" version="3.2.0">
+<MyGUI type="Layout" version="3.2.0">
 	<Widget type="Widget" skin="gui_keybinds_bg" name="mineralPanel" position="50 50 175 40">
 		<Widget type="ImageBox" skin="ImageBox" name="icon_gold" position="5 5 30 30" />
 		<Widget type="TextBox" skin="TextBox" name="amount_gold" position="35 5 40 30">
@@ -14,17 +14,17 @@
 		</Widget>
 	</Widget>
 	<Widget type="Widget" skin="gui_keybinds_bg" name="objectivePanel" position="1470 50 400 40">
-		<Widget type="TextBox" skin="TextBox" name="title" position="5 5 315 30">
+		<Widget type="TextBox" skin="TextBox" name="objective_title" position="5 5 310 30">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Left VCenter" />
 			<Property key="Caption" value="find trb" />
 		</Widget>
-		<Widget type="TextBox" skin="TextBox" name="progress" position="325 5 40 30">
+		<Widget type="TextBox" skin="TextBox" name="objective_progress" position="315 5 50 30">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Center" />
-			<Property key="Caption" value="0/1" />
+			<Property key="Caption" value="99/99" />
 		</Widget>
-		<Widget type="ImageBox" skin="ImageBox" name="icon" position="365 5 30 30" />
+		<Widget type="ImageBox" skin="ImageBox" name="objective_icon" position="365 5 30 30" />
 		<Widget type="Widget" skin="WhiteSkin" position="5 35 390 1">
 			<Property key="Colour" value="1 0.585938 0" />
 		</Widget>
@@ -118,6 +118,6 @@
 			<Property key="Caption" value="1" />
 		</Widget>
 		<Widget type="ImageBox" skin="ImageBox" name="icon_ability" position="95 5 30 30" />
-		<Widget type="ImageBox" skin="ImageBox" name="icon_abilityCooldown" position="125 0 40 40"/>
+		<Widget type="ImageBox" skin="ImageBox" name="icon_abilityCooldown" position="125 0 40 40" />
 	</Widget>
 </MyGUI>

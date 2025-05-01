@@ -35,6 +35,24 @@
             "file" : "$CONTENT_DATA/Scripts/harvestable/RockFormation.lua"
          },
          "uuid" : "e731dede-34df-467f-8beb-315985179860"
+      },
+      {
+         "col_box" : {
+            "x" : 4,
+            "y" : 4,
+            "z" : 6
+         },
+         "mass" : 10000.0,
+         "material" : "Rock",
+         "name" : "rock_mineral_morkite",
+         "removable" : false,
+         "renderable" : "$CONTENT_DATA/Harvestables/Renderables/rock_mineral.rend",
+         "script" : {
+            "class" : "MorkiteFormation",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/harvestable/RockFormation.lua"
+         },
+         "uuid" : "853b3592-296d-4393-8125-0fc60e01cccd"
       }
    ]
 }

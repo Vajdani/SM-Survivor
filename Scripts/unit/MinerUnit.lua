@@ -15,17 +15,18 @@ function MinerUnit:server_onCreate()
     if data then
         self.minerData = data
         self:sv_sendCharInit()
-        self.storage:save(data)
     end
 end
 
-function MinerUnit:sv_sendCharInit()
+function MinerUnit:sv_sendCharInit(data)
     if not sm.exists(self.unit.character) then
-        sm.event.sendToUnit(self.unit, "sv_sendCharInit")
+        sm.event.sendToUnit(self.unit, "sv_sendCharInit", data)
         return
     end
 
-    sm.event.sendToCharacter(self.unit.character, "sv_init", self.minerData)
+    local sent = data or self.minerData
+    self.storage:save(sent)
+    sm.event.sendToCharacter(self.unit.character, "sv_init", sent)
 end
 
 function MinerUnit:server_onProjectile(position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)

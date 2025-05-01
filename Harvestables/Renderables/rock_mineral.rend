@@ -16,7 +16,7 @@
             {
                "material" : "DifAsgNor_Pose2",
                "textureList" : [
-                  "$GAME_DATA/Textures/Default/default_dif.tga",
+                  "$GAME_DATA/Textures/Default/default_dif.tga", //"$GAME_DATA/Textures/transparent.tga",
                   "$CONTENT_DATA/Harvestables/Textures/rock_mineral.tga",
                   "$GAME_DATA/Textures/Default/default_nor.tga"
                ]

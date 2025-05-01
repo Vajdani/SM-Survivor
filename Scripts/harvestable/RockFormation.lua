@@ -63,3 +63,12 @@ end
 function MineralFormation:cl_colour(_type)
     self.harvestable:setColor(MINERALCOLOURS[_type])
 end
+
+
+
+---@class MorkiteFormation : MineralFormation
+MorkiteFormation = class(MineralFormation)
+MorkiteFormation.dropData = {
+    uuid = hvs_mineralDrop,
+    amount = function() return math.random(1, 2) end
+}

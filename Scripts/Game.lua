@@ -11,13 +11,21 @@ end
 
 g_enableWaypointEffects = false
 
+---@type ScriptableObject?
+g_sideMission = g_sideMission or nil
+
+-- ---@type ScriptableObject[]
+-- g_sideMissions = g_sideMissions or {}
+
+local sideMissionId = SIDEMISSION.COLLECTMORKITE
+
 function Game.server_onCreate( self )
 	print("Game.server_onCreate")
     self.sv = {}
 	self.sv.saved = self.storage:load()
     if self.sv.saved == nil then
 		self.sv.saved = {}
-		self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
+		self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World", { sideMissionId = sideMissionId } )
 		self.storage:save( self.sv.saved )
 	end
 
@@ -25,7 +33,8 @@ function Game.server_onCreate( self )
 		sm.world.loadWorld( self.sv.saved.world )
 	end
 
-	sm.scriptableObject.createScriptableObject(sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0"), nil, self.sv.saved.world)
+	sm.scriptableObject.createScriptableObject(sob_projectileManager, nil, self.sv.saved.world)
+	sm.scriptableObject.createScriptableObject(sob_eventManager)
 
 	g_unitManager = UnitManager()
 	g_unitManager:sv_onCreate( self.sv.saved.overworld )
@@ -74,8 +83,39 @@ end
 
 function Game:sv_recreate(data, player)
 	self.sv.saved.world:destroy()
-	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World" )
-	sm.scriptableObject.createScriptableObject(sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0"), nil, self.sv.saved.world)
+	self.sv.saved.world = sm.world.createWorld( "$CONTENT_DATA/Scripts/World.lua", "World", { sideMissionId = sideMissionId } )
+
+	-- for k, v in pairs(g_sideMissions) do
+	-- 	v:destroy()
+	-- end
+	-- g_sideMissions = {}
+
+	-- for i = 1, 1 do --math.random(1, 2) do
+	-- 	local id = math.random(#SIDEMISSION)
+	-- 	local missionData = SIDEMISSIONDATA[id]
+	-- 	table_insert(g_sideMissions,
+	-- 		sm.scriptableObject.createScriptableObject(
+	-- 			missionData.sobId,
+	-- 			{ id = id, data = missionData.data },
+	-- 			self.sv.saved.world
+	-- 		)
+	-- 	)
+	-- end
+
+	if g_sideMission then
+		g_sideMission:destroy()
+		g_sideMission = nil
+	end
+
+	local id = math.random(#SIDEMISSION)
+	local missionData = SIDEMISSIONDATA[id]
+	g_sideMission = sm.scriptableObject.createScriptableObject(
+		missionData.sobId,
+		{ id = id, data = missionData.data },
+		self.sv.saved.world
+	)
+
+	sm.scriptableObject.createScriptableObject(sob_projectileManager, nil, self.sv.saved.world)
 
 	self.storage:save( self.sv.saved )
 
@@ -86,6 +126,9 @@ function Game:sv_recreate(data, player)
 	for k, v in pairs(sm.player.getAllPlayers()) do
 		self.sv.saved.world:loadCell( 0, 0, v, "sv_createPlayerCharacter" )
 	end
+
+	-- self.network:setClientData(g_sideMissions, 1)
+	self.network:setClientData(g_sideMission, 1)
 end
 
 function Game:sv_enemies()
@@ -142,6 +185,13 @@ end
 
 function Game.client_onLoadingScreenLifted( self )
 	g_effectManager:cl_onLoadingScreenLifted()
+end
+
+function Game:client_onClientDataUpdate(data, channel)
+	if channel == 1 then
+		-- g_sideMissions = data
+		g_sideMission = data
+	end
 end
 
 function Game:cl_onRockHit(rock)

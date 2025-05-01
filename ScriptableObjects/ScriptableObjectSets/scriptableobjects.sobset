@@ -5,6 +5,18 @@
 			"classname": "ProjectileManager",
 			"name": "ProjectileManager",
 			"uuid": "9c287602-9061-4bf5-8db5-58516c348bf0"
+		},
+		{
+			"filename": "$CONTENT_DATA/Scripts/EventManager.lua",
+			"classname": "EventManager",
+			"name": "EventManager",
+			"uuid": "03ee1a0d-7d6e-4fef-b5c2-71b2cff004bb"
+		},
+		{
+			"filename": "$CONTENT_DATA/Scripts/sideMission/CollectItemMission.lua",
+			"classname": "CollectItemMission",
+			"name": "CollectItemMission",
+			"uuid": "085ed313-eb34-4330-a64e-20128dbf61da"
 		}
 	]
 }

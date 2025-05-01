@@ -14,17 +14,17 @@
 		</Widget>
 	</Widget>
 	<Widget type="Widget" skin="gui_keybinds_bg" name="objectivePanel" position_real="0.765625 0.046296296296296294 0.20833333333333334 0.037037037037037035">
-		<Widget type="TextBox" skin="TextBox" name="title" position_real="0.0125 0.125 0.7875 0.75">
+		<Widget type="TextBox" skin="TextBox" name="objective_title" position_real="0.0125 0.125 0.775 0.75">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Left VCenter" />
 			<Property key="Caption" value="find trb" />
 		</Widget>
-		<Widget type="TextBox" skin="TextBox" name="progress" position_real="0.8125 0.125 0.1 0.75">
+		<Widget type="TextBox" skin="TextBox" name="objective_progress" position_real="0.7875 0.125 0.125 0.75">
 			<Property key="FontName" value="SM_ButtonSmallBold" />
 			<Property key="TextAlign" value="Center" />
-			<Property key="Caption" value="0/1" />
+			<Property key="Caption" value="99/99" />
 		</Widget>
-		<Widget type="ImageBox" skin="ImageBox" name="icon" position_real="0.9125 0.125 0.075 0.75" />
+		<Widget type="ImageBox" skin="ImageBox" name="objective_icon" position_real="0.9125 0.125 0.075 0.75" />
 		<Widget type="Widget" skin="WhiteSkin" position_real="0.0125 0.875 0.975 0.025">
 			<Property key="Colour" value="1 0.585938 0" />
 		</Widget>

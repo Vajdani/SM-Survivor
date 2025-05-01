@@ -2,15 +2,6 @@
 
 MINERALDROPS = MINERALDROPS or {}
 
----@enum ROCKTYPES
-ROCKTYPES = {
-    [0] = { 0,  3 }, --Rock
-    [1] = { 1     }, --Border
-    [2] = { 2,  5 }, --Gold
-    [3] = { 3,  4 }, --Nitra
-    --[4] = { 4     }, --XP
-}
-
 ---@enum ROCKTYPE
 ROCKTYPE = {
     ROCK    = 0,
@@ -18,20 +9,33 @@ ROCKTYPE = {
     GOLD    = 2,
     NITRA   = 3,
     XP      = 4,
+    MORKITE = 5,
+}
+
+---@enum ROCKTYPES
+ROCKTYPES = {
+    [ROCKTYPE.ROCK] =    { 0,  3 },
+    [ROCKTYPE.BORDER] =  { 1     },
+    [ROCKTYPE.GOLD] =    { 2,  5 },
+    [ROCKTYPE.NITRA] =   { 3,  4 },
+    --[ROCKTYPE.XP] =    { 4     },
+    [ROCKTYPE.MORKITE] = { 5,  6 },
 }
 
 ---@enum MINERALS
 MINERALS = {
-    [ROCKTYPE.GOLD]  = "gold",
-    [ROCKTYPE.NITRA] = "nitra",
-    [ROCKTYPE.XP]    = "xp",
+    [ROCKTYPE.GOLD]    = "gold",
+    [ROCKTYPE.NITRA]   = "nitra",
+    [ROCKTYPE.XP]      = "xp",
+    [ROCKTYPE.MORKITE] = "morkite",
 }
 
 ---@enum MINERALCOLOURS
 MINERALCOLOURS = {
-    [ROCKTYPE.GOLD]  = sm.color.new(1,1,0),
-    [ROCKTYPE.NITRA] = sm.color.new(1,0,0),
-    [ROCKTYPE.XP]    = sm.color.new("#149dff"),
+    [ROCKTYPE.GOLD]    = sm.color.new(1, 1, 0),
+    [ROCKTYPE.NITRA]   = sm.color.new(1, 0, 0),
+    [ROCKTYPE.XP]      = sm.color.new("#149dff"),
+    [ROCKTYPE.MORKITE] = sm.color.new(0, 0, 1),
 }
 
 ---@enum UPGRADETIER
@@ -316,6 +320,22 @@ MINERDATA = {
     }
 }
 
+SIDEMISSION = {
+    COLLECTMORKITE = 1
+}
+
+SIDEMISSIONDATA = {
+    [SIDEMISSION.COLLECTMORKITE] = {
+        sobId = sm.uuid.new("085ed313-eb34-4330-a64e-20128dbf61da"),
+        title = "COLLECT MORKITE",
+        icon = "$CONTENT_DATA/Gui/MineralIcons/morkite.png",
+        data = {
+            mineralId = ROCKTYPE.MORKITE,
+            goal = 40
+        }
+    }
+}
+
 
 
 MAXPROJECTILECOUNT = 1000
@@ -337,6 +357,9 @@ unit_miner = sm.uuid.new("eb3d1c56-e2c0-4711-9c8d-218b36d5380b")
 hvs_mineralDrop = sm.uuid.new("a09539ba-95d3-4f65-989d-83d1e9c32d0f")
 hvs_xpDrop = sm.uuid.new("24b899a3-a663-4da5-b1bf-670ea4bf16a2")
 hvs_input = sm.uuid.new("7ebb9c69-3e14-4b4a-83b4-2a8e0b2e8952")
+
+sob_projectileManager = sm.uuid.new("9c287602-9061-4bf5-8db5-58516c348bf0")
+sob_eventManager = sm.uuid.new("03ee1a0d-7d6e-4fef-b5c2-71b2cff004bb")
 
 table_insert = table.insert
 perlin = sm.noise.perlinNoise2d
