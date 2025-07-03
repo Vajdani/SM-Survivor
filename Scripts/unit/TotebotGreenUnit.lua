@@ -1,5 +1,4 @@
 dofile "$CONTENT_DATA/Scripts/Timer.lua"
-dofile "$CONTENT_DATA/Scripts/unit/PathingState.lua"
 
 ---@class TotebotGreenUnit : UnitClass
 ---@field forgetTimer Timer
@@ -7,7 +6,7 @@ dofile "$CONTENT_DATA/Scripts/unit/PathingState.lua"
 ---@field target? Character
 ---@field lastTargetPosition Vec3
 ---@field isPathing boolean
----@field path NodePathNode[]
+---@field path NodePathElement[]
 TotebotGreenUnit = class()
 
 local attackUuid = sm.uuid.new( "7315c96b-c3bc-4e28-9294-36cb0082d8e4" )
