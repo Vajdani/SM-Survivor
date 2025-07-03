@@ -194,8 +194,17 @@ function Game:client_onClientDataUpdate(data, channel)
 	end
 end
 
+---@param rock Harvestable
 function Game:cl_onRockHit(rock)
-	table_insert(self.cl_rockAnims, { rock = rock, time = math.random(50, 100) * 0.01 })
+	local id = rock.id
+	if self.cl_rockAnims[id] then
+		self.cl_rockAnims[id].time = math.random(50, 100) * 0.01
+	else
+		self.cl_rockAnims[id] = {
+			rock = rock,
+			time = math.random(50, 100) * 0.01
+		}
+	end
 end
 
 function Game:cl_onDropCollect(args)
