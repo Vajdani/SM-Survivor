@@ -33,6 +33,8 @@ function Game.server_onCreate( self )
 		sm.world.loadWorld( self.sv.saved.world )
 	end
 
+	self:sv_createSideMission()
+
 	sm.scriptableObject.createScriptableObject(sob_projectileManager, nil, self.sv.saved.world)
 	sm.scriptableObject.createScriptableObject(sob_eventManager)
 
@@ -102,18 +104,7 @@ function Game:sv_recreate(data, player)
 	-- 	)
 	-- end
 
-	if g_sideMission then
-		g_sideMission:destroy()
-		g_sideMission = nil
-	end
-
-	local id = math.random(#SIDEMISSION)
-	local missionData = SIDEMISSIONDATA[id]
-	g_sideMission = sm.scriptableObject.createScriptableObject(
-		missionData.sobId,
-		{ id = id, data = missionData.data },
-		self.sv.saved.world
-	)
+	self:sv_createSideMission()
 
 	sm.scriptableObject.createScriptableObject(sob_projectileManager, nil, self.sv.saved.world)
 
@@ -129,6 +120,21 @@ function Game:sv_recreate(data, player)
 
 	-- self.network:setClientData(g_sideMissions, 1)
 	self.network:setClientData(g_sideMission, 1)
+end
+
+function Game:sv_createSideMission()
+	if g_sideMission then
+		g_sideMission:destroy()
+		g_sideMission = nil
+	end
+
+	local id = math.random(#SIDEMISSION)
+	local missionData = SIDEMISSIONDATA[id]
+	g_sideMission = sm.scriptableObject.createScriptableObject(
+		missionData.sobId,
+		{ id = id, data = missionData.data },
+		self.sv.saved.world
+	)
 end
 
 function Game:sv_enemies()

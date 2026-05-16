@@ -61,7 +61,7 @@ end
 local function AddRock(cellX, cellY, x, y, noise_x, noise_y, mineralSeed, rockType)
 	local rock = {
 		rockType = rockType or GetRockType(abs(perlin(noise_x, noise_y, mineralSeed))),
-		pos = { x, y },
+		pos = { x + 0.5, y + 0.5 },
 		rot = random(0, 3),
 	}
 
@@ -70,7 +70,7 @@ end
 
 local function AddWaypoint(cellX, cellY, x, y)
 	table_insert(g_cellData.gridData[cellY][cellX].nodes, {
-		pos = { x, y },
+		pos = { x + 0.5, y + 0.5 },
 		params = {
 			connections = {
 				id = g_wayPointCounter,

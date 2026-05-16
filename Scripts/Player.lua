@@ -152,33 +152,37 @@ function Player:server_onFixedUpdate()
 
 	self.input:setPosition(sm.vec3.new(pos.x, pos.y, -verticalOffset))
 
-	if self.isJumping and sm.game.getServerTick() - self.jumpTick >= jumpDelayTicks and cChar.velocity.z < 0 then
-		local hit, result = sm.physics.spherecast(pos, pos - VEC3_UP, 0.5, cChar)
-		if hit and result.type ~= "limiter" then
-			local contacts = sm.physics.getSphereContacts(pos, jumpImpactRadius)
-			for k, v in pairs(contacts.harvestables) do
-				if not MINERALDROPS[v.id] then
-					sm.event.sendToHarvestable(v, "sv_onHit", 1000)
-				end
-			end
+	local moveDir = self:GetMoveDir()
+	if self.isJumping then
+		sm.physics.applyImpulse(cChar, moveDir * cChar.mass * 0.25)
 
-			for k, v in pairs(contacts.characters) do
-				if not v:isPlayer() and v ~= cChar then
-					sm.event.sendToUnit(v:getUnit(), "sv_onHit", {
-						damage = 1000,
-						impact = (v.worldPosition - pos):normalize() * 10,
-						hitPos = v.worldPosition
-					})
+		if sm.game.getServerTick() - self.jumpTick >= jumpDelayTicks and cChar.velocity.z < 0 then
+			local hit, result = sm.physics.spherecast(pos, pos - VEC3_UP, 0.5, cChar)
+			if hit and result.type ~= "limiter" then
+				local contacts = sm.physics.getSphereContacts(pos, jumpImpactRadius)
+				for k, v in pairs(contacts.harvestables) do
+					if not MINERALDROPS[v.id] then
+						sm.event.sendToHarvestable(v, "sv_onHit", 1000)
+					end
 				end
-			end
 
-			self.isJumping = false
-			self.controlled:sendCharacterEvent("land")
-			sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", true)
+				for k, v in pairs(contacts.characters) do
+					if not v:isPlayer() and v ~= cChar then
+						sm.event.sendToUnit(v:getUnit(), "sv_onHit", {
+							damage = 1000,
+							impact = (v.worldPosition - pos):normalize() * 10,
+							hitPos = v.worldPosition
+						})
+					end
+				end
+
+				self.isJumping = false
+				self.controlled:sendCharacterEvent("land")
+				sm.event.sendToUnit(self.controlled, "sv_setMiningEnabled", true)
+			end
 		end
 	end
 
-	local moveDir = self:GetMoveDir()
 	self.controlled:setMovementDirection(moveDir)
 
 	local moving = moveDir:length2() > 0
@@ -603,7 +607,7 @@ end
 function Player:client_onFixedUpdate(dt)
 	if not self.isLocal or self.isDead then return end
 
-	local active = g_sideMission ~= nil and g_sideMission.clientPublicData ~= nil
+	local active = g_sideMission ~= nil and g_sideMission.clientPublicData ~= nil and g_sideMission.clientPublicData.title ~= nil
 	self.hud:setVisible("objectivePanel", active)
 	if active then
 		local data = g_sideMission.clientPublicData

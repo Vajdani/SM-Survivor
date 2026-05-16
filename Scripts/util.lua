@@ -312,9 +312,9 @@ MINERDATA = {
         mineSpeedMultiplier = 1,
         mineDamage = 1,
         ability = {
-            recharge = 60,
-            cooldown = 15,
-            uses = 2,
+            recharge = 20,
+            cooldown = 3,
+            uses = 5,
             icon = "gui_icon_upgrade.png"
         }
     }
